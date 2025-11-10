@@ -1,3 +1,5 @@
+@import url(./styles/keyframes.scss);
+
 :root{
     --login-background-gradient: linear-gradient(1.46deg, #313AE6 1.22%, #797EF3 98.76%);
     --clr-purple-1: #444DF2;
@@ -15,4 +17,10 @@
 *{
     margin: 0;
     box-sizing: border-box;
+}
+
+.center-content{
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
