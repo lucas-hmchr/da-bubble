@@ -1,0 +1,34 @@
+.flex-hor {
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    gap: 32px;
+}
+
+.login-google-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 24px;
+    background-color: var(--bg-clr);
+    padding: 16px 32px;
+    border-radius: 50px;
+    width: 100%;
+    border: 1px solid var(--bg-clr);
+    height: 57px;
+    color: var(--clr-purple-1);
+    font-size: 18px;
+    cursor: pointer;
+    transition: 0.1s ease-in-out;
+
+    >img {
+        height: 100%;
+    }
+
+    &:hover {
+        border: 1px solid var(--clr-purple-1);
+        font-weight: 700;
+    }
+
+
+}

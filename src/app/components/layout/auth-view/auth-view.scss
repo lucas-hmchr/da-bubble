@@ -2,6 +2,9 @@
   position: relative;
   height: 100dvh;
   overflow: hidden;
+  z-index: 1;
+  animation: noDisplay 0.1s forwards;
+  animation-delay: 2.2s;
 
   &::before {
     content: "";
@@ -27,7 +30,7 @@
 .logo-animation {
   position: relative;
   display: inline-block;
-  height: 56px;
+  height: 70px;
 }
 
 .logo-animation > .logo {
@@ -35,7 +38,7 @@
   top: 50%;
   left: 50%;
   transform: translate(-50%,-50%);
-  height: 56px;
+  height: 70px;
   width: auto;
   animation: logoShiftLeft 0.7s cubic-bezier(.22,.61,.36,1) forwards;
 }
@@ -57,9 +60,39 @@
     top: 50%;
     left: 0;
     transform: translate(-100%, -50%);
-    height: 32px;
+    height: 24px;
     width: auto;
     animation: nameSlideIn 1.2s ease forwards;
       animation-delay: 0.5s;
+  }
+}
+
+// Main Section
+
+.auth-window{
+  background-color: var(--bg-clr);
+  height: 100dvh;
+  width: 100%;
+  position: absolute;
+  top: 0;
+  z-index: 0;
+  padding: 64px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-direction: column;
+}
+
+.top-row{
+  display: flex;
+  justify-content: space-between;
+  width: 100%;
+
+  >div{
+    display: flex;
+    flex-direction: column;
+    align-items: end;
+    gap: 16px;
+    font-size: 18px;
   }
 }
