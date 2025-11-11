@@ -1,0 +1,16 @@
+.static-logo{
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 16px;
+}
+
+.icon {
+    aspect-ratio: 1/1;
+    height: 70px;
+}
+
+.name{
+    height: 24px;
+    width: auto;
+}
