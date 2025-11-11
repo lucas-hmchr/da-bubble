@@ -1,26 +1,57 @@
 @import url(./styles/keyframes.scss);
+@import url(./styles/auth-forms.scss);
 
-:root{
+:root {
     --login-background-gradient: linear-gradient(1.46deg, #313AE6 1.22%, #797EF3 98.76%);
     --clr-purple-1: #444DF2;
     --clr-purple-2: #797EF3;
     --clr-purple-3: #535AF1;
-    // purple-light is listed in figma but i could not figure out the hex yet
-    --clr-purple-light: #000000;
+    --clr-purple-light: #ADB0D9;
     --bg-clr: #ECEEFE;
     --clr-black: #000000;
     --clr-online-green: #92C83E;
     --clr-gray: #686868;
     --clr-rosa: #ED1E79;
+    --clr-white: #FFFFFF;
 }
 
-*{
+* {
     margin: 0;
     box-sizing: border-box;
 }
 
-.center-content{
+.center-content {
     display: flex;
     align-items: center;
     justify-content: center;
+}
+
+.linked-text {
+    color: var(--clr-purple-2);
+    cursor: pointer;
+    border: 1px solid transparent;
+    border-radius: 50px;
+    padding: 8px;
+    padding-inline: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 400;
+    transition: 0.1s ease-in-out;
+    font-size: 18px;
+
+    &:hover {
+        color: var(--clr-purple-1);
+        background-color: var(--bg-clr);
+        font-weight: 500;
+        border: 1px solid var(--clr-purple-light);
+    }
+}
+
+.fs-20{
+    font-size: 20px;
+}
+
+.text-center{
+    text-align: center;
 }
