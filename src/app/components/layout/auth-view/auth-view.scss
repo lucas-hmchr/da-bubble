@@ -1,67 +1,65 @@
-/* === Vollbild + Background-Layer === */
 .login-animation-screen {
   position: relative;
   height: 100dvh;
   overflow: hidden;
 
-  &::before{
-    content:"";
-    position:absolute;
-    inset:0;
+  &::before {
+    content: "";
+    position: absolute;
+    inset: 0;
     background: var(--login-background-gradient);
-    opacity:1;
-    /* Startet erst nach t1+t2, fadet dann in t3 aus */
-    animation: bgFade var(--t3) var(--ease) forwards;
-    animation-delay: calc(var(--t1) + var(--t2));
+    opacity: 1;
+    animation: bgFade 0.6s cubic-bezier(.22,.61,.36,1) forwards;
+    animation-delay: 2.1s;
   }
 }
 
-/* === Logo-Block (startet zentriert) und bewegt sich später in die Ecke === */
-.logo-container{
+.logo-container {
   position: absolute;
   top: 50%;
   left: 50%;
-  /* Start: perfekt zentriert, Ende: an die rechte Kante mit Abstand, oben mit Abstand */
-  transform: translate(-50%,-50%);
-  animation: toTopRight var(--t2) var(--ease) forwards;
-  animation-delay: var(--t1); /* erst nach Split-Phase */
+  transform: translate(-50%, -50%);
+  animation: toTopLeft 0.6s cubic-bezier(.22,.61,.36,1) forwards;
+  animation-delay: 1.6s;
   width: fit-content;
-  height: auto;
 }
 
-/* === Split-Animation innerhalb des Containers === */
-.logo-animation{
+.logo-animation {
   position: relative;
-  display: inline-block; /* damit die Endbreite der Summe entspricht */
-  /* optional, damit nichts „springt“ */
-  will-change: transform;
+  display: inline-block;
+  height: 56px;
+}
 
-  > .logo{
+.logo-animation > .logo {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%,-50%);
+  height: 56px;
+  width: auto;
+  animation: logoShiftLeft 0.7s cubic-bezier(.22,.61,.36,1) forwards;
+}
+
+.logo-animation > div {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-40px, -50%);
+  height: 100%;
+  width: 0;
+  overflow: hidden;
+  z-index: 2;
+  animation: nameWrapperGrow 0.7s cubic-bezier(.22,.61,.36,1) forwards;
+   animation-delay: 0.5s;
+
+  > .logo-name {
     position: absolute;
     top: 50%;
-    left: 50%;
-    transform: translate(-50%,-50%);
-    /* Logo fährt in Phase 1 leicht nach links */
-    animation: logoShiftLeft var(--t1) var(--ease) forwards;
-  }
-
-  > div{ /* Wrapper für den Namenszug */
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%,-50%); /* Start exakt über dem Logo */
-    height: 100%;
-    width: 0;              /* wächst in Phase 1 auf --name-width */
-    overflow: hidden;
-    animation: nameWrapperGrow var(--t1) var(--ease) forwards;
-
-    > .logo-name{
-      position: absolute;
-      top: 50%;
-      left: -100%;         /* komplett links draußen starten */
-      transform: translate(-50%,-50%);
-      /* slidet in Phase 1 von links nach innen bis mittig im Wrapper */
-      animation: nameSlideIn var(--t1) var(--ease) forwards;
-    }
+    left: 0;
+    transform: translate(-100%, -50%);
+    height: 32px;
+    width: auto;
+    animation: nameSlideIn 1.2s ease forwards;
+      animation-delay: 0.5s;
   }
 }
