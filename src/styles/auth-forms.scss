@@ -10,6 +10,7 @@
     justify-content: space-between;
     align-items: center;
     gap: 32px;
+    position: relative;
 
     h1 {
         color: var(--clr-purple-1);
@@ -87,5 +88,19 @@
 
 .form-input:focus-within {
     border: 1px solid var(--clr-purple-3);
+}
+
+.flex-hor {
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    gap: 32px;
+}
+
+.arrow-back{
+  position: absolute;
+  top: 56px;
+  left: 56px;
+  cursor: pointer;
 }
 
