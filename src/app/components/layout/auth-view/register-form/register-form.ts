@@ -10,11 +10,11 @@ import { RouterLink } from "@angular/router";
 })
 export class RegisterForm {
 
-  fullName = 'Lucas Hamacher';
+  fullName = '';
   email = '';
   password = '';
   acceptPP = false;
-  showRegistrationFirstStep = false;
+  showRegistrationFirstStep = true;
 
   avatars = [
     "avatar_female_1",
