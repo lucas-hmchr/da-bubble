@@ -15,15 +15,18 @@
 <div class="auth-window">
     <div class="top-row">
         <app-logo></app-logo>
+        @if (showRegistrationLink()) {
         <div>
             <span>Neu bei DABubble?</span>
-            <span class="linked-text">Konto erstellen</span>
+            <span class="linked-text" routerLink="/auth/register">Konto erstellen</span>
         </div>
+        }
     </div>
-    <app-login-form></app-login-form>
 
-    <div>
-        <span>Impressum</span>
-        <span>Datenschutz</span>
+    <router-outlet></router-outlet>
+
+    <div class="links">
+        <span class="linked-text">Impressum</span>
+        <span class="linked-text">Datenschutz</span>
     </div>
 </div>

@@ -1,0 +1,55 @@
+<div class="dialog-container">
+    @if(showRegistrationFirstStep) {
+    <div class="auth-form-container">
+        <h1>Konto erstellen</h1>
+        <span class="fs-20 text-center">Mit deinem Namen und deiner E-Mail-Adresse hast du dein neues
+            DABubble-Konto.</span>
+    </div>
+    <form class="auth-form-container" #form="ngForm" (ngSubmit)="continueRegistration()" id="registerForm">
+        <div class="form-input">
+            <img src="/icons/login/person_passive.svg" alt="" class="form-input-icon">
+            <input name="name" type="text" placeholder="Name und Nachname" [(ngModel)]="fullName" required
+                minlength="4">
+        </div>
+        <div class="form-input">
+            <img src="/icons/login/mail_passive.svg" alt="" class="form-input-icon">
+            <input name="email" type="email" placeholder="beispielname@email.com" [(ngModel)]="email" required email>
+        </div>
+        <div class="form-input">
+            <img src="/icons/login/lock_passive.svg" alt="" class="form-input-icon">
+            <input name="password" type="password" placeholder="Passwort" [(ngModel)]="password" required>
+        </div>
+        <div class="auth-form-container pp-container">
+            <input type="checkbox" required [(ngModel)]="acceptPP" name="acceptPP">
+            <p>Ich stimme der <span class="linked-text">Datenschutzerklärung</span> zu.</p>
+        </div>
+    </form>
+    <button style="margin-left: auto;" type="submit" class="submit-button"
+        [class]="form.valid ? 'btn-enabled' : 'btn-disabled'" [disabled]="!form.valid" form="registerForm">
+        <span>Weiter</span>
+    </button>
+    } @else {
+    <div class="auth-form-container">
+        <h1>Wähle deinen Avatar</h1>
+    </div>
+    <form class="auth-form-container" #form="ngForm" (ngSubmit)="submitRegistration()" id="registerForm">
+        <img src="/images/avatars/base_profile.svg" class="avatar-image-selected">
+        <span class="user-name">{{ this.fullName }}</span>
+        <span style="font-size: 20px; text-align: left; width: 100%;">Aus der Liste wählen</span>
+        <div class="avatar-selection">
+            @for (avatar of avatars; track $index) {
+                <img [src]="avatarUrl(avatar)" class="avatar-icon">
+            }
+        </div>
+
+    </form>
+    <button style="margin-left: auto;" type="submit" class="submit-button"
+        [class]="form.valid ? 'btn-enabled' : 'btn-disabled'" [disabled]="!form.valid" form="registerForm">
+        <span>Weiter</span>
+    </button>
+    }
+
+
+
+    <img src="/icons/global/arrow_back.svg" alt="arrow_back" class="arrow-back" routerLink="/auth">
+</div>
