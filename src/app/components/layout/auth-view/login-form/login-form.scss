@@ -29,6 +29,25 @@
         border: 1px solid var(--clr-purple-1);
         font-weight: 700;
     }
+}
 
 
+.guest-login-btn {
+    height: 49px;
+    padding: 16px 32px;
+    border-radius: 50px;
+    font-weight: 700;
+    font-size: 18px;
+    color: var(--clr-purple-1);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid var(--clr-purple-1);
+    background-color: transparent;
+    cursor: pointer;
+
+    &:hover{
+        background-color: var(--clr-purple-1);
+        color: white;
+    }
 }

@@ -68,6 +68,7 @@
         font-size: 18px;
         color: var(--clr-black);
         border: 1px solid var(--bg-clr);
+        flex: 1;
 
         &:focus {
             outline: none;
@@ -77,11 +78,14 @@
 }
 
 .form-input:focus-within .form-input-icon {
-  filter: brightness(0) saturate(100%) invert(0%) sepia(6%) saturate(0%) hue-rotate(58deg) brightness(100%) contrast(105%);
+    filter: brightness(0) saturate(100%) invert(0%) sepia(6%) saturate(0%) hue-rotate(58deg) brightness(100%) contrast(105%);
 }
+
 .form-input:has(> input:not(:placeholder-shown)) .form-input-icon {
-  filter: brightness(0) saturate(100%) invert(0%) sepia(6%) saturate(0%) hue-rotate(58deg) brightness(100%) contrast(105%);
+    filter: brightness(0) saturate(100%) invert(0%) sepia(6%) saturate(0%) hue-rotate(58deg) brightness(100%) contrast(105%);
 }
+
 .form-input:focus-within {
-  border: 1px solid var(--clr-purple-3);
+    border: 1px solid var(--clr-purple-3);
 }
+
