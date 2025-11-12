@@ -1,0 +1,41 @@
+.pp-container {
+    display: flex;
+    flex-direction: row;
+    justify-content: flex-start;
+    align-items: center;
+    padding-left: 16px;
+    gap: 16px;
+
+    >p {
+        flex: 1;
+        display: flex;
+        align-items: center;
+        justify-content: flex-start;
+    }
+}
+
+.avatar-image-selected {
+    aspect-ratio: 1/1;
+    width: 168px;
+}
+
+.user-name {
+    font: 700;
+    font-size: 32px;
+}
+
+.avatar-selection {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    width: 100%;
+    gap: 8px;
+}
+
+.avatar-icon {
+    border-radius: 50%;
+    aspect-ratio: 1/1;
+    width: 64px;
+    cursor: pointer;
+}
