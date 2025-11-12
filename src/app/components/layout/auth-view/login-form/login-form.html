@@ -3,17 +3,17 @@
         <h1>Anmeldung</h1>
         <span class="fs-20 text-center">Wir empfehlen dir, die E-Mail-Adresse zu nutzen, die du bei der Arbeit verwendest.</span>
     </div>
-    <div class="auth-form-container">
+    <form class="auth-form-container" #form="ngForm" (ngSubmit)="onSubmit()" id="loginForm">
         <div class="form-input">
             <img src="/icons/login/mail_passive.svg" alt="" class="form-input-icon">
-            <input type="email" placeholder="beispielname@email.com">
+            <input name="email" type="email" placeholder="beispielname@email.com" [(ngModel)]="email" required email>
         </div>
         <div class="form-input">
             <img src="/icons/login/lock_passive.svg" alt="" class="form-input-icon">
-            <input type="password" placeholder="Passwort">
+            <input name="password" type="password" placeholder="Passwort" [(ngModel)]="password" required>
         </div>
         <span class="linked-text">Passwort vergessen?</span>
-    </div>
+    </form>
     <div class="form-divider">
         <div></div>
         <span>ODER</span>
@@ -25,10 +25,10 @@
         </button>
     </div>
     <div class="auth-form-container flex-hor">
-        <button>
+        <button type="submit" class="submit-button" [class]="form.valid ? 'btn-enabled' : 'btn-disabled'" [disabled]="!form.valid" form="loginForm">
             <span>Anmelden</span>
         </button>
-        <button>
+        <button class="guest-login-btn">
             <span>Gäste-Login</span>
         </button>
     </div>
