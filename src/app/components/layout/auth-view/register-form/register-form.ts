@@ -1,17 +1,8 @@
 import { Component, inject, signal } from '@angular/core';
 import { FormsModule, NgForm } from '@angular/forms';
 import { Router } from "@angular/router";
-
-
-type Avatar = { id: number; name: string };
-
-type NewUser = {
-  fullName: string;
-  email: string;
-  password: string;
-  selectedAvatarId: number;
-};
-
+import { avatars, defaultAvatar } from './../../../../../shared/data/avatars';
+import type { Avatar, NewUser } from './../../../../models/user.model';
 
 @Component({
   selector: 'app-register-form',
@@ -25,16 +16,16 @@ export class RegisterForm {
 
   private router = inject(Router);
 
+  avatarList = avatars;
+  defaultAvatar = defaultAvatar;
+
   fullName = '';
   email = '';
   password = '';
   acceptPP = false;
   showRegistrationFirstStep = true;
 
-  selectedAvatar = signal<Avatar>({
-    id: 1,
-    name: "avatar_default"
-  })
+  selectedAvatar = signal<Avatar>(this.defaultAvatar)
 
   get newUser(): NewUser {
     return {
@@ -44,17 +35,6 @@ export class RegisterForm {
       selectedAvatarId: this.selectedAvatar().id,
     };
   }
-
-  // Avatar liste global positionieren, sodass nur id weitergegeben werden muss
-  avatars = [
-    { id: 2, name: "avatar_female_1" },
-    { id: 3, name: "avatar_female_2" },
-    { id: 4, name: "avatar_male_1" },
-    { id: 5, name: "avatar_male_2" },
-    { id: 6, name: "avatar_male_3" },
-    { id: 7, name: "avatar_male_4" }
-  ]
-
 
   avatarUrl(avatar: string) {
     return `/images/avatars/${avatar}.svg`

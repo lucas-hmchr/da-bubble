@@ -37,7 +37,7 @@
         <span class="user-name">{{ fullName }}</span>
         <span style="font-size: 20px; text-align: left; width: 100%;">Aus der Liste wählen:</span>
         <div class="avatar-selection">
-            @for (avatar of avatars; track $index) {
+            @for (avatar of avatarList; track $index) {
                 <img [src]="avatarUrl(avatar.name)" class="avatar-icon" (click)="selectAvatar(avatar)" [class.selected]="selectedAvatar().id === avatar.id">
             }
         </div>
