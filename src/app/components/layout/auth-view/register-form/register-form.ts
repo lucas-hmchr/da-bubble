@@ -1,6 +1,6 @@
 import { Component, inject, signal } from '@angular/core';
 import { FormsModule, NgForm } from '@angular/forms';
-import { RouterLink, Router } from "@angular/router";
+import { Router } from "@angular/router";
 
 
 type Avatar = { id: number; name: string };
@@ -15,7 +15,7 @@ type NewUser = {
 
 @Component({
   selector: 'app-register-form',
-  imports: [FormsModule, RouterLink],
+  imports: [FormsModule],
   templateUrl: './register-form.html',
   styleUrl: './register-form.scss',
 })
