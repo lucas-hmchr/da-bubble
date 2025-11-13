@@ -1,9 +1,9 @@
 import { Routes } from '@angular/router';
-import { AuthView } from './auth-view';
-import { LoginForm } from './login-form/login-form';
-import { RegisterForm } from './register-form/register-form';
-import { PasswordForgot } from './password-forgot/password-forgot';
-import { PasswordReset } from './password-reset/password-reset';
+import { AuthView } from '../components/layout/auth-view/auth-view';
+import { LoginForm } from '../components/layout/auth-view/login-form/login-form';
+import { RegisterForm } from '../components/layout/auth-view/register-form/register-form';
+import { PasswordForgot } from '../components/layout/auth-view/password-forgot/password-forgot';
+import { PasswordReset } from '../components/layout/auth-view/password-reset/password-reset';
 
 export const AUTH_ROUTES: Routes = [
   {
