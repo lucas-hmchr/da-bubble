@@ -33,21 +33,21 @@
         <h1>Wähle deinen Avatar</h1>
     </div>
     <form class="auth-form-container" #form="ngForm" (ngSubmit)="submitRegistration()" id="registerForm">
-        <img src="/images/avatars/base_profile.svg" class="avatar-image-selected">
-        <span class="user-name">{{ this.fullName }}</span>
-        <span style="font-size: 20px; text-align: left; width: 100%;">Aus der Liste wählen</span>
+        <img [src]="avatarUrl(selectedAvatar().name)" class="avatar-image-selected">
+        <span class="user-name">{{ fullName }}</span>
+        <span style="font-size: 20px; text-align: left; width: 100%;">Aus der Liste wählen:</span>
         <div class="avatar-selection">
-            @for (avatar of avatars; track $index) {
-                <img [src]="avatarUrl(avatar)" class="avatar-icon">
+            @for (avatar of avatarList; track $index) {
+                <img [src]="avatarUrl(avatar.name)" class="avatar-icon" (click)="selectAvatar(avatar)" [class.selected]="selectedAvatar().id === avatar.id">
             }
         </div>
-
     </form>
     <button style="margin-left: auto;" type="submit" class="submit-button"
-        [class]="form.valid ? 'btn-enabled' : 'btn-disabled'" [disabled]="!form.valid" form="registerForm">
+        [class]="selectedAvatar().id !== 1 ? 'btn-enabled' : 'btn-disabled'" [disabled]="selectedAvatar().id === 1"
+        (click)="submitRegistration()">
         <span>Weiter</span>
     </button>
     }
 
-    <img src="/icons/global/arrow_back.svg" alt="arrow_back" class="arrow-back" routerLink="/auth">
+    <img src="/icons/global/arrow_back.svg" alt="arrow_back" class="arrow-back" (click)="stepBack()">
 </div>
