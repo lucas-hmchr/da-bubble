@@ -1,3 +1,5 @@
+import type { Avatar } from "../../app/models/user.model"
+
 export const avatars: readonly Avatar[] = [
     { id: 2, name: "avatar_female_1" },
     { id: 3, name: "avatar_female_2" },
