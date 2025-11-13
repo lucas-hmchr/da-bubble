@@ -23,5 +23,5 @@ export class AuthView {
     { initialValue: this.route.firstChild?.routeConfig?.path ?? '' }
   );
 
-  showRegistrationLink = computed(() => this.currentChildPath() !== 'register')
+  showRegistrationLink = computed(() => this.currentChildPath() === 'login')
 }

@@ -17,6 +17,7 @@
 .avatar-image-selected {
     aspect-ratio: 1/1;
     width: 168px;
+    border-radius: 50%;
 }
 
 .user-name {
@@ -38,4 +39,17 @@
     aspect-ratio: 1/1;
     width: 64px;
     cursor: pointer;
+    border: 5px transparent solid;
+    box-sizing: content-box;
+    transition: 0.1s ease-in-out;
+
+    &:hover {
+        border: 5px solid rgb(228, 228, 228);
+        scale: 1.1;
+    }
+
+    &.selected {
+        border: 5px solid rgb(228, 228, 228);
+        scale: 1.1;
+    }
 }
