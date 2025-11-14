@@ -1,7 +1,8 @@
 <div class="dialog-container">
     <div class="auth-form-container">
         <h1>Anmeldung</h1>
-        <span class="fs-20 text-center">Wir empfehlen dir, die E-Mail-Adresse zu nutzen, die du bei der Arbeit verwendest.</span>
+        <span class="fs-20 text-center">Wir empfehlen dir, die E-Mail-Adresse zu nutzen, die du bei der Arbeit
+            verwendest.</span>
     </div>
     <form class="auth-form-container" #form="ngForm" (ngSubmit)="onSubmit()" id="loginForm">
         <div class="form-input">
@@ -11,6 +12,9 @@
         <div class="form-input">
             <img src="/icons/login/lock_passive.svg" alt="" class="form-input-icon">
             <input name="password" type="password" placeholder="Passwort" [(ngModel)]="password" required>
+            @if (false) {
+            <span class="error-message">Falsches Passwort oder E-Mail. Bitte erneut versuchen.</span>
+            }
         </div>
         <span class="linked-text" routerLink="/auth/password-forgot">Passwort vergessen?</span>
     </form>
@@ -25,7 +29,8 @@
         </button>
     </div>
     <div class="auth-form-container flex-hor">
-        <button type="submit" class="submit-button" [class]="form.valid ? 'btn-enabled' : 'btn-disabled'" [disabled]="!form.valid" form="loginForm">
+        <button type="submit" class="submit-button" [class]="form.valid ? 'btn-enabled' : 'btn-disabled'"
+            [disabled]="!form.valid" form="loginForm">
             <span>Anmelden</span>
         </button>
         <button class="guest-login-btn">

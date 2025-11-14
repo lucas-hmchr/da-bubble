@@ -13,14 +13,19 @@
         </div>
         <div class="form-input">
             <img src="/icons/login/mail_passive.svg" alt="" class="form-input-icon">
-            <input name="email" type="email" placeholder="beispielname@email.com" [(ngModel)]="email" required email>
+            <input #emailModel="ngModel" name="email" type="email" placeholder="beispielname@email.com" [(ngModel)]="email" required email>
+            @if (emailModel.invalid && (emailModel.dirty || emailModel.touched || form.submitted)) {
+                <span class="error-message">Bitte gebe eine valide E-Mail-Adresse an.</span>
+            }
         </div>
         <div class="form-input">
             <img src="/icons/login/lock_passive.svg" alt="" class="form-input-icon">
             <input name="password" type="password" placeholder="Passwort" [(ngModel)]="password" required>
         </div>
         <div class="auth-form-container pp-container">
-            <input type="checkbox" required [(ngModel)]="acceptPP" name="acceptPP">
+            <label class="checkbox">
+                <input type="checkbox" required [(ngModel)]="acceptPP" name="acceptPP">
+            </label>
             <p>Ich stimme der <span class="linked-text">Datenschutzerklärung</span> zu.</p>
         </div>
     </form>
@@ -38,7 +43,8 @@
         <span style="font-size: 20px; text-align: left; width: 100%;">Aus der Liste wählen:</span>
         <div class="avatar-selection">
             @for (avatar of avatarList; track $index) {
-                <img [src]="avatarUrl(avatar.name)" class="avatar-icon" (click)="selectAvatar(avatar)" [class.selected]="selectedAvatar().id === avatar.id">
+            <img [src]="avatarUrl(avatar.name)" class="avatar-icon" (click)="selectAvatar(avatar)"
+                [class.selected]="selectedAvatar().id === avatar.id">
             }
         </div>
     </form>

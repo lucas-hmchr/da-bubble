@@ -1,3 +1,5 @@
+@use './../../../../styles/variables.scss' as *;
+
 .login-animation-screen {
   position: relative;
   height: 100dvh;
@@ -12,7 +14,7 @@
     inset: 0;
     background: var(--login-background-gradient);
     opacity: 1;
-    animation: bgFade 0.6s cubic-bezier(.22,.61,.36,1) forwards;
+    animation: bgFade 0.6s cubic-bezier(.22, .61, .36, 1) forwards;
     animation-delay: 2.1s;
   }
 }
@@ -22,7 +24,7 @@
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
-  animation: toTopLeft 0.6s cubic-bezier(.22,.61,.36,1) forwards;
+  animation: toTopLeft 0.6s cubic-bezier(.22, .61, .36, 1) forwards;
   animation-delay: 1.6s;
   width: fit-content;
 }
@@ -33,17 +35,17 @@
   height: 70px;
 }
 
-.logo-animation > .logo {
+.logo-animation>.logo {
   position: absolute;
   top: 50%;
   left: 50%;
-  transform: translate(-50%,-50%);
+  transform: translate(-50%, -50%);
   height: 70px;
   width: auto;
-  animation: logoShiftLeft 0.7s cubic-bezier(.22,.61,.36,1) forwards;
+  animation: logoShiftLeft 0.7s cubic-bezier(.22, .61, .36, 1) forwards;
 }
 
-.logo-animation > div {
+.logo-animation>div {
   position: absolute;
   top: 50%;
   left: 50%;
@@ -52,10 +54,10 @@
   width: 0;
   overflow: hidden;
   z-index: 2;
-  animation: nameWrapperGrow 0.7s cubic-bezier(.22,.61,.36,1) forwards;
-   animation-delay: 0.5s;
+  animation: nameWrapperGrow 0.7s cubic-bezier(.22, .61, .36, 1) forwards;
+  animation-delay: 0.5s;
 
-  > .logo-name {
+  >.logo-name {
     position: absolute;
     top: 50%;
     left: 0;
@@ -63,16 +65,18 @@
     height: 24px;
     width: auto;
     animation: nameSlideIn 1.2s ease forwards;
-      animation-delay: 0.5s;
+    animation-delay: 0.5s;
   }
 }
 
 // Main Section
 
-.auth-window{
+.auth-window {
   background-color: var(--bg-clr);
   height: 100dvh;
+  max-height: 100dvh;
   width: 100%;
+  overflow: hidden;
   position: absolute;
   top: 0;
   z-index: 0;
@@ -83,12 +87,12 @@
   flex-direction: column;
 }
 
-.top-row{
+.top-row {
   display: flex;
   justify-content: space-between;
   width: 100%;
 
-  >div{
+  >div {
     display: flex;
     flex-direction: column;
     align-items: end;
@@ -97,9 +101,28 @@
   }
 }
 
-.links{
+.links {
   display: flex;
   justify-content: center;
   align-items: center;
   gap: 32px;
 }
+
+@media (max-width: $bp-tablet-md) {
+  .auth-window {
+    padding: 40px;
+  }
+}
+
+@media (max-width: $bp-phone-xl) {
+  .auth-window {
+    padding: 24px;
+  }
+}
+
+@media (max-width: $bp-phone-lg) {
+  .auth-window {
+    padding: 16px;
+  }
+}
+
