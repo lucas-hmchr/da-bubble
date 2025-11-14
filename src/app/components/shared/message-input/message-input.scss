@@ -1,0 +1,66 @@
+#message-container {
+    border: 1px solid var(--clr-purple-light);
+    border-radius: 10px;
+    padding: 10px 10px;
+    width: 400px;
+    width: 500px;
+    height: 200px;
+    background-color: white;
+}
+
+textarea{
+    resize: none;
+    // background-color: red;
+    width: 100%;
+    height: calc(100% - 50px);
+    font-size: 18px;
+    border: none;
+}
+
+#message-actions{
+    height: 50px;
+    width: 100%;
+    // background-color: rgba(0, 255, 0, 0.1);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    div{
+        display: flex;
+        gap: 8px;
+    }
+}
+.form-input-icon {
+    cursor: pointer;
+    height: 35px;
+    width: 35px;
+    padding: 5px;
+}
+
+.icon-smile {
+    content: url('/icons/global/smile1.svg');
+    &:hover {
+        content: url('/icons/global/smile3.svg');
+        background-color: var(--bg-clr);
+        border-radius: 100%;
+    }
+}
+
+.icon-at {
+    content: url('/icons/global/at1.svg');
+    &:hover {
+        content: url('/icons/global/at3.svg');
+        background-color: var(--bg-clr);
+        border-radius: 100%;
+    }
+}
+
+.icon-send {
+    cursor: pointer;
+    height: 30px;
+    width: 30px;
+    content: url('/icons/global/send1.svg');
+    &:hover {
+        content: url('/icons/global/send2.svg');
+    }
+}
