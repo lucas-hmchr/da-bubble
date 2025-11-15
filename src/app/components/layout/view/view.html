@@ -1,0 +1,47 @@
+<div class="view-container">
+
+  <!-- Header -->
+  <header class="view-header">
+    <h2># {{ channel?.name }}</h2>
+
+    <div class="members">
+      <div 
+        class="avatar" 
+        *ngFor="let member of channel?.members | slice:0:3"
+      >
+        {{ member | slice:0:1 | uppercase }}
+      </div>
+      <span class="count">{{ channel?.members?.length }}</span>
+    </div>
+  </header>
+
+  <main class="messages-area">
+
+    <!-- Datumstrenner -->
+    <div class="date-separator">
+      <span>Heute</span>
+    </div>
+
+    <!-- Beispiel Nachricht (kommt später aus der messages-Subcollection) -->
+    <div class="message-row">
+
+      <div class="avatar big">
+        F
+      </div>
+
+      <div class="message-content">
+        <div class="meta">
+          <span class="name">Frederik</span>
+          <span class="time">15:06</span>
+        </div>
+        <div class="bubble">
+          {{ channel?.name }} – Dies sind Beispieldaten aus Firestore.
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <!-- Eingabefeld -->
+  <app-message-input></app-message-input>
+
+</div>
