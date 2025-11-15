@@ -1,112 +1,46 @@
-.view-container {
-  display: flex;
-  flex-direction: column;
-  height: 100%;
-  background: #f7f8ff;
+section {
+    font-family: 'Nunito';
+    background-color: lightgray;
+    border-radius: 30px;
 }
 
-.view-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 16px 24px;
-  background: white;
-  border-bottom: 1px solid #e2e3f0;
-
-  h2 {
-    margin: 0;
-    font-size: 20px;
-    font-weight: 600;
-  }
-
-  .members {
+header {
     display: flex;
-    align-items: center;
-    gap: 4px;
-
-    .avatar {
-      width: 30px;
-      height: 30px;
-      background: #d0d3ff;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      border-radius: 50%;
-      font-weight: 600;
-      color: #333;
-    }
-
-    .count {
-      margin-left: 0.5rem;
-      font-weight: 600;
-      opacity: 0.7;
-    }
-  }
-}
-
-.messages-area {
-  flex: 1;
-  padding: 24px;
-  overflow-y: auto;
-
-  .date-separator {
-    display: flex;
-    justify-content: center;
-    margin-bottom: 24px;
-
-    span {
-      padding: 6px 14px;
-      background: white;
-      border-radius: 20px;
-      font-size: 14px;
-      border: 1px solid #ddd;
-    }
-  }
-
-  .message-row {
-    display: flex;
-    gap: 12px;
-    margin-bottom: 20px;
-
-    .avatar.big {
-      width: 40px;
-      height: 40px;
-      background: #c9cdff;
-      border-radius: 50%;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      font-weight: bold;
-    }
-
-    .message-content {
-      .meta {
+    justify-content: space-between;
+    height: 96px;
+    padding-left: 32px;
+    padding-right: 16px;
+    
+    >div:nth-child(1) {
+        font-size: 24px;
         display: flex;
-        gap: 8px;
-        align-items: baseline;
-
-        .name {
-          font-weight: 600;
+        align-items: center;
+        img {
+            height: 40px;
         }
-        .time {
-          font-size: 12px;
-          opacity: 0.7;
-        }
-      }
-
-      .bubble {
-        margin-top: 8px;
-        padding: 14px;
-        background: #818cf8;
-        color: white;
-        border-radius: 14px;
-        max-width: 500px;
-        line-height: 1.45;
-      }
     }
-  }
-}
+    >div:nth-child(2) {
+        font-size: 20px;
+        width: fit-content;
+        // background-color: white;
+        display: flex;
+        align-items: center;
+        gap: 16px;
+        img {
+            height: 40px;
+        }
+    }
+    
+}   
 
-app-message-input {
-  border-top: 1px solid #e2e3f0;
+.add-person {
+    content: url('/icons/global/person_add1.svg');
+    background-color: var(--bg-clr);
+    border-radius: 100%;
+    padding: 7px;
+        &:hover {
+        content: url('/icons/global/person_add2.svg');
+        background-color: var(--bg-clr);
+        border-radius: 100%;
+    }
 }
