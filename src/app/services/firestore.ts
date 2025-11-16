@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import {
   Firestore,
   collection,
@@ -7,7 +7,10 @@ import {
   doc,
   docData,
   updateDoc,
-  deleteDoc, query, where
+  deleteDoc,
+  query,
+  where,
+  orderBy,
 } from '@angular/fire/firestore';
 import { Observable } from 'rxjs';
 
@@ -15,9 +18,9 @@ import { Observable } from 'rxjs';
   providedIn: 'root'
 })
 export class FirestoreService {
+  firestore: Firestore = inject(Firestore);
 
-  constructor(private firestore: Firestore) { }
-
+  constructor() {}
   getCollection<T extends object>(path: string): Observable<T[]> {
     const ref = collection(this.firestore, path);
     return collectionData(ref, { idField: 'id' }) as Observable<T[]>;
@@ -27,7 +30,6 @@ export class FirestoreService {
     const ref = doc(this.firestore, path);
     return docData(ref) as Observable<T | undefined>;
   }
-
 
   addDocument<T extends object>(path: string, data: T) {
     const ref = collection(this.firestore, path);
@@ -47,6 +49,13 @@ export class FirestoreService {
   getCollectionWhere<T extends object>(path: string, field: string, value: any): Observable<T[]> {
     const ref = collection(this.firestore, path);
     const q = query(ref, where(field, '==', value));
+    return collectionData(q, { idField: 'id' }) as Observable<T[]>;
+  }
+
+  getSubcollection<T extends object>(parentPath: string, parentId: string, subcollectionName: string): Observable<T[]> {
+    const path = `${parentPath}/${parentId}/${subcollectionName}`;
+    const ref = collection(this.firestore, path);
+    const q = query(ref, orderBy('timestamp', 'asc')); // Sortiert Nachrichten aufsteigend nach Zeit
     return collectionData(q, { idField: 'id' }) as Observable<T[]>;
   }
 }

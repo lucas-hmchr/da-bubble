@@ -1,6 +1,6 @@
 section {
     font-family: 'Nunito';
-    background-color: lightgray;
+    background-color: white;
     border-radius: 30px;
 }
 
@@ -10,6 +10,7 @@ header {
     height: 96px;
     padding-left: 32px;
     padding-right: 16px;
+    box-shadow: 0 5px 5px -2px rgba(100, 100, 100, 0.1);
     
     >div:nth-child(1) {
         font-size: 24px;
