@@ -52,10 +52,10 @@ export class FirestoreService {
     return collectionData(q, { idField: 'id' }) as Observable<T[]>;
   }
 
-  getSubcollection<T extends object>(parentPath: string, parentId: string, subcollectionName: string): Observable<T[]> {
+  getSubcollection<T extends object>(parentPath: string, parentId: string, subcollectionName: string, orderByField: string): Observable<T[]> {
     const path = `${parentPath}/${parentId}/${subcollectionName}`;
     const ref = collection(this.firestore, path);
-    const q = query(ref, orderBy('timestamp', 'asc')); // Sortiert Nachrichten aufsteigend nach Zeit
+    const q = query(ref, orderBy(orderByField, 'asc')); // Sortiert Nachrichten aufsteigend nach Zeit
     return collectionData(q, { idField: 'id' }) as Observable<T[]>;
   }
 }

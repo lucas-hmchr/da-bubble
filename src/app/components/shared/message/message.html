@@ -1,4 +1,11 @@
-<section>
+<div *ngIf="messages$ | async as messages">
+
+  <!-- Fallback, wenn keine Nachrichten vorhanden sind -->
+  <div *ngIf="messages.length === 0" class="empty-channel-info">
+    <p>Sei der Erste, der eine Nachricht in diesem Channel schreibt!</p>
+  </div>
+
+<section *ngFor="let msg of messages" class="message-wrapper">
     <div class="date-separator">
         <span>Dienstag, 14 Januar</span>
     </div>

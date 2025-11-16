@@ -27,7 +27,7 @@ export class Message implements OnChanges {
 
   loadMessages() {
     if (this.channel) {
-      this.messages$ = this.firestoreService.getSubcollection<MessageData>('channels', this.channel.id, 'messages');
+      this.messages$ = this.firestoreService.getSubcollection<MessageData>('channels', this.channel.id, 'messages', 'createdAt');
     }
   }
 }

@@ -1,6 +1,9 @@
 export interface MessageData {
   id: string;
   text: string;
-  authorId: string;
-  timestamp: any; // Firestore Timestamp
+  senderId: string;
+  createdAt: any; // Firestore Timestamp
+  editedAt?: any;
+  reactions?: { [key: string]: string[] };
+  threadCount?: number;
 }
