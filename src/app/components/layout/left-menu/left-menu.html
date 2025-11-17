@@ -1,15 +1,20 @@
-<mat-drawer-container class="example-container" autosize>
-  <mat-drawer #drawer class="example-sidenav" mode="side">
-    <p>Auto-resizing sidenav</p>
-    @if (showFiller) {
-      <p>Lorem, ipsum dolor sit amet consectetur.</p>
-    }
-  </mat-drawer>
+<div class="left-menu-container">
+    <mat-drawer-container class="mat-drawer-container" autosize>
+        <mat-drawer #drawer class="left-menu-sidenav" mode="side">
+            <div class="channels-button-container">
+                <div class="workspace-logo-text-container">
+                    <img src="/icons/global/workspace_logo.svg" alt="">
+                    <span>Devspace</span>
+                </div>
+                <img src="/icons/global/edit_square.svg" alt="">
+            </div>
+        </mat-drawer>
+    </mat-drawer-container>
 
-  <div class="example-sidenav-content">
-    <button type="button" matButton (click)="drawer.toggle()">
-      Toggle sidenav
-    </button>
-  </div>
-
-</mat-drawer-container>
+    <div class="left-menu-button-icon-container cp">
+        <div class="left-menu-button" type="button" (click)="drawer.toggle()">
+            Workspace-Menu schließen
+        </div>
+        <div class="show-menu-icon"></div>
+    </div>
+</div>
