@@ -13,9 +13,10 @@
         </div>
         <div class="form-input">
             <img src="/icons/login/mail_passive.svg" alt="" class="form-input-icon">
-            <input #emailModel="ngModel" name="email" type="email" placeholder="beispielname@email.com" [(ngModel)]="email" required email>
+            <input #emailModel="ngModel" name="email" type="email" placeholder="beispielname@email.com"
+                [(ngModel)]="email" required email>
             @if (emailModel.invalid && (emailModel.dirty || emailModel.touched || form.submitted)) {
-                <span class="error-message">Bitte gebe eine valide E-Mail-Adresse an.</span>
+            <span class="error-message">Bitte gebe eine valide E-Mail-Adresse an.</span>
             }
         </div>
         <div class="form-input">
@@ -26,7 +27,9 @@
             <label class="checkbox">
                 <input type="checkbox" required [(ngModel)]="acceptPP" name="acceptPP">
             </label>
-            <p>Ich stimme der <span class="linked-text">Datenschutzerklärung</span> zu.</p>
+            <p>Ich stimme der
+                <span class="linked-text">Datenschutzerklärung</span> zu.
+            </p>
         </div>
     </form>
     <button style="margin-left: auto;" type="submit" class="submit-button"

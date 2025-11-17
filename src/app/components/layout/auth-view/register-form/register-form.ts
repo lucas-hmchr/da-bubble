@@ -1,4 +1,4 @@
-import { Component, inject, signal } from '@angular/core';
+import { Component, computed, HostListener, inject, signal } from '@angular/core';
 import { FormsModule, NgForm } from '@angular/forms';
 import { Router } from "@angular/router";
 import { avatars, defaultAvatar } from './../../../../../shared/data/avatars';
@@ -55,6 +55,5 @@ export class RegisterForm {
 
   stepBack() {
     this.showRegistrationFirstStep ? this.router.navigate(['/auth']) : this.showRegistrationFirstStep = true;
-    console.log(this.newUser)
   }
 }
