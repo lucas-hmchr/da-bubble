@@ -3,6 +3,7 @@ import { FormsModule, NgForm } from '@angular/forms';
 import { Router } from "@angular/router";
 import { avatars, defaultAvatar } from './../../../../../shared/data/avatars';
 import type { Avatar, NewUser } from './../../../../models/user.model';
+import { AuthService } from '../../../../auth/auth.service';
 
 @Component({
   selector: 'app-register-form',
@@ -15,6 +16,7 @@ import type { Avatar, NewUser } from './../../../../models/user.model';
 export class RegisterForm {
 
   private router = inject(Router);
+  private authService = inject(AuthService);
 
   avatarList = avatars;
   defaultAvatar = defaultAvatar;
@@ -32,7 +34,7 @@ export class RegisterForm {
       fullName: this.fullName,
       email: this.email,
       password: this.password,
-      selectedAvatarId: this.selectedAvatar().id,
+      selectedAvatarName: this.selectedAvatar().name,
     };
   }
 
@@ -44,9 +46,12 @@ export class RegisterForm {
     this.showRegistrationFirstStep = false;
   }
 
-  submitRegistration() {
-    const payload = this.newUser;
-    console.log(payload)
+  async submitRegistration() {
+    try {
+      await this.authService.register(this.newUser.email, this.newUser.password, this.newUser.fullName, this.newUser.selectedAvatarName);
+    } catch (err: any) {
+      console.log(err)
+    }
   }
 
   selectAvatar(avatar: Avatar) {
