@@ -1,12 +1,11 @@
 import { Component, computed, HostListener, inject, signal } from '@angular/core';
-import { Logo } from "../../shared/logo/logo";
 import { RouterOutlet, RouterLinkWithHref, ActivatedRoute, Router, NavigationEnd } from "@angular/router";
 import { toSignal } from '@angular/core/rxjs-interop';
 import { filter, startWith, map } from 'rxjs';
 
 @Component({
   selector: 'app-auth-view',
-  imports: [Logo, RouterOutlet, RouterLinkWithHref],
+  imports: [RouterOutlet, RouterLinkWithHref],
   templateUrl: './auth-view.html',
   styleUrl: './auth-view.scss',
 })
