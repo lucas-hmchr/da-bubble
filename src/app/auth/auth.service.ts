@@ -84,7 +84,16 @@ export class AuthService {
         this.router.navigate(['/auth']);
     }
 
-    async resetPassword(email: string): Promise<void> {
-        await sendPasswordResetEmail(this.auth, email);
+    async resetPassword(email: string): Promise<'ok' | 'user-not-found'> {
+        try {
+            await sendPasswordResetEmail(this.auth, email);
+            return 'ok';
+        } catch (error: any) {
+            if (error.code === 'auth/user-not-found') {
+                return 'user-not-found';
+            }
+            throw error;
+        }
     }
+
 }
