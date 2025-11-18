@@ -83,6 +83,14 @@
             outline: none;
             border: none;
         }
+
+        &:is(:-webkit-autofill, :autofill) {
+            background-color: var(--bg-clr) !important;
+        }
+
+        &:-internal-autofill-selected {
+            background-color: var(--bg-clr) !important;
+        }
     }
 }
 
@@ -137,10 +145,10 @@
     }
 
     .registration-mobile {
-        color: var(--clr-purple-1)!important;
-        background-color: var(--bg-clr)!important;
-        font-weight: 500!important;
-        border: 1px solid var(--clr-purple-light)!important;
+        color: var(--clr-purple-1) !important;
+        background-color: var(--bg-clr) !important;
+        font-weight: 500 !important;
+        border: 1px solid var(--clr-purple-light) !important;
         margin-top: 24px;
     }
 }
