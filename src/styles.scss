@@ -59,6 +59,16 @@ body {
     font-family: 'Nunito';
 }
 
+/* Entfernt den Schatten bei allen Expansion Panels */
+.mat-expansion-panel {
+  box-shadow: none !important;
+}
+
+.mat-expansion-panel-header {
+  background: none !important;
+}
+
+
 .center-content {
     display: flex;
     align-items: center;

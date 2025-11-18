@@ -1,15 +1,15 @@
+.left-menu-container {
+    font-family: 'Nunito', sans-serif;
+}
+
+
 .mat-drawer-container {
-    // width: calc(100% - 32px);
     height: 800px;
-    // border: 1px solid rgba(0, 0, 0, 0.5);
     background-color: #ECEEFE;
 }
 
+
 .left-menu-button-icon-container {
-    // display: flex;
-    // height: 100%;
-    // align-items: center;
-    // justify-content: center;
     position: absolute;
     left: -142px;
     top: 60%;
@@ -20,7 +20,6 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 20px;
     border-radius: 0 0 30px 30px;
     box-shadow: -4px 4px 7px rgba(0, 0, 0, 0.2);
     font-weight: 700;
@@ -55,6 +54,7 @@
     display: flex;
     align-items: center;
     justify-content: space-between;
+    margin-bottom: 32px;
 
     div {
         display: flex;
@@ -65,4 +65,104 @@
             margin-right: 16px;
         }
     }
+}
+
+.devspace-txt {
+    font-weight: 700;
+    font-size: 24px;
+}
+
+.edit-square-icon {
+    &:hover {
+        content: url(/icons/global/edit_square_hover.svg);
+    }
+
+    &:active {
+        content: url(/icons/global/edit_square_click.svg);
+    }
+}
+
+.channel-panel {
+    box-shadow: none;
+}
+
+::ng-deep .channel-panel .mat-content.mat-content-hide-toggle {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin: 0;
+    box-shadow: none;
+
+}
+
+::ng-deep .mat-expansion-panel-header.mat-focus-indicator {
+    padding: 0;
+}
+
+.header-left {
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+
+    .three-circle-channels-container {
+        display: flex;
+        align-items: center;
+
+        img {
+            margin-right: 8px;
+        }
+    }
+
+    &:hover {
+        color: #535AF1;
+
+        .three-circle-channels-container {
+
+            img {
+                content: url(/icons/global/workspaces_three_circles_hover.svg);
+            }
+        }
+    }
+
+    &:active {
+        color: #000000;
+
+        .arrow-icon {
+            color: #535AF1
+        }
+
+        .three-circle-channels-container {
+
+            img {
+                content: url(/icons/global/workspaces_three_circles_hover.svg);
+            }
+        }
+    }
+}
+
+.add-icon {
+    &:hover {
+        content: url(/icons/global/add_hover.svg);
+    }
+
+    &:active {
+        content: url(/icons/global/add_click.svg);
+    }
+}
+
+.arrow-icon {
+    margin-right: 16px;
+    display: inline-block;
+    transform: rotate(-90deg);
+    transition: transform 0.25s ease;
+
+    &.open {
+        transform: rotate(0deg);
+    }
+}
+
+.channel-add {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
 }
