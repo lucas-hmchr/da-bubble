@@ -10,6 +10,7 @@ import {
 } from '@angular/fire/auth';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { Firestore, doc, serverTimestamp, setDoc } from '@angular/fire/firestore';
+import { Router } from '@angular/router';
 
 @Injectable({
     providedIn: 'root',
@@ -19,6 +20,7 @@ export class AuthService {
     private auth = inject(Auth);
     private user$ = user(this.auth);
     private firestore = inject(Firestore);
+    private router = inject(Router)
 
     readonly userSignal = toSignal<User | null>(this.user$, { initialValue: null });
     readonly isLoggedIn = computed(() => !!this.userSignal());
@@ -37,6 +39,7 @@ export class AuthService {
             displayName,
             createdAt: serverTimestamp(),
         });
+        this.router.navigate(['/auth'])
         return cred.user;
     }
 

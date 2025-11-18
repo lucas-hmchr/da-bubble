@@ -21,7 +21,10 @@
         </div>
         <div class="form-input">
             <img src="/icons/login/lock_passive.svg" alt="" class="form-input-icon">
-            <input name="password" type="password" placeholder="Passwort" [(ngModel)]="password" required>
+            <input #passwordModel="ngModel" name="password" type="password" placeholder="Passwort" [(ngModel)]="password" required minlength="6">
+            @if (passwordModel.invalid && (passwordModel.dirty || passwordModel.touched || form.submitted)) {
+            <span class="error-message">Das Passwort muss mindestens 6 Zeichen enthalten.</span>
+            }
         </div>
         <div class="auth-form-container pp-container">
             <label class="checkbox">
