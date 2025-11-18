@@ -22,6 +22,7 @@
         font-weight: 700;
         font-size: 46px;
         line-height: 100%;
+        max-width: 95%;
     }
 }
 
@@ -132,6 +133,14 @@
     .arrow-back {
         top: 48px;
         left: 40px;
+    }
+
+    .registration-mobile {
+        color: var(--clr-purple-1)!important;
+        background-color: var(--bg-clr)!important;
+        font-weight: 500!important;
+        border: 1px solid var(--clr-purple-light)!important;
+        margin-top: 24px;
     }
 }
 
