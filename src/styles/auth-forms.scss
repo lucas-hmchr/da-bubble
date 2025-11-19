@@ -182,10 +182,6 @@
         gap: 20px;
     }
 
-    // .arrow-back {
-    //     top: 42px;
-    //     left: 40px;
-    // }
     .arrow-back {
         bottom: 48px;
         left: 48px;
@@ -196,7 +192,7 @@
 @media (max-width: $bp-phone-md) {
     .dialog-container {
         padding: 16px 16px;
-        padding-top: 32px !important;
+        padding-top: 32px;
     }
 
     .form-input {
@@ -214,10 +210,6 @@
         gap: none;
     }
 
-    // .arrow-back {
-    //     top: 40px;
-    //     left: 26px;
-    // }
     .arrow-back {
         bottom: 32px;
         left: 32px;
@@ -237,5 +229,41 @@
     .arrow-back {
         bottom: 28px;
         left: 28px;
+    }
+}
+
+@media (max-height: 780px) and (max-width: 360px) {
+    .dialog-container {
+        padding-top: 12px;
+        gap: 12px;
+    }
+
+    .mobile-registration-link{
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        width: 100%;
+
+        > .linked-text{
+            margin-top: 0px;
+        }
+    }
+}
+
+@media (max-height: 780px) and (min-width: 360px) {
+    .dialog-container {
+        gap: 12px;
+        padding: 16px;
+    }
+
+    .mobile-registration-link{
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        width: 100%;
+
+        > .linked-text{
+            margin-top: 0px;
+        }
     }
 }

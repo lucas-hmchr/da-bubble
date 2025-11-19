@@ -38,7 +38,7 @@ export class AuthService {
             photoURL: `/images/avatars/${avatarName}.svg`,
         });
         await this.createUserDocForNewUser(cred.user, { avatarName });
-        this.router.navigate(['/auth'])
+        this.router.navigate(['/'])
     }
 
     getUserRef(uid: string = this.activeUser()!.uid) {
@@ -61,7 +61,12 @@ export class AuthService {
     }
 
     async login(email: string, password: string): Promise<void> {
-        await signInWithEmailAndPassword(this.auth, email, password);
+        try {
+            await signInWithEmailAndPassword(this.auth, email, password);
+            this.router.navigate(['/']);
+        } catch (error) {
+            console.log(error)
+        }
     }
 
     async signInWithGoogle(): Promise<void> {
@@ -72,6 +77,7 @@ export class AuthService {
             if (!snap.exists()) {
                 await this.createUserDocForNewUser(user);
             }
+            console.log('activeUser', this.activeUser());
             this.router.navigate(['/']);
         } catch (error: any) {
             console.error('Google Login Fehler:', error);

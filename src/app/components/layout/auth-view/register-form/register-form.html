@@ -23,7 +23,7 @@
             <img src="/icons/login/lock_passive.svg" alt="" class="form-input-icon">
             <input #passwordModel="ngModel" name="password" type="password" placeholder="Passwort" [(ngModel)]="password" required minlength="6">
             @if (passwordModel.invalid && (passwordModel.dirty || passwordModel.touched || form.submitted)) {
-            <span class="error-message">Das Passwort muss mindestens 6 Zeichen enthalten.</span>
+            <span class="error-message">Verwende min. 6 Zeichen.</span>
             }
         </div>
         <div class="auth-form-container pp-container">
