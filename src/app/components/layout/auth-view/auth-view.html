@@ -27,11 +27,11 @@
     <router-outlet></router-outlet>
 
     @if (showRegistrationLink() && isMobile()) {
-    <div>
+    <div class="mobile-registration-link">
         <span style="font-size: 18px;">Neu bei DABubble?</span>
         <span class="linked-text registration-mobile" routerLink="/auth/register">Konto erstellen</span>
     </div>
-    } @else {
+    } @else if (!showRegistrationLink() && !isMobile()) {
     <div class="links">
         <span class="linked-text">Impressum</span>
         <span class="linked-text">Datenschutz</span>

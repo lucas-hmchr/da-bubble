@@ -102,7 +102,7 @@
   }
 }
 
-.logo-static{
+.logo-static {
   height: 70px;
 }
 
@@ -147,5 +147,12 @@
 @media (max-width: $bp-phone-md) {
   .auth-window {
     padding: 12px;
+  }
+}
+
+@media (max-height: 780px) {
+  .auth-window {
+    justify-content: center;
+    gap: 12px;
   }
 }
