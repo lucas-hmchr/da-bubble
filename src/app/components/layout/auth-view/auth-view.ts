@@ -1,7 +1,8 @@
-import { Component, computed, HostListener, inject, signal } from '@angular/core';
+import { Component, computed, effect, HostListener, inject, signal } from '@angular/core';
 import { RouterOutlet, RouterLinkWithHref, ActivatedRoute, Router, NavigationEnd } from "@angular/router";
 import { toSignal } from '@angular/core/rxjs-interop';
 import { filter, startWith, map } from 'rxjs';
+import { AuthService } from '../../../auth/auth.service';
 
 @Component({
   selector: 'app-auth-view',
@@ -13,6 +14,12 @@ export class AuthView {
   private router = inject(Router);
   private route = inject(ActivatedRoute);
   readonly screenWidth = signal(window.innerWidth);
+
+    constructor(private authService: AuthService) {
+    effect(() => {
+      console.log('activeUser in AppShell:', this.authService.activeUser());
+    });
+  }
 
   currentChildPath = toSignal(
     this.router.events.pipe(
