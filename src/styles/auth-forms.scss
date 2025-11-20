@@ -21,6 +21,8 @@
         text-align: center;
         font-weight: 700;
         font-size: 46px;
+        line-height: 100%;
+        max-width: 95%;
     }
 }
 
@@ -36,6 +38,7 @@
 .form-divider {
     position: relative;
     width: 100%;
+    margin-bottom: 8px;
 
     >div {
         height: 1px;
@@ -80,6 +83,14 @@
             outline: none;
             border: none;
         }
+
+        &:is(:-webkit-autofill, :autofill) {
+            background-color: var(--bg-clr) !important;
+        }
+
+        &:-internal-autofill-selected {
+            background-color: var(--bg-clr) !important;
+        }
     }
 }
 
@@ -104,7 +115,7 @@
 
 .arrow-back {
     position: absolute;
-    top: 56px;
+    top: 48px;
     left: 56px;
     cursor: pointer;
 }
@@ -114,6 +125,14 @@
     bottom: -20px;
     left: 8px;
     color: red;
+    font-size: 14px;
+}
+
+.info-message {
+    position: absolute;
+    bottom: -20px;
+    left: 8px;
+    color: orange;
     font-size: 14px;
 }
 
@@ -127,14 +146,124 @@
     .dialog-container {
         padding: 32px 32px;
     }
+
+    .arrow-back {
+        top: 48px;
+        left: 40px;
+    }
+
+    .registration-mobile {
+        color: var(--clr-purple-1) !important;
+        background-color: var(--bg-clr) !important;
+        font-weight: 500 !important;
+        border: 1px solid var(--clr-purple-light) !important;
+        margin-top: 24px;
+    }
+}
+
+@media (max-width: $bp-phone-xl) {
+    .arrow-back {
+        top: 48px;
+        left: 32px;
+    }
 }
 
 @media (max-width: $bp-phone-lg) {
     .dialog-container {
-        padding: 24px;
+        padding: 32px 20px;
+        gap: 20px;
 
-        > h1{
+        h1 {
             font-size: 32px;
+        }
+    }
+
+    .auth-form-container {
+        gap: 20px;
+    }
+
+    .arrow-back {
+        bottom: 48px;
+        left: 48px;
+        top: auto;
+    }
+}
+
+@media (max-width: $bp-phone-md) {
+    .dialog-container {
+        padding: 16px 16px;
+        padding-top: 32px;
+    }
+
+    .form-input {
+        gap: 12px;
+        padding: 12px 24px;
+        height: 50px;
+
+        >input {
+            font-size: 17px;
+        }
+    }
+
+    .flex-hor {
+        justify-content: space-between;
+        gap: none;
+    }
+
+    .arrow-back {
+        bottom: 32px;
+        left: 32px;
+    }
+}
+
+@media (max-width: $bp-phone-sm) {
+    .dialog-container {
+        padding: 12px;
+        padding-top: 16px;
+    }
+
+    .form-input {
+        padding: 10px 18px;
+    }
+
+    .arrow-back {
+        bottom: 28px;
+        left: 28px;
+    }
+}
+
+@media (max-height: 780px) and (max-width: 360px) {
+    .dialog-container {
+        padding-top: 12px;
+        gap: 12px;
+    }
+
+    .mobile-registration-link{
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        width: 100%;
+
+        > .linked-text{
+            margin-top: 0px;
+        }
+    }
+}
+
+@media (max-height: 780px) and (min-width: 360px) {
+    .dialog-container {
+        gap: 12px;
+        padding: 16px;
+    }
+
+    .mobile-registration-link{
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        width: 100%;
+
+        > .linked-text{
+            margin-top: 0px;
         }
     }
 }

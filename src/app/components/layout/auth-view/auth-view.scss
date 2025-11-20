@@ -90,6 +90,7 @@
 .top-row {
   display: flex;
   justify-content: space-between;
+  align-items: flex-start;
   width: 100%;
 
   >div {
@@ -99,6 +100,10 @@
     gap: 16px;
     font-size: 18px;
   }
+}
+
+.logo-static {
+  height: 70px;
 }
 
 .links {
@@ -114,9 +119,22 @@
   }
 }
 
+@media (max-width: $bp-tablet-sm) {
+  .auth-window {
+    justify-content: center;
+    gap: 32px;
+  }
+
+  .top-row {
+    justify-content: center;
+  }
+}
+
 @media (max-width: $bp-phone-xl) {
   .auth-window {
     padding: 24px;
+    justify-content: center;
+    gap: 32px;
   }
 }
 
@@ -126,3 +144,15 @@
   }
 }
 
+@media (max-width: $bp-phone-md) {
+  .auth-window {
+    padding: 12px;
+  }
+}
+
+@media (max-height: 780px) {
+  .auth-window {
+    justify-content: center;
+    gap: 12px;
+  }
+}
