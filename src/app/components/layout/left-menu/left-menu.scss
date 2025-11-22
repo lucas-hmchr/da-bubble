@@ -1,3 +1,16 @@
+.mr-8{
+    margin-right: 8px;
+}
+
+.mb-16{
+    margin-bottom: 16px;
+}
+
+.d-flex{
+    display: flex;
+    align-items: center;
+}
+
 .left-menu-container {
     font-family: 'Nunito', sans-serif;
 }
@@ -39,8 +52,8 @@
     padding: 30px;
     border-radius: 30px;
     margin-top: 16px;
-    margin-left: 16px;
-    margin-bottom: 16px;
+    margin-left: 20px;
+    margin-bottom: 20px;
 }
 
 .show-menu-icon {
@@ -164,5 +177,4 @@
 .channel-add {
     display: flex;
     align-items: center;
-    justify-content: space-between;
 }
