@@ -2,7 +2,7 @@ export type NewUser = {
   fullName: string;
   email: string;
   password: string;
-  selectedAvatarId: number;
+  selectedAvatarName: string;
 };
 
 export interface Avatar {

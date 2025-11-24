@@ -5,6 +5,7 @@
 // Learn more about theming and how to use it for your application's
 // custom components at https://material.angular.dev/guide/theming
 @use '@angular/material' as mat;
+@use './styles/variables.scss' as *;
 
 html {
   @include mat.theme((
@@ -37,7 +38,6 @@ body {
 @import url(./styles/auth-forms.scss);
 @import url(./styles/fonts.css);
 @import url(./styles/variables.scss);
-
 
 :root {
     --login-background-gradient: linear-gradient(1.46deg, #313AE6 1.22%, #797EF3 98.76%);
@@ -101,6 +101,12 @@ body {
     font-size: 20px;
 }
 
+@media(max-width: $bp-phone-lg) {
+    .fs-20 {
+        font-size: 17px;
+    }
+}
+
 .text-center {
     text-align: center;
 }
@@ -118,6 +124,13 @@ body {
     border: none;
 }
 
+@media(max-width: $bp-phone-sm) {
+    .submit-button {
+        padding: 12px 24px;
+        font-size: 16px;
+    }
+}
+
 .btn-disabled {
     background-color: var(--clr-gray);
     cursor: not-allowed;
@@ -127,7 +140,7 @@ body {
     background-color: var(--clr-purple-1);
     cursor: pointer;
 
-    &:hover{
+    &:hover {
         background-color: var(--clr-purple-2);
     }
 }
