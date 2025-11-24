@@ -10,7 +10,7 @@ import {MatIconModule} from '@angular/material/icon';
   templateUrl: './workspace-sidebar.html',
   styleUrl: './workspace-sidebar.scss',
 })
-export class LeftMenu {
+export class WorkspaceSidebar {
   readonly channelOpen = signal(false);
   readonly dmOpen = signal(false);
 }
