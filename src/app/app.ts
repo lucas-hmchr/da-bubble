@@ -1,10 +1,10 @@
 import { Component, signal } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
-import { LeftMenu } from "./components/layout/left-menu/left-menu";
+import { WorkspaceSidebar } from "./components/layout/workspace-sidebar/workspace-sidebar";
 
 @Component({
   selector: 'app-root',
-  imports: [RouterOutlet, LeftMenu],
+  imports: [RouterOutlet, WorkspaceSidebar],
   templateUrl: './app.html',
   styleUrl: './app.scss'
 })

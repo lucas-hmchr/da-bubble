@@ -10,12 +10,12 @@
             </div>
             <mat-accordion>
                 <!-- Channel -->
-                <mat-expansion-panel hideToggle="true" class="channel-panel" (opened)="panelOpenState.set(true)"
-                    (closed)="panelOpenState.set(false)">
+                <mat-expansion-panel hideToggle="true" class="channel-panel" (opened)="channelOpen.set(true)"
+                    (closed)="channelOpen.set(false)">
 
                     <mat-expansion-panel-header class="arrow-channel-add-container">
                         <div class="header-left">
-                            <mat-icon class="arrow-icon" [class.open]="panelOpenState()">arrow_drop_down</mat-icon>
+                            <mat-icon class="arrow-icon" [class.open]="channelOpen()">arrow_drop_down</mat-icon>
                             <div class="three-circle-channels-container">
                                 <img src="/icons/global/workspaces_three_circles_default.svg" alt="">
                                 <span>Channels</span>
@@ -24,14 +24,14 @@
                         <img class="add-icon" src="/icons/global/add_default.svg" alt="">
                     </mat-expansion-panel-header>
 
-                    <div class="channel-list">
+                    <div class="channel-list ml-16">
                         <div class="channel-item d-flex mb-16">
-                            <mat-icon class="mr-8">tag</mat-icon>
+                            <img src="/icons/global/tag.svg" class="mr-8" alt="">
                             Entwicklerteam
                         </div>
 
                         <div class="channel-item d-flex mb-16">
-                            <mat-icon class="mr-8">tag</mat-icon>
+                            <img src="/icons/global/tag.svg" class="mr-8" alt="">
                             Office-team
                         </div>
 
@@ -44,37 +44,24 @@
                 </mat-expansion-panel>
 
                 <!-- direktnachrichten -->
-                <mat-expansion-panel hideToggle="true" class="channel-panel" (opened)="panelOpenState.set(true)"
-                    (closed)="panelOpenState.set(false)">
+                <mat-expansion-panel hideToggle="true" class="channel-panel" (opened)="dmOpen.set(true)"
+                    (closed)="dmOpen.set(false)">
 
-                    <mat-expansion-panel-header class="arrow-channel-add-container">
+                    <mat-expansion-panel-header class="arrow-dMessage-container">
                         <div class="header-left">
-                            <mat-icon class="arrow-icon" [class.open]="panelOpenState()">arrow_drop_down</mat-icon>
-                            <div class="three-circle-channels-container">
-                                <img src="/icons/global/workspaces_three_circles_default.svg" alt="">
+                            <mat-icon class="arrow-icon" [class.open]="dmOpen()">arrow_drop_down</mat-icon>
+                            <div class="account-directMessage-container">
+                                <img src="/icons/global/account_circle.svg" class="mr-8" alt="">
                                 <span>Direktnachrichten</span>
                             </div>
                         </div>
-                        <img class="add-icon" src="/icons/global/add_default.svg" alt="">
                     </mat-expansion-panel-header>
-
-                    <div class="channel-list">
-                        <div class="channel-item d-flex mb-16">
-                            <mat-icon class="mr-8">tag</mat-icon>
-                            Entwicklerteam
-                        </div>
-
-                        <div class="channel-item d-flex mb-16">
-                            <mat-icon class="mr-8">tag</mat-icon>
-                            Office-team
-                        </div>
-
-                        <div class="channel-add">
-                            <img src="/icons/global/add_circle.svg" class="mr-8" alt="">
-                            Channel hinzufügen
+                    <div class="account-submenu-container ml-16">
+                        <div class="account-avatar-name">
+                            <img src="/images/avatars/avatar_male_3.svg" class="avatar mr-8" alt="">
+                            <span>Frederick Beck</span>
                         </div>
                     </div>
-
                 </mat-expansion-panel>
             </mat-accordion>
 

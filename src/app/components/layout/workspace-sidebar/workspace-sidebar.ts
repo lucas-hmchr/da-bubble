@@ -5,11 +5,12 @@ import {MatExpansionModule} from '@angular/material/expansion';
 import {MatIconModule} from '@angular/material/icon';
 
 @Component({
-  selector: 'app-left-menu',
+  selector: 'app-workspace-sidebar',
   imports: [MatSidenavModule, MatButtonModule, MatExpansionModule, MatIconModule],
-  templateUrl: './left-menu.html',
-  styleUrl: './left-menu.scss',
+  templateUrl: './workspace-sidebar.html',
+  styleUrl: './workspace-sidebar.scss',
 })
 export class LeftMenu {
-  readonly panelOpenState = signal(false);
+  readonly channelOpen = signal(false);
+  readonly dmOpen = signal(false);
 }

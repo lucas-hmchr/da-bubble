@@ -1,18 +1,18 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { LeftMenu } from './left-menu';
+import { WorkspaceSidebar } from './workspace-sidebar';
 
 describe('LeftMenu', () => {
-  let component: LeftMenu;
-  let fixture: ComponentFixture<LeftMenu>;
+  let component: WorkspaceSidebar;
+  let fixture: ComponentFixture<WorkspaceSidebar>;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [LeftMenu]
+      imports: [WorkspaceSidebar]
     })
     .compileComponents();
 
-    fixture = TestBed.createComponent(LeftMenu);
+    fixture = TestBed.createComponent(WorkspaceSidebar);
     component = fixture.componentInstance;
     fixture.detectChanges();
   });

@@ -1,12 +1,16 @@
-.mr-8{
+.mr-8 {
     margin-right: 8px;
 }
 
-.mb-16{
+.mb-16 {
     margin-bottom: 16px;
 }
 
-.d-flex{
+.ml-16{
+    margin-left: 16px;
+}
+
+.d-flex {
     display: flex;
     align-items: center;
 }
@@ -117,7 +121,8 @@
     display: flex;
     align-items: center;
 
-    .three-circle-channels-container {
+    .three-circle-channels-container,
+    .account-directMessage-container {
         display: flex;
         align-items: center;
 
@@ -130,12 +135,18 @@
         color: #535AF1;
 
         .three-circle-channels-container {
-
             img {
                 content: url(/icons/global/workspaces_three_circles_hover.svg);
             }
         }
+
+        .account-directMessage-container {
+            img {
+                content: url(/icons/global/account_circle_hover.svg);
+            }
+        }
     }
+
 
     &:active {
         color: #000000;
@@ -148,6 +159,12 @@
 
             img {
                 content: url(/icons/global/workspaces_three_circles_hover.svg);
+            }
+        }
+
+        .account-directMessage-container {
+            img {
+                content: url(/icons/global/account_circle_hover.svg);
             }
         }
     }
@@ -177,4 +194,16 @@
 .channel-add {
     display: flex;
     align-items: center;
+}
+
+.account-avatar-name {
+    display: flex;
+    align-items: center;
+
+    img {
+        border-radius: 50%;
+        height: 50px;
+        width: 50px;
+    }
+
 }
