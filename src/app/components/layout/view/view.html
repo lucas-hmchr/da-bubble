@@ -12,7 +12,8 @@
     </div>
 </header>
 
-<div id="messages-container" *ngIf="channel">
+<div id="chat-container" *ngIf="channel">
+<app-message ></app-message>
 <app-message [channel]="channel"></app-message>
 <app-message-input [channel]="channel"></app-message-input>
 </div>
