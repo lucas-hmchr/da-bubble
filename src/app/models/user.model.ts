@@ -12,4 +12,5 @@ export interface Avatar {
   displayName?: string;
   email?: string;
   status?: string;
+  name: string;
 }
