@@ -1,21 +1,23 @@
 <section>
 
-<header>
-    <div>
-        <h2># DevTeam </h2>
-        <img src="/icons/global/keyboard_arrow_down.svg" alt="">
-    </div>
-    <div>
-        <img src="/images/avatars/avatar_default.svg" alt="">
-        <span>1</span>
-        <img class="add-person" src="/icons/global/person_add1.svg" alt="">
-    </div>
-</header>
+    <header>
+        <div>
+            <h2># DevTeam </h2>
+            <img src="/icons/global/keyboard_arrow_down.svg" alt="">
+        </div>
+        <div>
+            <img src="/images/avatars/avatar_default.svg" alt="">
+            <span>1</span>
+            <img class="add-person" src="/icons/global/person_add1.svg" alt="">
+        </div>
+    </header>
 
-<div id="chat-container" *ngIf="channel">
-<app-message ></app-message>
-<app-message [channel]="channel"></app-message>
-<app-message-input [channel]="channel"></app-message-input>
-</div>
+    <div id="chat-container" *ngIf="channel">
+        <div>
+            <app-message></app-message>
+            <app-message [channel]="channel"></app-message>
+        </div>
+        <app-message-input [channel]="channel"></app-message-input>
+    </div>
 
 </section>

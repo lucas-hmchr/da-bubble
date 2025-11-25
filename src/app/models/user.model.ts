@@ -6,7 +6,7 @@ export type NewUser = {
 };
 
 export interface Avatar {
-  id?: string;
+  id?: number;
   avatarUrl?: string;
   createdAt?: any;
   displayName?: string;

@@ -5,11 +5,12 @@ import { WorkspaceSidebar } from '../workspace-sidebar/workspace-sidebar';
 import { AuthService } from '../../../auth/auth.service';
 import { FirestoreService } from '../../../services/firestore';
 import { Avatar } from '../../../models/user.model';
+import { ThreadMenu } from '../thread-menu/thread-menu';
 
 @Component({
   selector: 'app-app-shell',
   standalone: true,
-  imports: [Topbar, View, WorkspaceSidebar],
+  imports: [Topbar, View, WorkspaceSidebar,ThreadMenu],
   templateUrl: './app-shell.html',
   styleUrl: './app-shell.scss',
 })
