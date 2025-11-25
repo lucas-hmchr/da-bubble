@@ -1,16 +1,56 @@
 #message-container {
     border: 1px solid var(--clr-purple-light);
-    border-radius: 10px;
+    border-radius: 20px;
     padding: 10px 10px;
-    width: calc(100% - 2 * 10px);
+    width: calc(100% - 2 * 35px);
     // width: 400px;
     // width: 500px;
     height: 200px;
     background-color: transparent;
-    margin: 0px 10px;
+    margin: 0px 35px;
+    margin-bottom: 30px;
+    position: relative; // wichtig für das absolute Dropdown
 }
 
-textarea{
+.mention-dropdown {
+  position: absolute;
+  bottom: 50px; // ungefähr Höhe der textarea-Unterkante
+  left: 0;
+  width: 320px;
+  max-height: 260px;
+  background: #ffffff;
+  border-radius: 20px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+  overflow-y: auto;
+  padding: 8px 0;
+  z-index: 10;
+}
+
+.mention-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 16px;
+  cursor: pointer;
+  font-size: 16px;
+
+  &:hover {
+    background: rgba(89, 96, 255, 0.08); // leichtes Blau
+  }
+}
+
+.mention-avatar {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: #e2e2ff; // Platzhalter
+}
+
+.mention-name {
+  flex: 1;
+}
+
+textarea {
     resize: none;
     // background-color: red;
     width: 100%;
@@ -19,7 +59,7 @@ textarea{
     border: none;
 }
 
-#message-actions{
+#message-actions {
     height: 50px;
     width: 100%;
     // background-color: rgba(0, 255, 0, 0.1);
@@ -27,11 +67,12 @@ textarea{
     align-items: center;
     justify-content: space-between;
 
-    div{
+    div {
         display: flex;
         gap: 8px;
     }
 }
+
 .form-input-icon {
     cursor: pointer;
     height: 35px;
@@ -41,6 +82,7 @@ textarea{
 
 .icon-smile {
     content: url('/icons/global/smile1.svg');
+
     &:hover {
         content: url('/icons/global/smile3.svg');
         background-color: var(--bg-clr);
@@ -50,6 +92,7 @@ textarea{
 
 .icon-at {
     content: url('/icons/global/at1.svg');
+
     &:hover {
         content: url('/icons/global/at3.svg');
         background-color: var(--bg-clr);
@@ -62,6 +105,7 @@ textarea{
     height: 30px;
     width: 30px;
     content: url('/icons/global/send1.svg');
+
     &:hover {
         content: url('/icons/global/send2.svg');
     }

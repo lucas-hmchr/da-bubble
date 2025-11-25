@@ -1,10 +1,36 @@
-<div id="message-container">
-    <textarea name="" id="" placeholder="Antworten..."></textarea>
-    <div id="message-actions">
-        <div>
-            <img src="/icons/global/smile1.svg" alt="Emoji" class="form-input-icon icon-smile">
-            <img src="/icons/global/at1.svg" alt="Mention" class="form-input-icon icon-at">
-        </div>
-        <img src="/icons/global/send1.svg" alt="Send" class="icon-send">
+<div id="message-container" class="message-container">
+  <!-- Mentions-Dropdown -->
+  <div class="mention-dropdown" *ngIf="showMentions">
+    <div
+      class="mention-item"
+      *ngFor="let user of filteredUsers"
+      (click)="onSelectUser(user)"
+    >
+      <!-- Hier könntest du noch ein Avatar-Image einbauen -->
+      <span class="mention-avatar"></span>
+      <span class="mention-name">{{ user }}</span>
     </div>
+  </div>
+
+  <textarea
+    #messageInput
+    placeholder="Antworten..."
+    (keyup)="onKeyup($event)"
+  ></textarea>
+
+  <div id="message-actions">
+    <div>
+      <img
+        src="/icons/global/smile1.svg"
+        alt="Emoji"
+        class="form-input-icon icon-smile"
+      />
+      <img
+        src="/icons/global/at1.svg"
+        alt="Mention"
+        class="form-input-icon icon-at"
+      />
+    </div>
+    <img src="/icons/global/send1.svg" alt="Send" class="icon-send" />
+  </div>
 </div>
