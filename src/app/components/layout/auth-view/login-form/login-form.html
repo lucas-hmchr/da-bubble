@@ -33,7 +33,7 @@
             [disabled]="!form.valid" form="loginForm">
             <span>Anmelden</span>
         </button>
-        <button class="guest-login-btn">
+        <button class="guest-login-btn" (click)="continueAsGuest()">
             <span>Gäste-Login</span>
         </button>
     </div>
