@@ -4,6 +4,10 @@ section {
     border-radius: 30px;
 }
 
+#chat-container{
+    padding: 10px 0px;
+}
+
 header {
     display: flex;
     justify-content: space-between;
@@ -21,6 +25,7 @@ header {
         }
     }
     >div:nth-child(2) {
+        
         font-size: 20px;
         width: fit-content;
         // background-color: white;

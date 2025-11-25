@@ -6,6 +6,11 @@ export type NewUser = {
 };
 
 export interface Avatar {
-    id: number,
-    name: string,
+  id?: string;
+  avatarUrl?: string;
+  createdAt?: any;
+  displayName?: string;
+  email?: string;
+  status?: string;
+  name: string;
 }
