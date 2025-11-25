@@ -22,7 +22,8 @@
 
 
 .mat-drawer-container {
-    height: 800px;
+    // height: 800px;
+    height: calc(100% - 16px);
     background-color: #ECEEFE;
 }
 
