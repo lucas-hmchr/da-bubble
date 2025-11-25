@@ -11,6 +11,7 @@ import {
     signInWithPopup,
     signInWithRedirect,
     UserCredential,
+    signInAnonymously,
 } from '@angular/fire/auth';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { Firestore, doc, getDoc, serverTimestamp, setDoc } from '@angular/fire/firestore';
@@ -46,16 +47,19 @@ export class AuthService {
         return userRef;
     }
 
-    private async createUserDocForNewUser(user: User, opts?: { avatarName?: string }) {
-        const { avatarName } = opts ?? {};
+    private async createUserDocForNewUser(
+        user: User,
+        opts?: { avatarName?: string; isGuest?: boolean }
+    ) {
+        const { avatarName, isGuest } = opts ?? {};
         const ref = this.getUserRef(user.uid);
-
         await setDoc(ref, {
             uid: user.uid,
-            email: user.email,
-            displayName: user.displayName,
-            avatarName: avatarName ?? null,
-            isOnline: false,
+            email: user.email ?? null,
+            displayName: user.displayName ?? (isGuest ? 'Gast' : null),
+            avatarName: avatarName ?? (isGuest ? 'avatar_default' : null),
+            isGuest: !!isGuest,
+            isOnline: true,
             createdAt: serverTimestamp(),
         });
     }
@@ -83,6 +87,23 @@ export class AuthService {
             console.error('Google Login Fehler:', error);
             throw error;
         }
+    }
+
+    async loginAsGuest(): Promise<void> {
+        const cred = await signInAnonymously(this.auth);
+        const user = cred.user;
+        const ref = this.getUserRef(user.uid);
+        const snap = await getDoc(ref);
+        if (!snap.exists()) {
+            await this.createUserDocForNewUser(user, { isGuest: true });
+        } else {
+            await setDoc(
+                ref,
+                { lastActiveAt: serverTimestamp() },
+                { merge: true },
+            );
+        }
+        this.router.navigate(['/']);
     }
 
     async logout(): Promise<void> {

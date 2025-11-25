@@ -24,4 +24,12 @@ export class LoginForm {
   triggerGoogleLogin() {
     this.authService.signInWithGoogle();
   }
+
+  continueAsGuest() {
+    try {
+      this.authService.loginAsGuest();
+    } catch (err) {
+      console.error(err);
+    } 
+  }
 }
