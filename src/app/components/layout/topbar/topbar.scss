@@ -2,3 +2,34 @@
     background-color: var(--bg-clr);
     height: 100vh;
 }
+
+.top-bar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 15px 45px;
+}
+
+.search-bar {
+    position: relative;
+
+    .search-inputs {
+        height: 70px;
+        width: 989px;
+        border-radius: 42px;
+        padding: 17.5px 45px;
+        border: none;
+        outline: none;
+        font-size: 33px;
+    }
+
+    .search-icon-right {
+        position: absolute;
+        right: 30px;
+        top: 50%;
+        transform: translateY(-50%);
+        width: 35px;
+        height: 35px;
+        cursor: pointer;
+    }
+}
