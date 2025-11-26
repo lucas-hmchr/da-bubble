@@ -33,3 +33,13 @@
         cursor: pointer;
     }
 }
+
+.profil-image {
+    position: relative;
+
+    .online-icon {
+        position: absolute;
+        top: 50px;
+        right: 80px;
+    }
+}
