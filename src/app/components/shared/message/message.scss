@@ -45,7 +45,10 @@ section {
             align-items: center;
         }
     }
+}
 
+.fdrr{
+    flex-direction: row-reverse;
 }
 
 p{
@@ -67,12 +70,24 @@ a {
     color: #686868;
 }
 
-.other-person{
-    background-color: #ECEEFE;
+.bubble {
     padding: 15px;
-    border-top-right-radius: 30px;
-    border-bottom-right-radius: 30px;
-    border-bottom-left-radius: 30px;
+    border-radius: 30px;
+    // border-top-right-radius: 30px;
+    // border-bottom-right-radius: 30px;
+    // border-bottom-left-radius: 30px;
+}
+
+.other-person{
+    background-color:var(--bg-clr);
+    color: black;
+    border-top-left-radius: 0px;
+}
+
+.me-person {
+    background-color: var(--clr-purple-2);
+    color: white;
+    border-top-right-radius: 0px;
 }
 
 .text {
