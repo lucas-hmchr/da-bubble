@@ -1,21 +1,18 @@
 #message-container {
+    position: relative;
     border: 1px solid var(--clr-purple-light);
     border-radius: 20px;
     padding: 10px 10px;
     width: calc(100% - 2 * 35px);
-    // width: 400px;
-    // width: 500px;
     height: 200px;
     background-color: transparent;
     margin: 0px 35px;
     margin-bottom: 30px;
-    position: relative; // wichtig für das absolute Dropdown
+    position: relative; // wichtig für absolute Position
 }
 
 .mention-dropdown {
   position: absolute;
-  bottom: 50px; // ungefähr Höhe der textarea-Unterkante
-  left: 0;
   width: 320px;
   max-height: 260px;
   background: #ffffff;
@@ -27,27 +24,27 @@
 }
 
 .mention-item {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  padding: 10px 16px;
-  cursor: pointer;
-  font-size: 16px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 16px;
+    cursor: pointer;
+    font-size: 16px;
 
-  &:hover {
-    background: rgba(89, 96, 255, 0.08); // leichtes Blau
-  }
+    &:hover {
+        background: rgba(89, 96, 255, 0.08); // leichtes Blau
+    }
 }
 
 .mention-avatar {
-  width: 32px;
-  height: 32px;
-  border-radius: 50%;
-  background: #e2e2ff; // Platzhalter
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background: #e2e2ff; // Platzhalter
 }
 
 .mention-name {
-  flex: 1;
+    flex: 1;
 }
 
 textarea {
