@@ -1,13 +1,19 @@
 <div id="message-container" class="message-container" #container>
-  <!-- Mentions-Dropdown -->
   <div class="mention-dropdown" *ngIf="showMentions" [ngStyle]="{
-    left: mentionPosition.left + 'px',
-    bottom: mentionPosition.bottom + 'px'
-  }">
+      left: mentionPosition.left + 'px',
+      bottom: mentionPosition.bottom + 'px'
+    }">
     <div class="mention-item" *ngFor="let user of filteredUsers" (click)="onSelectUser(user)">
-      <span class="mention-avatar"></span>
-      <span class="mention-name">{{ user }}</span>
+      <span class="mention-avatar">
+        <img [src]="'/images/avatars/' + (user.avatarUrl || 'avatar_default') + '.svg'" [alt]="getListLabel(user)" />
+        <span *ngIf="user.isOnline" class="status-dot"></span>
+      </span>
+      <span class="mention-name">
+        {{ getListLabel(user) }}
+      </span>
     </div>
+
+
   </div>
 
   <textarea #messageInput placeholder="Antworten..." (keyup)="onKeyup($event)"></textarea>

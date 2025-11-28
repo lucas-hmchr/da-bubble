@@ -17,13 +17,17 @@ import { ThreadMenu } from '../thread-menu/thread-menu';
 export class AppShell {
   users: Avatar[] = [];
   usersJson = '';
+  currentUserUid: string | null = null;
   
   constructor(
     private authService: AuthService,
     private firestoreService: FirestoreService,
   ) {
     effect(() => {
-      console.log('activeUser in AppShell:', this.authService.activeUser());
+      const active = this.authService.activeUser();
+      console.log('activeUser in AppShell:', active);
+
+      this.currentUserUid = active?.uid ?? null;
     });
 
     this.firestoreService.getCollection<Avatar>('users').subscribe((users) => {
