@@ -11,6 +11,8 @@
     position: relative; // wichtig für absolute Position
 }
 
+
+
 .mention-dropdown {
     position: absolute;
     width: 320px;
@@ -40,18 +42,32 @@
     width: 32px;
     height: 32px;
     border-radius: 50%;
-    overflow: hidden; // Bild innerhalb rund maskieren
-    background: #e2e2ff; // optionaler Hintergrund, falls Bild mal nicht lädt
+    //   overflow: hidden;
+    background: #e2e2ff;
     display: flex;
     align-items: center;
     justify-content: center;
+    position: relative; // wichtig für den Status-Punkt
 
     img {
         width: 100%;
         height: 100%;
-        object-fit: cover; // falls du später keine SVGs, sondern PNG/JPG nutzt
+        border-radius: 50%; // Rundheit aufs Bild legen
+        object-fit: cover;
     }
 }
+
+.status-dot {
+  position: absolute;
+  right: -1px;    // leicht nach außen
+  bottom: -1px;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: #22c55e;
+  border: 2px solid #ffffff;
+}
+
 
 .mention-name {
     flex: 1;
@@ -64,6 +80,11 @@ textarea {
     height: calc(100% - 50px);
     font-size: 18px;
     border: none;
+
+    &:focus {
+        outline: none;
+        border: none;
+    }
 }
 
 #message-actions {

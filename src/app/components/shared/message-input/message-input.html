@@ -7,11 +7,16 @@
       <span class="mention-avatar">
         <img [src]="'/images/avatars/' + (user.avatarUrl || 'avatar_default') + '.svg'"
           [alt]="user.displayName || user.name" />
+
+        <!-- Online-Indikator -->
+        <span *ngIf="user.isOnline" class="status-dot"></span>
       </span>
+
       <span class="mention-name">
         {{ user.displayName || user.name }}
       </span>
     </div>
+
   </div>
 
   <textarea #messageInput placeholder="Antworten..." (keyup)="onKeyup($event)"></textarea>
