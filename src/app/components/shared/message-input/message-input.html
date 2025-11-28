@@ -1,24 +1,13 @@
 <div id="message-container" class="message-container" #container>
 
   <!-- User-Mentions (@) -->
-  <div
-    class="mention-dropdown"
-    *ngIf="showMentions && activeMentionType === 'user'"
-    [ngStyle]="{
+  <div class="mention-dropdown" *ngIf="showMentions && activeMentionType === 'user'" [ngStyle]="{
       left: mentionPosition.left + 'px',
       bottom: mentionPosition.bottom + 'px'
-    }"
-  >
-    <div
-      class="mention-item"
-      *ngFor="let user of filteredUsers"
-      (click)="onSelectUser(user)"
-    >
+    }">
+    <div class="mention-item" *ngFor="let user of filteredUsers" (click)="onSelectUser(user)">
       <span class="mention-avatar">
-        <img
-          [src]="'/images/avatars/' + (user.avatarUrl || 'avatar_default') + '.svg'"
-          [alt]="getListLabel(user)"
-        />
+        <img [src]="'/images/avatars/' + (user.avatarUrl || 'avatar_default') + '.svg'" [alt]="getListLabel(user)" />
         <span *ngIf="user.isOnline" class="status-dot"></span>
       </span>
       <span class="mention-name">
@@ -28,30 +17,18 @@
   </div>
 
   <!-- Channel-Mentions (#) -->
-  <div
-    class="mention-dropdown"
-    *ngIf="showMentions && activeMentionType === 'channel'"
-    [ngStyle]="{
+  <div class="mention-dropdown" *ngIf="showMentions && activeMentionType === 'channel'" [ngStyle]="{
       left: mentionPosition.left + 'px',
       bottom: mentionPosition.bottom + 'px'
-    }"
-  >
-    <div
-      class="mention-item"
-      *ngFor="let ch of filteredChannels"
-      (click)="onSelectChannel(ch)"
-    >
-      <span class="mention-name">
-        #{{ ch.name }}
-      </span>
+    }">
+    <div class="mention-item" *ngFor="let ch of filteredChannels" (click)="onSelectChannel(ch)">
+      <span class="mention-hash">#</span>
+      <span class="mention-name">{{ ch.name }}</span>
     </div>
+
   </div>
 
-  <textarea
-    #messageInput
-    placeholder="Antworten..."
-    (keyup)="onKeyup($event)"
-  ></textarea>
+  <textarea #messageInput placeholder="Antworten..." (keyup)="onKeyup($event)"></textarea>
 
   <div id="message-actions">
     <div>
