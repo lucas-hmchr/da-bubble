@@ -1,4 +1,4 @@
-import { Component, effect } from '@angular/core';
+import { Component, effect, signal } from '@angular/core';
 import { Topbar } from "../topbar/topbar";
 import { View } from '../view/view';
 import { WorkspaceSidebar } from '../workspace-sidebar/workspace-sidebar';
