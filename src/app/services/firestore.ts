@@ -12,7 +12,8 @@ import {
   where,
   orderBy,
 } from '@angular/fire/firestore';
-import { Observable } from 'rxjs';
+import { Observable, BehaviorSubject } from 'rxjs';
+import { Avatar } from '../models/user.model';
 
 @Injectable({
   providedIn: 'root'
@@ -20,7 +21,12 @@ import { Observable } from 'rxjs';
 export class FirestoreService {
   firestore: Firestore = inject(Firestore);
 
-  constructor() {}
+  constructor() { }
+
+  getUsers(): Observable<Avatar[]> {
+    return this.getCollection<Avatar>('users');
+  }
+
   getCollection<T extends object>(path: string): Observable<T[]> {
     const ref = collection(this.firestore, path);
     return collectionData(ref, { idField: 'id' }) as Observable<T[]>;
@@ -57,5 +63,16 @@ export class FirestoreService {
     const ref = collection(this.firestore, path);
     const q = query(ref, orderBy(orderByField, 'asc')); // Sortiert Nachrichten aufsteigend nach Zeit
     return collectionData(q, { idField: 'id' }) as Observable<T[]>;
+  }
+
+  private usersSubject = new BehaviorSubject<Avatar[] | null>(null);
+  users$ = this.usersSubject.asObservable();
+
+  loadUsersOnce() {
+    if (this.usersSubject.value !== null) return; // schon geladen
+
+    this.getUsers().subscribe((users) => {
+      this.usersSubject.next(users);
+    });
   }
 }

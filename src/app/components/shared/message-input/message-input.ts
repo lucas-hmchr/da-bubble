@@ -1,6 +1,8 @@
-import { Component, Input, ElementRef, ViewChild } from '@angular/core';
+import { Component, Input, ElementRef, ViewChild, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Channel } from '../../../models/channel.interface';
+import { FirestoreService } from '../../../services/firestore'; // Pfad anpassen
+import { Avatar } from '../../../models/user.model';
 
 @Component({
   selector: 'app-message-input',
@@ -14,32 +16,50 @@ export class MessageInput {
   @ViewChild('messageInput') messageInput!: ElementRef<HTMLTextAreaElement>;
   @ViewChild('container') container!: ElementRef<HTMLDivElement>;
 
-  users = [
-    'Frederick Beck (Du)',
-    'Sofia Müller',
-    'Noah Braun',
-    'Elise Roth',
-    'Elias Neumann',
-    'Steffen Hoffmann',
-  ];
+  // users = [
+  //   'Frederick Beck (Du)',
+  //   'Sofia Müller',
+  //   'Noah Braun',
+  //   'Elise Roth',
+  //   'Elias Neumann',
+  //   'Steffen Hoffmann',
+  // ];
+
+  users: Avatar[] = [];
+  filteredUsers: Avatar[] = [];
+
+  // filteredUsers = [...this.users];
 
   showMentions = false;
-  filteredUsers = [...this.users];
-
   mentionPosition = { top: 0, left: 0, bottom: 0 };
 
 
-  constructor() {}
+  constructor(private firestoreService: FirestoreService) { }
+
+  ngOnInit(): void {
+    // einfache Variante:
+    this.firestoreService.getUsers().subscribe((users) => {
+      this.users = users;
+      this.filteredUsers = users;
+    });
+
+    // ODER, wenn du die shared-Variante nutzen willst:
+    // this.firestoreService.loadUsersOnce();
+    // this.firestoreService.users$.subscribe(users => {
+    //   if (!users) return;
+    //   this.users = users;
+    //   this.filteredUsers = users;
+    // });
+  }
 
   onKeyup(event: KeyboardEvent) {
     const textarea = event.target as HTMLTextAreaElement;
     const value = textarea.value;
-
     const lastChar = value.slice(-1);
 
     if (lastChar === '@' && !this.showMentions) {
       this.showMentions = true;
-      this.filteredUsers = [...this.users];
+      this.filteredUsers = this.users;
       this.updateMentionPosition();
       return;
     }
@@ -49,14 +69,17 @@ export class MessageInput {
     this.updateMentionPosition();
 
     const mentionQuery = this.getCurrentMentionQuery(value);
-
     if (!mentionQuery) {
       this.showMentions = false;
       return;
     }
 
+    const queryLower = mentionQuery.toLowerCase();
+
     this.filteredUsers = this.users.filter((u) =>
-      u.toLowerCase().includes(mentionQuery.toLowerCase())
+      (u.displayName ?? u.name ?? '')
+        .toLowerCase()
+        .includes(queryLower)
     );
   }
 
@@ -72,53 +95,49 @@ export class MessageInput {
   }
 
   private updateMentionPosition() {
-  const textarea = this.messageInput.nativeElement;
-  const containerEl = this.container.nativeElement;
+    const textarea = this.messageInput.nativeElement;
+    const containerEl = this.container.nativeElement;
 
-  const caretIndex = textarea.selectionStart ?? textarea.value.length;
+    const caretIndex = textarea.selectionStart ?? textarea.value.length;
 
-  const mirror = document.createElement('div');
-  const style = window.getComputedStyle(textarea);
+    const mirror = document.createElement('div');
+    const style = window.getComputedStyle(textarea);
 
-  Array.from(style).forEach((name) => {
-    mirror.style.setProperty(name, style.getPropertyValue(name));
-  });
+    Array.from(style).forEach((name) => {
+      mirror.style.setProperty(name, style.getPropertyValue(name));
+    });
 
-  mirror.style.position = 'absolute';
-  mirror.style.visibility = 'hidden';
-  mirror.style.whiteSpace = 'pre-wrap';
-  mirror.style.wordWrap = 'break-word';
-  mirror.style.overflow = 'hidden';
+    mirror.style.position = 'absolute';
+    mirror.style.visibility = 'hidden';
+    mirror.style.whiteSpace = 'pre-wrap';
+    mirror.style.wordWrap = 'break-word';
+    mirror.style.overflow = 'hidden';
 
-  mirror.style.top = textarea.offsetTop + 'px';
-  mirror.style.left = textarea.offsetLeft + 'px';
-  mirror.style.width = textarea.clientWidth + 'px';
+    mirror.style.top = textarea.offsetTop + 'px';
+    mirror.style.left = textarea.offsetLeft + 'px';
+    mirror.style.width = textarea.clientWidth + 'px';
 
-  mirror.textContent = textarea.value.substring(0, caretIndex);
+    mirror.textContent = textarea.value.substring(0, caretIndex);
 
-  const marker = document.createElement('span');
-  marker.textContent = '\u200b';
-  mirror.appendChild(marker);
+    const marker = document.createElement('span');
+    marker.textContent = '\u200b';
+    mirror.appendChild(marker);
 
-  containerEl.appendChild(mirror);
+    containerEl.appendChild(mirror);
 
-  const markerRect = marker.getBoundingClientRect();
-  const containerRect = containerEl.getBoundingClientRect();
+    const markerRect = marker.getBoundingClientRect();
+    const containerRect = containerEl.getBoundingClientRect();
 
-  this.mentionPosition = {
-    // top lassen wir zur Not drin, nutzen aber bottom fürs Dropdown
-    top: markerRect.bottom - containerRect.top + 8,
-    left: markerRect.left - containerRect.left,
-    // Abstand vom unteren Rand des Containers, damit die Liste nach oben wächst
-    bottom: containerRect.bottom - markerRect.top + 8,
-  };
+    this.mentionPosition = {
+      top: markerRect.bottom - containerRect.top + 8,
+      left: markerRect.left - containerRect.left,
+      bottom: containerRect.bottom - markerRect.top + 8,
+    };
 
-  containerEl.removeChild(mirror);
-}
+    containerEl.removeChild(mirror);
+  }
 
-
-
-  onSelectUser(user: string) {
+  onSelectUser(user: Avatar) {
     const textarea = this.messageInput.nativeElement;
     const value = textarea.value;
 
@@ -126,7 +145,8 @@ export class MessageInput {
     if (lastAt === -1) return;
 
     const before = value.slice(0, lastAt);
-    const newValue = `${before}@${user} `;
+    const display = user.displayName ?? user.name; // falls ein Feld fehlt
+    const newValue = `${before}@${display} `;
 
     textarea.value = newValue;
     textarea.focus();
