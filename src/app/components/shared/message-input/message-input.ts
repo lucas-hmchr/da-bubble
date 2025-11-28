@@ -28,6 +28,10 @@ export class MessageInput {
 
   users: Avatar[] = [];
   filteredUsers: Avatar[] = [];
+  channelsList: Channel[] = [];
+  filteredChannels: Channel[] = [];
+
+  activeMentionType: 'user' | 'channel' | null = null;
 
   // filteredUsers = [...this.users];
 
@@ -38,19 +42,17 @@ export class MessageInput {
   constructor(private firestoreService: FirestoreService) { }
 
   ngOnInit(): void {
-    // einfache Variante:
-    this.firestoreService.getUsers().subscribe((users) => {
+    // Users
+    this.firestoreService.getCollection<Avatar>('users').subscribe((users) => {
       this.users = users;
       this.filteredUsers = users;
     });
 
-    // ODER, wenn du die shared-Variante nutzen willst:
-    // this.firestoreService.loadUsersOnce();
-    // this.firestoreService.users$.subscribe(users => {
-    //   if (!users) return;
-    //   this.users = users;
-    //   this.filteredUsers = users;
-    // });
+    // Channels
+    this.firestoreService.getCollection<Channel>('channels').subscribe((channels) => {
+      this.channelsList = channels;
+      this.filteredChannels = channels;
+    });
   }
 
   onKeyup(event: KeyboardEvent) {
@@ -58,44 +60,76 @@ export class MessageInput {
     const value = textarea.value;
     const lastChar = value.slice(-1);
 
-    if (lastChar === '@' && !this.showMentions) {
+    // --- Trigger erkennen ---
+
+    if (lastChar === '@') {
+      this.activeMentionType = 'user';
       this.showMentions = true;
       this.filteredUsers = this.users;
       this.updateMentionPosition();
       return;
     }
 
-    if (!this.showMentions) return;
-
-    this.updateMentionPosition();
-
-    const mentionQuery = this.getCurrentMentionQuery(value);
-    if (!mentionQuery) {
-      this.showMentions = false;
+    if (lastChar === '#') {
+      this.activeMentionType = 'channel';
+      this.showMentions = true;
+      this.filteredChannels = this.channelsList;
+      this.updateMentionPosition();
       return;
     }
 
-    const queryLower = mentionQuery.toLowerCase();
+    // Wenn kein Dropdown offen ist → fertig
+    if (!this.showMentions || !this.activeMentionType) return;
 
-    this.filteredUsers = this.users.filter((u) =>
-      (u.displayName ?? u.name ?? '')
-        .toLowerCase()
-        .includes(queryLower)
-    );
+    // Position des Dropdowns aktualisieren, falls Cursor sich bewegt
+    this.updateMentionPosition();
+
+    // --- Filter je nach aktivem Typ ---
+
+    if (this.activeMentionType === 'user') {
+      const mentionQuery = this.getCurrentTriggerQuery(value, '@');
+
+      if (!mentionQuery) {
+        this.showMentions = false;
+        this.activeMentionType = null;
+        return;
+      }
+
+      const q = mentionQuery.toLowerCase();
+      this.filteredUsers = this.users.filter((u) =>
+        (u.displayName ?? u.name ?? '').toLowerCase().includes(q)
+      );
+    }
+
+    if (this.activeMentionType === 'channel') {
+      const mentionQuery = this.getCurrentTriggerQuery(value, '#');
+
+      if (!mentionQuery) {
+        this.showMentions = false;
+        this.activeMentionType = null;
+        return;
+      }
+
+      const q = mentionQuery.toLowerCase();
+      this.filteredChannels = this.channelsList.filter((c) =>
+        (c.name ?? '').toLowerCase().includes(q)
+      );
+    }
   }
 
 
 
-  private getCurrentMentionQuery(value: string): string | null {
-    const lastAt = value.lastIndexOf('@');
-    if (lastAt === -1) return null;
+  private getCurrentTriggerQuery(value: string, trigger: string): string | null {
+    const lastIndex = value.lastIndexOf(trigger);
+    if (lastIndex === -1) return null;
 
-    const afterAt = value.slice(lastAt + 1);
-    const spaceIndex = afterAt.search(/\s/);
-    const query = spaceIndex === -1 ? afterAt : afterAt.slice(0, spaceIndex);
+    const after = value.slice(lastIndex + 1);
+    const spaceIndex = after.search(/\s/);
+    const query = spaceIndex === -1 ? after : after.slice(0, spaceIndex);
 
     return query;
   }
+
 
   private updateMentionPosition() {
     const textarea = this.messageInput.nativeElement;
@@ -170,6 +204,23 @@ export class MessageInput {
     textarea.focus();
 
     this.showMentions = false;
+  }
+
+  onSelectChannel(channel: Channel) {
+    const textarea = this.messageInput.nativeElement;
+    const value = textarea.value;
+
+    const lastHash = value.lastIndexOf('#');
+    if (lastHash === -1) return;
+
+    const before = value.slice(0, lastHash);
+    const newValue = `${before}#${channel.name} `;
+
+    textarea.value = newValue;
+    textarea.focus();
+
+    this.showMentions = false;
+    this.activeMentionType = null;
   }
 
 
