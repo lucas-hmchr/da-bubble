@@ -28,13 +28,14 @@
 
   </div>
 
-  <textarea #messageInput placeholder="Antworten..." (keyup)="onKeyup($event)"></textarea>
+  <textarea #messageInput placeholder="Antworten..." (keyup)="onKeyup($event)"
+    (keydown.enter)="onEnter($event)"></textarea>
 
   <div id="message-actions">
     <div>
       <img src="/icons/global/smile1.svg" alt="Emoji" class="form-input-icon icon-smile" />
       <img src="/icons/global/at1.svg" alt="Mention" class="form-input-icon icon-at" />
     </div>
-    <img src="/icons/global/send1.svg" alt="Send" class="icon-send" />
+    <img src="/icons/global/send1.svg" alt="Send" class="icon-send" (click)="onSend()" />
   </div>
 </div>

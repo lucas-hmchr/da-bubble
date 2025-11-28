@@ -13,6 +13,8 @@ import { Avatar } from '../../../models/user.model';
 export class MessageInput {
   @Input() channel?: Channel;
   @Input() currentUserUid: string | null = null;
+  @Input() contextType: 'channel' | 'conversation' = 'channel';
+  @Input() conversationId?: string;
 
   @ViewChild('messageInput') messageInput!: ElementRef<HTMLTextAreaElement>;
   @ViewChild('container') container!: ElementRef<HTMLDivElement>;
@@ -55,7 +57,7 @@ export class MessageInput {
     });
   }
 
-  onKeyup(event: KeyboardEvent) {
+  onKeyup(event: KeyboardEvent | Event) {
     const textarea = event.target as HTMLTextAreaElement;
     const value = textarea.value;
     const lastChar = value.slice(-1);
@@ -114,6 +116,112 @@ export class MessageInput {
       this.filteredChannels = this.channelsList.filter((c) =>
         (c.name ?? '').toLowerCase().includes(q)
       );
+    }
+  }
+
+
+  onEnter(event: KeyboardEvent | Event) {
+    if ((event as KeyboardEvent).shiftKey) {
+      return;
+    }
+
+    event.preventDefault();
+    this.onSend();
+  }
+
+  async onSend() {
+    const textarea = this.messageInput.nativeElement;
+    const text = textarea.value.trim();
+
+    // 1. Nichts senden, wenn leer
+    if (!text) {
+      return;
+    }
+
+    if (!this.currentUserUid) {
+      console.warn('Kein aktueller Benutzer (UID) – Nachricht wird nicht gesendet.');
+      return;
+    }
+
+    const now = new Date(); // optional: später serverTimestamp() in FirestoreService nutzen
+
+    try {
+      if (this.contextType === 'channel') {
+        // --- CHANNEL ---
+        if (!this.channel?.id) {
+          console.warn('Kein Channel gesetzt – Nachricht wird nicht gesendet.');
+          return;
+        }
+
+        const channelId = this.channel.id as string;
+
+        // Nachricht in channels/{channelId}/messages
+        await this.firestoreService.addDocument(
+          `channels/${channelId}/messages`,
+          {
+            text,
+            senderId: this.currentUserUid,
+            createdAt: now,
+            editedAt: now,
+            threadCount: 0,
+            reactions: {
+              emojiName: '',
+              senderId: this.currentUserUid,
+            },
+          }
+        );
+
+        // lastMessageAt im Channel-Dokument aktualisieren
+        await this.firestoreService.updateDocument(
+          'channels',
+          channelId,
+          {
+            lastMessageAt: now,
+          }
+        );
+
+      } else if (this.contextType === 'conversation') {
+        // --- CONVERSATION / DIREKTCHAT ---
+        if (!this.conversationId) {
+          console.warn('Keine Conversation-ID gesetzt – Nachricht wird nicht gesendet.');
+          return;
+        }
+
+        const convId = this.conversationId;
+
+        // Nachricht in conversations/{convId}/messages
+        await this.firestoreService.addDocument(
+          `conversations/${convId}/messages`,
+          {
+            text,
+            senderId: this.currentUserUid,
+            createdAt: now,
+            editedAt: now,
+            threadCount: 0,
+            reactions: {
+              emojiName: '',
+              senderId: this.currentUserUid,
+            },
+          }
+        );
+
+        // lastMessageAt in conversations/{convId}
+        await this.firestoreService.updateDocument(
+          'conversations',
+          convId,
+          {
+            lastMessageAt: now,
+          }
+        );
+      }
+
+      // 5. Eingabefeld leeren & Mentions schließen
+      textarea.value = '';
+      this.showMentions = false;
+      this.activeMentionType = null;
+
+    } catch (error) {
+      console.error('Fehler beim Senden der Nachricht:', error);
     }
   }
 

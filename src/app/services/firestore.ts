@@ -11,13 +11,30 @@ import {
   query,
   where,
   orderBy,
+  serverTimestamp,
 } from '@angular/fire/firestore';
 import { Observable, BehaviorSubject } from 'rxjs';
 import { Avatar } from '../models/user.model';
 
+export interface ChannelMessage {
+  text: string;
+  senderId: string;
+  createdAt: any;
+  editedAt: any;
+  threadCount: number;
+  reactions: {
+    emojiName: string;
+    senderId: string;
+  };
+}
+
 @Injectable({
   providedIn: 'root'
 })
+
+
+
+
 export class FirestoreService {
   firestore: Firestore = inject(Firestore);
 
@@ -73,6 +90,35 @@ export class FirestoreService {
 
     this.getUsers().subscribe((users) => {
       this.usersSubject.next(users);
+    });
+  }
+
+  async sendMessageToChannel(
+    channelId: string,
+    text: string,
+    senderId: string
+  ): Promise<void> {
+    const channelRef = doc(this.firestore, `channels/${channelId}`);
+    const messagesRef = collection(this.firestore, `channels/${channelId}/messages`);
+
+    const now = serverTimestamp();
+
+    // 1. Nachricht in Subcollection "messages" anlegen
+    await addDoc(messagesRef, <ChannelMessage>{
+      text,
+      senderId,
+      createdAt: now,
+      editedAt: now,
+      threadCount: 0,
+      reactions: {
+        emojiName: '',
+        senderId,
+      },
+    });
+
+    // 2. lastMessageAt im Channel aktualisieren
+    await updateDoc(channelRef, {
+      lastMessageAt: now,
     });
   }
 }
