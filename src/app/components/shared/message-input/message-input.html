@@ -5,17 +5,14 @@
     }">
     <div class="mention-item" *ngFor="let user of filteredUsers" (click)="onSelectUser(user)">
       <span class="mention-avatar">
-        <img [src]="'/images/avatars/' + (user.avatarUrl || 'avatar_default') + '.svg'"
-          [alt]="user.displayName || user.name" />
-
-        <!-- Online-Indikator -->
+        <img [src]="'/images/avatars/' + (user.avatarUrl || 'avatar_default') + '.svg'" [alt]="getListLabel(user)" />
         <span *ngIf="user.isOnline" class="status-dot"></span>
       </span>
-
       <span class="mention-name">
-        {{ user.displayName || user.name }}
+        {{ getListLabel(user) }}
       </span>
     </div>
+
 
   </div>
 

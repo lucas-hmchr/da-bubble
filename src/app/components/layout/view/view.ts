@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, Input } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FirestoreService } from '../../../services/firestore';
 import { MessageInput } from '../../shared/message-input/message-input';
@@ -20,8 +20,8 @@ import { Channel } from '../../../models/channel.interface';
 export class View implements OnInit {
 
   channel?: Channel;
-
-  constructor(private firestoreService: FirestoreService) {}
+  @Input() currentUserUid: string | null = null;  // <--- neu
+  constructor(private firestoreService: FirestoreService) { }
 
   ngOnInit(): void {
     this.loadChannelByName("Devteam");

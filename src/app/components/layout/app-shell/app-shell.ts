@@ -24,7 +24,10 @@ export class AppShell {
     private firestoreService: FirestoreService,
   ) {
     effect(() => {
-      console.log('activeUser in AppShell:', this.authService.activeUser());
+      const active = this.authService.activeUser();
+      console.log('activeUser in AppShell:', active);
+
+      this.currentUserUid = active?.uid ?? null;
     });
 
     this.firestoreService.getCollection<Avatar>('users').subscribe((users) => {

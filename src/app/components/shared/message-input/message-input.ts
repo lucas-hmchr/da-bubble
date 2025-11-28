@@ -12,6 +12,7 @@ import { Avatar } from '../../../models/user.model';
 })
 export class MessageInput {
   @Input() channel?: Channel;
+  @Input() currentUserUid: string | null = null;
 
   @ViewChild('messageInput') messageInput!: ElementRef<HTMLTextAreaElement>;
   @ViewChild('container') container!: ElementRef<HTMLDivElement>;
@@ -83,6 +84,8 @@ export class MessageInput {
     );
   }
 
+
+
   private getCurrentMentionQuery(value: string): string | null {
     const lastAt = value.lastIndexOf('@');
     if (lastAt === -1) return null;
@@ -137,6 +140,22 @@ export class MessageInput {
     containerEl.removeChild(mirror);
   }
 
+  // Name, wie er in der Liste angezeigt wird (mit "(Du)")
+  getListLabel(user: Avatar): string {
+    const baseName = user.displayName ?? user.name ?? '';
+
+    if (this.currentUserUid && user.uid === this.currentUserUid) {
+      return `${baseName} (Du)`;
+    }
+
+    return baseName;
+  }
+
+  // Name, wie er in der Nachricht stehen soll (ohne "(Du)")
+  getMentionLabel(user: Avatar): string {
+    return user.displayName ?? user.name ?? '';
+  }
+
   onSelectUser(user: Avatar) {
     const textarea = this.messageInput.nativeElement;
     const value = textarea.value;
@@ -145,12 +164,13 @@ export class MessageInput {
     if (lastAt === -1) return;
 
     const before = value.slice(0, lastAt);
-    const display = user.displayName ?? user.name; // falls ein Feld fehlt
-    const newValue = `${before}@${display} `;
+    const newValue = `${before}@${this.getMentionLabel(user)} `;
 
     textarea.value = newValue;
     textarea.focus();
 
     this.showMentions = false;
   }
+
+
 }
