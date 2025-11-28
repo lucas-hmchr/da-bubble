@@ -14,4 +14,5 @@ export interface Avatar {
   status?: string;
   name: string;
   isOnline?: boolean;
+  uid?: string;
 }

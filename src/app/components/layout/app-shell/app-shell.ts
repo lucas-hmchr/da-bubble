@@ -10,14 +10,15 @@ import { ThreadMenu } from '../thread-menu/thread-menu';
 @Component({
   selector: 'app-app-shell',
   standalone: true,
-  imports: [Topbar, View, WorkspaceSidebar,ThreadMenu],
+  imports: [Topbar, View, WorkspaceSidebar, ThreadMenu],
   templateUrl: './app-shell.html',
   styleUrl: './app-shell.scss',
 })
 export class AppShell {
   users: Avatar[] = [];
   usersJson = '';
-
+  currentUserUid: string | null = null;
+  
   constructor(
     private authService: AuthService,
     private firestoreService: FirestoreService,
