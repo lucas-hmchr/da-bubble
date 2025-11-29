@@ -13,6 +13,46 @@
                 <img src="icons/global/Avatar.svg" alt="avatar-profil">
                 <img src="icons/global/Online.svg" alt="avatar-online-icon" class="online-icon">
             </div>
+            <img src="icons/global/keyboard_arrow_down.svg" (click)="toggleDropdownMenu($event)" alt="arrow-drop-down">
+            <div class="dropdown-menu" [class.show]="isDropdownMenuOpen">
+                <div class="menu-name" (click)="openProfilModal()">Profil</div>
+                <div class="menu-name">Log out</div>
+            </div>
         </div>
     </div>
 </section>
+
+<div class="profil-modal-overlay" [class.show]="isProfilModalOpen" (click)="closeProfilModal()">
+    <div class="profil-modal" (click)="$event.stopPropagation()">
+        <div class="modal-header">
+            <h2>Profil</h2>
+            <div class="close-icon-wrapper" (click)="closeProfilModal()">
+                <img src="icons/global/close.svg" alt="close" class="close-icon">
+            </div>
+        </div>
+
+        <div class="modal-content">
+            <div class="avatar-large">
+                <img src="icons/global/Avatar.svg" alt="avatar-profil">
+            </div>
+
+            <div class="profil-info">
+                <h3>Frederik Beck</h3>
+                <button class="edit-button">Bearbeiten</button>
+            </div>
+
+            <div class="status">
+                <span class="status-dot"></span>
+                <span class="status-text">Aktive</span>
+            </div>
+
+            <div class="email-section">
+                <img src="icons/login/mail_active.svg" alt="email" class="email-icon">
+                <div class="email-info">
+                    <p class="email-label">E-Mail-Adresse</p>
+                    <p class="email-address">fred.beck@email.com</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
