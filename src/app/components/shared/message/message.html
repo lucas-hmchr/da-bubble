@@ -1,26 +1,32 @@
 <div *ngIf="messages$ | async as messages">
 
-  <!-- Fallback, wenn keine Nachrichten vorhanden sind -->
-  <div *ngIf="messages.length === 0" class="empty-channel-info">
-    <p>Sei der Erste, der eine Nachricht in diesem Channel schreibt!</p>
-  </div>
-
-<section *ngFor="let msg of messages" class="message-wrapper">
-    <div class="date-separator">
-        <span>Dienstag, 14 Januar</span>
+    <div *ngIf="messages.length === 0" class="empty-channel-info">
+        <p>Sei der Erste, der eine Nachricht in diesem Channel schreibt!</p>
     </div>
-    <div class="message-content fdrr">
-        <img class="profile-pic" src="images/avatars/avatar_male_4.svg" alt="">
-        <div>
+
+    <section *ngFor="let msg of messages" class="message-wrapper">
+        <div class="message-content" [ngClass]="{ fdrr: isOwnMessage(msg) }">
+            <img class="profile-pic" [src]="getSenderAvatarUrl(msg.senderId)" [alt]="getSenderName(msg.senderId)" />
+
+
             <div>
-            <span class="send-name">Noah Braun</span>
-            <span class="send-info">14:25 Uhr</span>
-            </div>
-            <p class="text me-person bubble">Welche Version ist aktuell von Angular?</p>
-            <div>
-                <a href="">2 Antworten</a>
-                <span class="send-info">Letzte Antwort 14:56</span>
+                <div>
+                    <span class="send-name">
+                        {{ getSenderName(msg.senderId) }}
+                    </span>
+                    <!-- Uhrzeit optional -->
+                    <!-- <span class="send-info">{{ msg.createdAt | date:'HH:mm' }} Uhr</span> -->
+                </div>
+
+                <p class="text bubble" [ngClass]="isOwnMessage(msg) ? 'me-person' : 'other-person'">
+                    {{ msg.text }}
+                </p>
+
+                <div *ngIf="msg.threadCount > 0">
+                    <a href="javascript:void(0)">{{ msg.threadCount }} Antworten</a>
+                </div>
             </div>
         </div>
-    </div>
-</section>
+    </section>
+
+</div>
