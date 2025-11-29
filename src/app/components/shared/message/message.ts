@@ -77,4 +77,33 @@ export class Message implements OnChanges {
     return !!this.currentUserUid && msg.senderId === this.currentUserUid;
   }
 
+isSameDay(a: any, b: any): boolean {
+  const d1 = this.toDate(a);
+  const d2 = this.toDate(b);
+  if (!d1 || !d2) return false;
+
+  return (
+    d1.getFullYear() === d2.getFullYear() &&
+    d1.getMonth() === d2.getMonth() &&
+    d1.getDate() === d2.getDate()
+  );
+}
+
+
+  toDate(value: any): Date | null {
+    if (!value) return null;
+
+    if (value instanceof Date) {
+      return value;
+    }
+
+    // Firestore Timestamp hat eine toDate()-Methode
+    if (value.toDate) {
+      return value.toDate();
+    }
+
+    // Fallback für alles andere (z.B. String)
+    return new Date(value);
+  }
+
 }

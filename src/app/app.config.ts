@@ -1,4 +1,4 @@
-import { ApplicationConfig, provideBrowserGlobalErrorListeners, provideZoneChangeDetection } from '@angular/core';
+import { ApplicationConfig, provideBrowserGlobalErrorListeners, provideZoneChangeDetection, LOCALE_ID } from '@angular/core';
 import { provideRouter } from '@angular/router';
 
 import { routes } from './app.routes';
@@ -22,6 +22,10 @@ export const appConfig: ApplicationConfig = {
     })),
     provideAuth(() => getAuth()),
     provideFirestore(() => getFirestore()),
-    provideDatabase(() => getDatabase())
+    provideDatabase(() => getDatabase()),
+
+    // ⬇️ hier neu:
+    { provide: LOCALE_ID, useValue: 'de-DE' }
   ]
 };
+
