@@ -1,4 +1,4 @@
-<div *ngIf="messages$ | async as messages">
+<div>
 
   <!-- Fallback, wenn keine Nachrichten vorhanden sind -->
   <div *ngIf="messages.length === 0" class="empty-channel-info">
@@ -34,8 +34,6 @@
           <span class="send-name">
             {{ getSenderName(msg.senderId) }}
           </span>
-
-          <!-- Uhrzeit -->
           <span class="send-info">
             {{ toDate(msg.createdAt) | date:'HH:mm' }} Uhr
           </span>
@@ -54,4 +52,7 @@
       </div>
     </div>
   </section>
+
+  <!-- Unsichtbarer Anker zum Runterscrollen -->
+  <div #bottom></div>
 </div>
