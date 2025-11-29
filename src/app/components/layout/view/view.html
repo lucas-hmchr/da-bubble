@@ -14,7 +14,6 @@
 
     <div id="chat-container" *ngIf="channel">
         <div>
-            <app-message></app-message>
             <app-message [channel]="channel"></app-message>
         </div>
         <app-message-input [channel]="channel" [contextType]="'channel'"
