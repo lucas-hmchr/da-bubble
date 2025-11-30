@@ -1,6 +1,7 @@
-import { Component, computed, signal } from '@angular/core';
+import { Component, computed, inject, signal } from '@angular/core';
 import { FormsModule, NgForm } from '@angular/forms';
-import { RouterLink } from "@angular/router";
+import { Router, RouterLink } from "@angular/router";
+import { AuthService } from '../../../../auth/auth.service';
 
 @Component({
   selector: 'app-login-form',
@@ -10,11 +11,25 @@ import { RouterLink } from "@angular/router";
 })
 export class LoginForm {
 
+  private router = inject(Router);
+  private authService = inject(AuthService);
+
   email = '';
   password = '';
 
-  onSubmit() {
-    console.log(this.email, this.password)
+  submitLogin() {
+    this.authService.login(this.email, this.password)
   }
 
+  triggerGoogleLogin() {
+    this.authService.signInWithGoogle();
+  }
+
+  continueAsGuest() {
+    try {
+      this.authService.loginAsGuest();
+    } catch (err) {
+      console.error(err);
+    } 
+  }
 }

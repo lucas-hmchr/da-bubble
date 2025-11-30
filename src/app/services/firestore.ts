@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import {
   Firestore,
   collection,
@@ -7,16 +7,42 @@ import {
   doc,
   docData,
   updateDoc,
-  deleteDoc, query, where
+  deleteDoc,
+  query,
+  where,
+  orderBy,
+  serverTimestamp,
 } from '@angular/fire/firestore';
-import { Observable } from 'rxjs';
+import { Observable, BehaviorSubject } from 'rxjs';
+import { Avatar } from '../models/user.model';
+
+export interface ChannelMessage {
+  text: string;
+  senderId: string;
+  createdAt: any;
+  editedAt: any;
+  threadCount: number;
+  reactions: {
+    emojiName: string;
+    senderId: string;
+  };
+}
 
 @Injectable({
   providedIn: 'root'
 })
-export class FirestoreService {
 
-  constructor(private firestore: Firestore) { }
+
+
+
+export class FirestoreService {
+  firestore: Firestore = inject(Firestore);
+
+  constructor() { }
+
+  getUsers(): Observable<Avatar[]> {
+    return this.getCollection<Avatar>('users');
+  }
 
   getCollection<T extends object>(path: string): Observable<T[]> {
     const ref = collection(this.firestore, path);
@@ -27,7 +53,6 @@ export class FirestoreService {
     const ref = doc(this.firestore, path);
     return docData(ref) as Observable<T | undefined>;
   }
-
 
   addDocument<T extends object>(path: string, data: T) {
     const ref = collection(this.firestore, path);
@@ -48,5 +73,52 @@ export class FirestoreService {
     const ref = collection(this.firestore, path);
     const q = query(ref, where(field, '==', value));
     return collectionData(q, { idField: 'id' }) as Observable<T[]>;
+  }
+
+  getSubcollection<T extends object>(parentPath: string, parentId: string, subcollectionName: string, orderByField: string): Observable<T[]> {
+    const path = `${parentPath}/${parentId}/${subcollectionName}`;
+    const ref = collection(this.firestore, path);
+    const q = query(ref, orderBy(orderByField, 'asc')); // Sortiert Nachrichten aufsteigend nach Zeit
+    return collectionData(q, { idField: 'id' }) as Observable<T[]>;
+  }
+
+  private usersSubject = new BehaviorSubject<Avatar[] | null>(null);
+  users$ = this.usersSubject.asObservable();
+
+  loadUsersOnce() {
+    if (this.usersSubject.value !== null) return; // schon geladen
+
+    this.getUsers().subscribe((users) => {
+      this.usersSubject.next(users);
+    });
+  }
+
+  async sendMessageToChannel(
+    channelId: string,
+    text: string,
+    senderId: string
+  ): Promise<void> {
+    const channelRef = doc(this.firestore, `channels/${channelId}`);
+    const messagesRef = collection(this.firestore, `channels/${channelId}/messages`);
+
+    const now = serverTimestamp();
+
+    // 1. Nachricht in Subcollection "messages" anlegen
+    await addDoc(messagesRef, <ChannelMessage>{
+      text,
+      senderId,
+      createdAt: now,
+      editedAt: now,
+      threadCount: 0,
+      reactions: {
+        emojiName: '',
+        senderId,
+      },
+    });
+
+    // 2. lastMessageAt im Channel aktualisieren
+    await updateDoc(channelRef, {
+      lastMessageAt: now,
+    });
   }
 }

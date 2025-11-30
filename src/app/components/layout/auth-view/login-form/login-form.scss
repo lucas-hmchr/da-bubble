@@ -1,3 +1,5 @@
+@use './../../../../../styles/variables.scss' as *;
+
 .login-google-btn {
     display: flex;
     align-items: center;
@@ -39,8 +41,24 @@
     background-color: transparent;
     cursor: pointer;
 
-    &:hover{
+    &:hover {
         background-color: var(--clr-purple-1);
         color: white;
     }
+}
+
+@media (max-width: $bp-phone-md) {
+
+    .login-google-btn {
+        gap: 12px;
+        padding: 12px 24px;
+        height: 50px;
+        font-size: 17px;
+    }
+
+    .guest-login-btn {
+        padding: 12px 24px;
+        font-size: 16px;
+    }
+
 }

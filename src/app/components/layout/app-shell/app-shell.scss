@@ -1,0 +1,15 @@
+app-thread-menu {
+    width: 485px;
+    height: calc(100vh - 64px);
+}
+
+app-view {
+    width: 100%;
+    height: calc(100vh - 64px);
+}
+section {
+    background-color: var(--bg-clr);
+    display: flex;
+    flex-direction: row;
+    gap: 16px;
+}

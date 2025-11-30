@@ -1,24 +1,17 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, Input } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FirestoreService } from '../../../services/firestore';
 import { MessageInput } from '../../shared/message-input/message-input';
+import { Message } from '../../shared/message/message';
+import { Channel } from '../../../models/channel.interface';
 
-// ----------- Interface MUSS ÜBER dem decorator stehen! -------------
-interface Channel {
-  id: string;
-  name: string;
-  members: string[];
-  createdAt?: any;
-  lastMessageAt?: any;
-}
-
-// ---------------- Component decorator -----------------
 @Component({
   selector: 'app-view',
   standalone: true,
   imports: [
     CommonModule,
-    MessageInput
+    MessageInput,
+    Message
   ],
   templateUrl: './view.html',
   styleUrls: ['./view.scss'], // <-- styleUrls (Mehrzahl)
@@ -27,27 +20,28 @@ interface Channel {
 export class View implements OnInit {
 
   channel?: Channel;
-
-  constructor(private firestoreService: FirestoreService) {}
+  @Input() currentUserUid: string | null = null;  // <--- neu
+  constructor(private firestoreService: FirestoreService) { }
 
   ngOnInit(): void {
-    this.firestoreService
-      .getCollectionWhere<Channel>('channels', 'name', 'Devteam')
-      .subscribe((result) => {
-        this.channel = result[0];
-        console.log('Geladener Channel:', this.channel);
-      });
+    this.loadChannelByName("Devteam");
+    // this.firestoreService
+    //   .getCollectionWhere<Channel>('channels', 'name', 'Devteam')
+    //   .subscribe((result) => {
+    //     this.channel = result[0];
+    //     console.log('Geladener Channel:', this.channel);
+    //   });
   }
 
-  loadChannelByName() {
+  loadChannelByName(channelName: string) {
     this.firestoreService
-      .getCollectionWhere<Channel>('channels', 'name', 'Devteam')
+      .getCollectionWhere<Channel>('channels', 'name', channelName)
       .subscribe({
         next: (channels) => {
           if (channels.length === 0) {
-            console.log('Kein Channel mit dem Namen "Devteam" gefunden.');
+            console.log(`Kein Channel mit dem Namen "${channelName}" gefunden.`);
           } else {
-            console.log('Channel gefunden:', channels[0]);
+            this.channel = channels[0];
           }
         },
         error: (err) => {

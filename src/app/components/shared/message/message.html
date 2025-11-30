@@ -1,0 +1,57 @@
+<div *ngIf="messages$ | async as messages">
+
+  <!-- Fallback, wenn keine Nachrichten vorhanden sind -->
+  <div *ngIf="messages.length === 0" class="empty-channel-info">
+    <p>Sei der Erste, der eine Nachricht in diesem Channel schreibt!</p>
+  </div>
+
+  <section
+    *ngFor="let msg of messages; let i = index"
+    class="message-wrapper"
+  >
+    <!-- Datum-Separator -->
+    <div
+      class="date-separator"
+      *ngIf="i === 0 || !isSameDay(msg.createdAt, messages[i-1].createdAt)"
+    >
+      <span>
+        {{ toDate(msg.createdAt) | date:'EEEE, d. MMMM' }}
+      </span>
+    </div>
+
+    <div
+      class="message-content"
+      [ngClass]="{ fdrr: isOwnMessage(msg) }"
+    >
+      <img
+        class="profile-pic"
+        [src]="getSenderAvatarUrl(msg.senderId)"
+        [alt]="getSenderName(msg.senderId)"
+      />
+
+      <div>
+        <div>
+          <span class="send-name">
+            {{ getSenderName(msg.senderId) }}
+          </span>
+
+          <!-- Uhrzeit -->
+          <span class="send-info">
+            {{ toDate(msg.createdAt) | date:'HH:mm' }} Uhr
+          </span>
+        </div>
+
+        <p
+          class="text bubble"
+          [ngClass]="isOwnMessage(msg) ? 'me-person' : 'other-person'"
+        >
+          {{ msg.text }}
+        </p>
+
+        <div *ngIf="msg.threadCount > 0">
+          <a href="javascript:void(0)">{{ msg.threadCount }} Antworten</a>
+        </div>
+      </div>
+    </div>
+  </section>
+</div>

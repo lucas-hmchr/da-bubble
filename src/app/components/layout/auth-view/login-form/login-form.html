@@ -4,7 +4,7 @@
         <span class="fs-20 text-center">Wir empfehlen dir, die E-Mail-Adresse zu nutzen, die du bei der Arbeit
             verwendest.</span>
     </div>
-    <form class="auth-form-container" #form="ngForm" (ngSubmit)="onSubmit()" id="loginForm">
+    <form class="auth-form-container" #form="ngForm" (ngSubmit)="submitLogin()" id="loginForm">
         <div class="form-input">
             <img src="/icons/login/mail_passive.svg" alt="" class="form-input-icon">
             <input name="email" type="email" placeholder="beispielname@email.com" [(ngModel)]="email" required email>
@@ -23,7 +23,7 @@
         <span>ODER</span>
     </div>
     <div class="auth-form-container">
-        <button class="login-google-btn">
+        <button class="login-google-btn" (click)="triggerGoogleLogin()">
             <img src="/icons/login/google.svg" alt="">
             <span>Anmelden mit Google</span>
         </button>
@@ -33,7 +33,7 @@
             [disabled]="!form.valid" form="loginForm">
             <span>Anmelden</span>
         </button>
-        <button class="guest-login-btn">
+        <button class="guest-login-btn" (click)="continueAsGuest()">
             <span>Gäste-Login</span>
         </button>
     </div>
