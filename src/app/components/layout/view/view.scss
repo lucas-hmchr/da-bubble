@@ -73,8 +73,12 @@ header {
   flex: 1;
   min-height: 0;       // verhindert, dass das Element unendlich wächst
   overflow-y: auto;
-  padding: 16px 24px 0; // optional, nach Geschmack
+  padding: 16px 0px 0; // optional, nach Geschmack
   scroll-behavior: smooth;
+}
+
+.blackborder {
+    border: 1px solid black;
 }
 
 app-message-input {
