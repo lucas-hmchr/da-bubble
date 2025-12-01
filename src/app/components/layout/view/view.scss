@@ -4,9 +4,12 @@ section {
     border-radius: 30px;
     // margin-bottom: 16px;
     height: calc(100% - 16px);
+    display: flex;
+    flex-direction: column;
+    height: 100%;
 }
 
-#chat-container{
+#chat-container {
     // background-color: rgba(255, 0, 0, 0.2);
     height: calc(100% - 96px);
     // padding: 10px 0px;
@@ -14,6 +17,8 @@ section {
     display: flex;
     justify-content: space-between;
     flex-direction: column;
+    flex: 1; // nimmt den restlichen Platz unter dem Header ein
+    min-height: 0;
 }
 
 header {
@@ -23,38 +28,60 @@ header {
     padding-left: 32px;
     padding-right: 16px;
     box-shadow: 0 5px 5px -2px rgba(100, 100, 100, 0.1);
-    
+    flex-shrink: 0;
+
     >div:nth-child(1) {
         font-size: 24px;
         display: flex;
         align-items: center;
+
         img {
             height: 40px;
         }
     }
+
     >div:nth-child(2) {
-        
+
         font-size: 20px;
         width: fit-content;
         // background-color: white;
         display: flex;
         align-items: center;
         gap: 16px;
+
         img {
             height: 40px;
         }
     }
-    
-}   
+
+}
 
 .add-person {
     content: url('/icons/global/person_add1.svg');
     background-color: var(--bg-clr);
     border-radius: 100%;
     padding: 7px;
-        &:hover {
+
+    &:hover {
         content: url('/icons/global/person_add2.svg');
         background-color: var(--bg-clr);
         border-radius: 100%;
     }
+}
+
+.messages-scroll {
+  flex: 1;
+  min-height: 0;       // verhindert, dass das Element unendlich wächst
+  overflow-y: auto;
+  padding: 16px 0px 0; // optional, nach Geschmack
+  scroll-behavior: smooth;
+}
+
+.blackborder {
+    border: 1px solid black;
+}
+
+app-message-input {
+  flex-shrink: 0;
+  /* optional: border-top, padding, Hintergrund, etc. */
 }

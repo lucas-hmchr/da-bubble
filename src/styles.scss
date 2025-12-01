@@ -1,9 +1,4 @@
-
 // Include theming for Angular Material with `mat.theme()`.
-// This Sass mixin will define CSS variables that are used for styling Angular Material
-// components according to the Material 3 design spec.
-// Learn more about theming and how to use it for your application's
-// custom components at https://material.angular.dev/guide/theming
 @use '@angular/material' as mat;
 @use './styles/variables.scss' as *;
 
@@ -19,44 +14,36 @@ html {
 }
 
 body {
-  // Default the application to a light color theme. This can be changed to
-  // `dark` to enable the dark color theme, or to `light dark` to defer to the
-  // user's system settings.
   color-scheme: light;
-
-  // Set a default background, font and text colors for the application using
-  // Angular Material's system-level CSS variables. Learn more about these
-  // variables at https://material.angular.dev/guide/system-variables
   background-color: var(--mat-sys-surface);
   color: var(--mat-sys-on-surface);
   font: var(--mat-sys-body-medium);
-
-  // Reset the user agent margin.
   margin: 0;
 }
+
 @import url(./styles/keyframes.scss);
 @import url(./styles/auth-forms.scss);
 @import url(./styles/fonts.css);
 @import url(./styles/variables.scss);
 
 :root {
-    --login-background-gradient: linear-gradient(1.46deg, #313AE6 1.22%, #797EF3 98.76%);
-    --clr-purple-1: #444DF2;
-    --clr-purple-2: #797EF3;
-    --clr-purple-3: #535AF1;
-    --clr-purple-light: #ADB0D9;
-    --bg-clr: #ECEEFE;
-    --clr-black: #000000;
-    --clr-online-green: #92C83E;
-    --clr-gray: #686868;
-    --clr-rosa: #ED1E79;
-    --clr-white: #FFFFFF;
+  --login-background-gradient: linear-gradient(1.46deg, #313AE6 1.22%, #797EF3 98.76%);
+  --clr-purple-1: #444DF2;
+  --clr-purple-2: #797EF3;
+  --clr-purple-3: #535AF1;
+  --clr-purple-light: #ADB0D9;
+  --bg-clr: #ECEEFE;
+  --clr-black: #000000;
+  --clr-online-green: #92C83E;
+  --clr-gray: #686868;
+  --clr-rosa: #ED1E79;
+  --clr-white: #FFFFFF;
 }
 
 * {
-    margin: 0;
-    box-sizing: border-box;
-    font-family: 'Nunito';
+  margin: 0;
+  box-sizing: border-box;
+  font-family: 'Nunito';
 }
 
 /* Entfernt den Schatten bei allen Expansion Panels */
@@ -68,85 +55,139 @@ body {
   background: none !important;
 }
 
-
 .center-content {
-    display: flex;
-    align-items: center;
-    justify-content: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .linked-text {
-    color: var(--clr-purple-2);
-    cursor: pointer;
-    border: 1px solid transparent;
-    border-radius: 50px;
-    padding: 8px;
-    padding-inline: 12px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-weight: 400;
-    transition: 0.1s ease-in-out;
-    font-size: 18px;
+  color: var(--clr-purple-2);
+  cursor: pointer;
+  border: 1px solid transparent;
+  border-radius: 50px;
+  padding: 8px 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 400;
+  transition: 0.1s ease-in-out;
+  font-size: 18px;
 
-    &:hover {
-        color: var(--clr-purple-1);
-        background-color: var(--bg-clr);
-        font-weight: 500;
-        border: 1px solid var(--clr-purple-light);
-    }
+  &:hover {
+    color: var(--clr-purple-1);
+    background-color: var(--bg-clr);
+    font-weight: 500;
+    border: 1px solid var(--clr-purple-light);
+  }
 }
 
 .fs-20 {
-    font-size: 20px;
+  font-size: 20px;
 }
 
-@media(max-width: $bp-phone-lg) {
-    .fs-20 {
-        font-size: 17px;
-    }
+@media (max-width: $bp-phone-lg) {
+  .fs-20 {
+    font-size: 17px;
+  }
 }
 
 .text-center {
-    text-align: center;
+  text-align: center;
 }
 
 .submit-button {
-    height: 49px;
-    padding: 16px 32px;
-    border-radius: 50px;
-    font-weight: 700;
-    font-size: 18px;
-    color: var(--clr-white);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    border: none;
+  height: 49px;
+  padding: 16px 32px;
+  border-radius: 50px;
+  font-weight: 700;
+  font-size: 18px;
+  color: var(--clr-white);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
 }
 
-@media(max-width: $bp-phone-sm) {
-    .submit-button {
-        padding: 12px 24px;
-        font-size: 16px;
-    }
+@media (max-width: $bp-phone-sm) {
+  .submit-button {
+    padding: 12px 24px;
+    font-size: 16px;
+  }
 }
 
 .btn-disabled {
-    background-color: var(--clr-gray);
-    cursor: not-allowed;
+  background-color: var(--clr-gray);
+  cursor: not-allowed;
 }
 
 .btn-enabled {
-    background-color: var(--clr-purple-1);
-    cursor: pointer;
+  background-color: var(--clr-purple-1);
+  cursor: pointer;
 
-    &:hover {
-        background-color: var(--clr-purple-2);
-    }
+  &:hover {
+    background-color: var(--clr-purple-2);
+  }
 }
-html, body { height: 100%; }
-body { margin: 0; font-family: Roboto, "Helvetica Neue", sans-serif; }
 
-.cp{
-    cursor: pointer;
+html,
+body {
+  height: 100%;
 }
+
+body {
+  margin: 0;
+  font-family: Roboto, 'Helvetica Neue', sans-serif;
+}
+
+.cp {
+  cursor: pointer;
+}
+
+/* BASIS: Scrollbar allgemein (Chrome/Edge/Safari) */
+*::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+*::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+*::-webkit-scrollbar-thumb {
+  background-color: var(--clr-purple-1);
+  border-radius: 999px;
+  border: 2px solid transparent;
+}
+
+/* Scrollbar-Pfeile / Buttons komplett entfernen */
+*::-webkit-scrollbar-button,
+*::-webkit-scrollbar-button:single-button,
+*::-webkit-scrollbar-button:single-button:vertical:decrement,
+*::-webkit-scrollbar-button:single-button:vertical:increment,
+*::-webkit-scrollbar-button:vertical:decrement,
+*::-webkit-scrollbar-button:vertical:increment {
+  display: none;
+  width: 0;
+  height: 0;
+  background: transparent;
+  border: 0;
+}
+
+/* Firefox: globale Scrollbar-Farben */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--clr-purple-1) transparent;
+}
+
+/* ❗ KEIN background-color mehr auf .message-container,
+   damit dein Hover (var(--bg-clr)) wieder nur beim Hover sichtbar ist.
+   Wenn du hier noch was für den Scrollbalken track-spezifisch tun willst,
+   kannst du NUR den Track setzen, z.B.:
+
+   .message-container::-webkit-scrollbar-track {
+     background-color: #fff; // oder var(--mat-sys-surface)
+   }
+
+   – aber OHNE background-color auf .message-container selbst.
+*/
