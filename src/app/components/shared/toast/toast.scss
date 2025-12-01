@@ -1,63 +1,123 @@
 @use './../../../../styles/variables.scss' as *;
 
 .toast-wrapper {
-  position: fixed;
-  top: 16px;
-  right: 16px;
-  z-index: 1000;
-  pointer-events: none;
+    position: fixed;
+    top: 16px;
+    right: 16px;
+    z-index: 1000;
+    pointer-events: none;
 }
 
 .toast {
-  pointer-events: auto;
-  padding: 32px;
-  border-radius: 24px 24px 0px 24px;
-  font-size: 32px;
-  font-weight: 700;
-  background-color: var(--clr-purple-1);
-  box-shadow: 0px 6px 10px 0px #00000033;
-  color: white;
-  display: flex;
-  gap: 16px;
-  align-items: center;
+    pointer-events: auto;
+    padding: 32px;
+    border-radius: 24px 24px 0px 24px;
+    font-size: 32px;
+    font-weight: 700;
+    background-color: var(--clr-purple-1);
+    box-shadow: 0px 6px 10px 0px #00000033;
+    color: white;
+    display: flex;
+    gap: 16px;
+    align-items: center;
 
-  transform: translateX(120%);
-  opacity: 0;
-  animation: toast-in 150ms ease-out forwards;
+    transform: translateX(120%);
+    opacity: 0;
+    animation: toast-in 150ms ease-out forwards;
 
-  &.closing {
-    animation: toast-out 150ms ease-in forwards;
-  }
+    &.closing {
+        animation: toast-out 150ms ease-in forwards;
+    }
 
-  .toast-message {
-    display: block;
-    line-height: 1.4;
-  }
+    .toast-message {
+        display: block;
+        line-height: 1.4;
+        max-width: 400px;
+    }
 
-  img {
-    height: 36px;
-    aspect-ratio: 1 / 1;
-  }
+    img {
+        height: 36px;
+        aspect-ratio: 1 / 1;
+    }
 }
 
 @keyframes toast-in {
-  from {
-    transform: translateX(120%);
-    opacity: 0;
-  }
-  to {
-    transform: translateX(0);
-    opacity: 1;
-  }
+    from {
+        transform: translateX(120%);
+        opacity: 0;
+    }
+
+    to {
+        transform: translateX(0);
+        opacity: 1;
+    }
 }
 
 @keyframes toast-out {
-  from {
-    transform: translateX(0);
-    opacity: 1;
-  }
-  to {
-    transform: translateX(120%);
-    opacity: 0;
-  }
+    from {
+        transform: translateX(0);
+        opacity: 1;
+    }
+
+    to {
+        transform: translateX(120%);
+        opacity: 0;
+    }
+}
+
+@media (max-width: $bp-tablet-lg) {
+    .toast {
+        padding: 28px;
+        font-size: 28px;
+
+        img {
+            height: 28px;
+        }
+    }
+}
+
+@media (max-width: $bp-phone-xl) {
+    .toast {
+        padding: 24px;
+        font-size: 24px;
+
+        .toast-message {
+            max-width: 300px;
+        }
+
+        img {
+            height: 24px;
+        }
+    }
+}
+
+@media (max-width: $bp-phone-lg) {
+    .toast {
+        padding: 16px 20px;
+        font-size: 18px;
+
+        .toast-message {
+            max-width: 240px;
+        }
+
+        img {
+            height: 18px;
+        }
+    }
+}
+
+@media (max-width: $bp-phone-md) {
+    .toast {
+        padding: 14px 16px;
+        font-size: 16px;
+        border-radius: 12px 12px 0px 12px;
+
+        .toast-message {
+            max-width: 200px;
+        }
+
+        img {
+            height: 16px;
+        }
+    }
 }
