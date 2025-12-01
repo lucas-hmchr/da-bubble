@@ -1,24 +1,32 @@
 <section>
 
-    <header>
-        <div>
-            <h2># DevTeam </h2>
-            <img src="/icons/global/keyboard_arrow_down.svg" alt="">
-        </div>
-        <div>
-            <img src="/images/avatars/avatar_default.svg" alt="">
-            <span>1</span>
-            <img class="add-person" src="/icons/global/person_add1.svg" alt="">
-        </div>
-    </header>
-
-    <div id="chat-container" *ngIf="channel">
-        <div>
-            <app-message [channel]="channel" [currentUserUid]="currentUserUid"></app-message>
-
-        </div>
-        <app-message-input [channel]="channel" [contextType]="'channel'"
-            [currentUserUid]="currentUserUid"></app-message-input>
+  <header>
+    <div>
+      <h2># DevTeam </h2>
+      <img src="/icons/global/keyboard_arrow_down.svg" alt="">
     </div>
+    <div>
+      <img src="/images/avatars/avatar_default.svg" alt="">
+      <span>1</span>
+      <img class="add-person" src="/icons/global/person_add1.svg" alt="">
+    </div>
+  </header>
+
+  <div id="chat-container" *ngIf="channel">
+    <!-- Scrollbarer Bereich für Nachrichten -->
+    <div class="messages-scroll">
+      <app-message
+        [channel]="channel"
+        [currentUserUid]="currentUserUid"
+      ></app-message>
+    </div>
+
+    <!-- Eingabefeld bleibt immer unten sichtbar -->
+    <app-message-input
+      [channel]="channel"
+      [contextType]="'channel'"
+      [currentUserUid]="currentUserUid"
+    ></app-message-input>
+  </div>
 
 </section>
