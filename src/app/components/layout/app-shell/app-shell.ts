@@ -4,7 +4,7 @@ import { View } from '../view/view';
 import { WorkspaceSidebar } from '../workspace-sidebar/workspace-sidebar';
 import { AuthService } from '../../../auth/auth.service';
 import { FirestoreService } from '../../../services/firestore';
-import { Avatar } from '../../../models/user.model';
+import { User } from '../../../models/user.model';
 import { ThreadMenu } from '../thread-menu/thread-menu';
 
 @Component({
@@ -15,7 +15,7 @@ import { ThreadMenu } from '../thread-menu/thread-menu';
   styleUrl: './app-shell.scss',
 })
 export class AppShell {
-  users: Avatar[] = [];
+  users: User[] = [];
   usersJson = '';
   currentUserUid: string | null = null;
   
@@ -30,7 +30,7 @@ export class AppShell {
       this.currentUserUid = active?.uid ?? null;
     });
 
-    this.firestoreService.getCollection<Avatar>('users').subscribe((users) => {
+    this.firestoreService.getCollection<User>('users').subscribe((users) => {
       this.users = users;
       this.usersJson = JSON.stringify(users);
       console.log('users in AppShell:', this.users);

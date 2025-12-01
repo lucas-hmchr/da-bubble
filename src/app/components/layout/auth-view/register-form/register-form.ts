@@ -1,9 +1,10 @@
 import { Component, computed, HostListener, inject, signal } from '@angular/core';
 import { FormsModule, NgForm } from '@angular/forms';
 import { Router } from "@angular/router";
-import { avatars, defaultAvatar } from './../../../../../shared/data/avatars';
-import type { Avatar, NewUser } from './../../../../models/user.model';
+import { avatars, getAvatarById, Avatar, AvatarId } from './../../../../../shared/data/avatars';
+import type { User, NewUser } from './../../../../models/user.model';
 import { AuthService } from '../../../../auth/auth.service';
+
 
 @Component({
   selector: 'app-register-form',
@@ -18,8 +19,8 @@ export class RegisterForm {
   private router = inject(Router);
   private authService = inject(AuthService);
 
-  avatarList = avatars;
-  defaultAvatar = defaultAvatar;
+  avatarList = avatars.filter(a => a.id !== 'avatar_default');
+  defaultAvatar = getAvatarById('avatar_default');
 
   fullName = '';
   email = '';
@@ -34,12 +35,12 @@ export class RegisterForm {
       fullName: this.fullName,
       email: this.email,
       password: this.password,
-      selectedAvatarName: this.selectedAvatar().name,
+      avatarId: this.selectedAvatar().id,
     };
   }
 
-  avatarUrl(avatar: string) {
-    return `/images/avatars/${avatar}.svg`
+  getAvatarUrl(avatarId: AvatarId) {
+    return getAvatarById(avatarId).src;
   }
 
   continueRegistration() {
@@ -48,7 +49,7 @@ export class RegisterForm {
 
   async submitRegistration() {
     try {
-      await this.authService.register(this.newUser.email, this.newUser.password, this.newUser.fullName, this.newUser.selectedAvatarName);
+      await this.authService.register(this.newUser.email, this.newUser.password, this.newUser.fullName, this.newUser.avatarId);
     } catch (err: any) {
       console.log(err)
     }

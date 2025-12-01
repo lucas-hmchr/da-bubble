@@ -1,8 +1,9 @@
-import { Component, Input, ElementRef, ViewChild, OnInit } from '@angular/core';
+import { Component, Input, ElementRef, ViewChild, OnInit, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Channel } from '../../../models/channel.interface';
 import { FirestoreService } from '../../../services/firestore'; // Pfad anpassen
-import { Avatar } from '../../../models/user.model';
+import { User } from '../../../models/user.model';
+import { AvatarId, getAvatarById } from '../../../../shared/data/avatars';
 
 @Component({
   selector: 'app-message-input',
@@ -28,8 +29,8 @@ export class MessageInput {
   //   'Steffen Hoffmann',
   // ];
 
-  users: Avatar[] = [];
-  filteredUsers: Avatar[] = [];
+  users: User[] = [];
+  filteredUsers: User[] = [];
   channelsList: Channel[] = [];
   filteredChannels: Channel[] = [];
 
@@ -45,7 +46,7 @@ export class MessageInput {
 
   ngOnInit(): void {
     // Users
-    this.firestoreService.getCollection<Avatar>('users').subscribe((users) => {
+    this.firestoreService.getCollection<User>('users').subscribe((users) => {
       this.users = users;
       this.filteredUsers = users;
     });
@@ -55,6 +56,10 @@ export class MessageInput {
       this.channelsList = channels;
       this.filteredChannels = channels;
     });
+  }
+
+  getAvatarSrc(id: AvatarId) {
+    return getAvatarById(id).src;
   }
 
   onKeyup(event: KeyboardEvent | Event) {
@@ -283,7 +288,7 @@ export class MessageInput {
   }
 
   // Name, wie er in der Liste angezeigt wird (mit "(Du)")
-  getListLabel(user: Avatar): string {
+  getListLabel(user: User): string {
     const baseName = user.displayName ?? user.name ?? '';
 
     if (this.currentUserUid && user.uid === this.currentUserUid) {
@@ -294,11 +299,11 @@ export class MessageInput {
   }
 
   // Name, wie er in der Nachricht stehen soll (ohne "(Du)")
-  getMentionLabel(user: Avatar): string {
+  getMentionLabel(user: User): string {
     return user.displayName ?? user.name ?? '';
   }
 
-  onSelectUser(user: Avatar) {
+  onSelectUser(user: User) {
     const textarea = this.messageInput.nativeElement;
     const value = textarea.value;
 
