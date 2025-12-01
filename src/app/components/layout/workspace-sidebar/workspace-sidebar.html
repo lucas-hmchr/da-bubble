@@ -9,7 +9,7 @@
                 <img class="edit-square-icon cp" src="/icons/global/edit_square_default.svg" alt="">
             </div>
             <div class="channel-message-add-container">
-                <img class="add-icon cp" src="/icons/global/add_default.svg" alt="">
+                <img class="add-icon cp" src="/icons/global/add_default.svg" (click)="openAddChannelDialog()" alt="">
                 <mat-accordion>
                     <!-- Channel -->
                     <mat-expansion-panel hideToggle="true" class="channel-panel" (opened)="channelOpen.set(true)"
@@ -36,7 +36,7 @@
                                 Office-team
                             </div>
 
-                            <div class="channel-add">
+                            <div class="channel-add cp" (click)="openAddChannelDialog()">
                                 <img src="/icons/global/add_circle.svg" class="mr-8" alt="">
                                 Channel hinzufügen
                             </div>

@@ -188,6 +188,24 @@
 .channel-add {
     display: flex;
     align-items: center;
+
+    &:hover {
+        color: #535AF1;
+
+        img {
+            content: url(/icons/global/add_circle_hover.svg);
+
+        }
+    }
+
+    &:active{
+                color: #000000;
+
+        img {
+            content: url(/icons/global/add_circle_hover.svg);
+
+        }
+    }
 }
 
 .account-avatar-name {
