@@ -1,0 +1,83 @@
+.text-closeIcon-container {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 28px;
+}
+
+.add-channel-dialog-container {
+    padding: 32px;
+    background-color: #ffffff;
+    height: 100%;
+
+    h1 {
+        font-size: 24px;
+    }
+
+
+    .text {
+        margin-bottom: 24px;
+        font-size: 18px;
+        display: block;
+        font-family: "Nunito";
+        font-weight: 700;
+    }
+
+    .text-channel-dialog {
+        font-size: 18px;
+    }
+
+    .text-input-container {
+        margin: 24px 0;
+
+
+
+        input {
+            width: 100%;
+            height: 60px;
+            border: solid 1px #ADB0D9;
+            border-radius: 40px;
+            padding-left: 20px;
+            font-size: 18px;
+        }
+    }
+}
+
+input::placeholder {
+    color: #686868;
+    font-size: 18px;
+}
+
+.button-add-container {
+    display: flex;
+    flex-direction: row-reverse;
+
+    .button-add-channel {
+        background-color: #444DF2;
+        height: 49px;
+        width: 125px;
+        color: white;
+        font-size: 18px;
+        border-radius: 25px;
+        border: none;
+
+        &:hover {
+            background-color: #797EF3;
+        }
+
+        &:active {
+            background-color: #444DF2;
+        }
+    }
+}
+
+.optional {
+    font-weight: 400;
+    color: #686868;
+}
+
+.close-icon {
+    &:hover{
+        content: url(/icons/global/close_right_top_hover.svg);
+    }
+}
