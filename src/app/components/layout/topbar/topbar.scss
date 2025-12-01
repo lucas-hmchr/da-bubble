@@ -1,6 +1,5 @@
 .header {
     background-color: var(--bg-clr);
-    height: 100vh;
 }
 
 .top-bar {
@@ -40,6 +39,25 @@
     gap: 20px;
     cursor: pointer;
     position: relative;
+
+    h1 {
+        transition: color 0.2s ease;
+    }
+
+    img[alt="arrow-drop-down"] {
+        transition: transform 0.2s ease, filter 0.2s ease;
+    }
+
+    &:hover {
+        h1 {
+            color: #444DF2;
+        }
+
+        img[alt="arrow-drop-down"] {
+            transform: translateY(2px);
+            filter: brightness(0) saturate(100%) invert(29%) sepia(78%) saturate(3527%) hue-rotate(235deg) brightness(94%) contrast(92%);
+        }
+    }
 }
 
 .dropdown-menu {
