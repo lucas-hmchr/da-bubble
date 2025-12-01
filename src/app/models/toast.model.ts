@@ -1,4 +1,4 @@
 export interface ToastModel {
   message: string,
-  icon: string,
+  icon: string | undefined,
 }

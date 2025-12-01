@@ -12,6 +12,7 @@ export class Toast {
   private toastService = inject(ToastService);
 
   toast = computed<ToastModel | null>(() => this.toastService.toast());
+  isClosing = computed(() => this.toastService.isClosing());
 
   hide() {
     this.toastService.hide();

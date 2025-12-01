@@ -16,19 +16,48 @@
   font-weight: 700;
   background-color: var(--clr-purple-1);
   box-shadow: 0px 6px 10px 0px #00000033;
-  transition: transform 0.15s ease, opacity 0.15s ease;
   color: white;
   display: flex;
   gap: 16px;
   align-items: center;
+
+  transform: translateX(120%);
+  opacity: 0;
+  animation: toast-in 150ms ease-out forwards;
+
+  &.closing {
+    animation: toast-out 150ms ease-in forwards;
+  }
 
   .toast-message {
     display: block;
     line-height: 1.4;
   }
 
-  img{
+  img {
     height: 36px;
-    aspect-ratio: 1/1;
+    aspect-ratio: 1 / 1;
+  }
+}
+
+@keyframes toast-in {
+  from {
+    transform: translateX(120%);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+@keyframes toast-out {
+  from {
+    transform: translateX(0);
+    opacity: 1;
+  }
+  to {
+    transform: translateX(120%);
+    opacity: 0;
   }
 }
