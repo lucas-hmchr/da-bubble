@@ -22,10 +22,10 @@ export class Message implements OnChanges {
   users: User[] = [];
   messages: MessageData[] = [];
   @ViewChild('bottom') bottom!: ElementRef<HTMLDivElement>;
-  private userMap = new Map<string, Avatar>();
+  private userMap = new Map<string, User>();
 
   constructor(private firestoreService: FirestoreService) {
-    this.firestoreService.getCollection<Avatar>('users').subscribe((users) => {
+    this.firestoreService.getCollection<User>('users').subscribe((users) => {
       this.users = users;
       this.userMap.clear();
       for (const u of users) {
