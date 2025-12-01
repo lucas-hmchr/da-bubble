@@ -1,9 +1,15 @@
-import { Component, Input, ElementRef, ViewChild, OnInit, computed } from '@angular/core';
+import {
+  Component,
+  Input,
+  ElementRef,
+  ViewChild,
+  OnInit,
+} from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Channel } from '../../../models/channel.interface';
-import { FirestoreService } from '../../../services/firestore'; // Pfad anpassen
 import { User } from '../../../models/user.model';
 import { AvatarId, getAvatarById } from '../../../../shared/data/avatars';
+import { MessageInputService } from '../../../services/message-intput.service';
 
 @Component({
   selector: 'app-message-input',
@@ -11,7 +17,7 @@ import { AvatarId, getAvatarById } from '../../../../shared/data/avatars';
   templateUrl: './message-input.html',
   styleUrl: './message-input.scss',
 })
-export class MessageInput {
+export class MessageInput implements OnInit {
   @Input() channel?: Channel;
   @Input() currentUserUid: string | null = null;
   @Input() contextType: 'channel' | 'conversation' = 'channel';
@@ -29,16 +35,15 @@ export class MessageInput {
   showMentions = false;
   mentionPosition = { top: 0, left: 0, bottom: 0 };
 
-
-  constructor(private firestoreService: FirestoreService) { }
+  constructor(private messageService: MessageInputService) {}
 
   ngOnInit(): void {
-    this.firestoreService.getCollection<User>('users').subscribe((users) => {
+    this.messageService.loadUsers().subscribe((users) => {
       this.users = users;
       this.filteredUsers = users;
     });
 
-    this.firestoreService.getCollection<Channel>('channels').subscribe((channels) => {
+    this.messageService.loadChannels().subscribe((channels) => {
       this.channelsList = channels;
       this.filteredChannels = channels;
     });
@@ -53,176 +58,146 @@ export class MessageInput {
     const value = textarea.value;
     const lastChar = value.slice(-1);
 
-    if (lastChar === '@') {
-      this.activeMentionType = 'user';
-      this.showMentions = true;
-      this.filteredUsers = this.users;
-      this.updateMentionPosition();
-      return;
-    }
-
-    if (lastChar === '#') {
-      this.activeMentionType = 'channel';
-      this.showMentions = true;
-      this.filteredChannels = this.channelsList;
-      this.updateMentionPosition();
+    if (lastChar === '@' || lastChar === '#') {
+      this.startMention(lastChar);
       return;
     }
 
     if (!this.showMentions || !this.activeMentionType) return;
 
     this.updateMentionPosition();
-
-    if (this.activeMentionType === 'user') {
-      const mentionQuery = this.getCurrentTriggerQuery(value, '@');
-
-      if (!mentionQuery) {
-        this.showMentions = false;
-        this.activeMentionType = null;
-        return;
-      }
-
-      const q = mentionQuery.toLowerCase();
-      this.filteredUsers = this.users.filter((u) =>
-        (u.displayName ?? u.name ?? '').toLowerCase().includes(q)
-      );
-    }
-
-    if (this.activeMentionType === 'channel') {
-      const mentionQuery = this.getCurrentTriggerQuery(value, '#');
-
-      if (!mentionQuery) {
-        this.showMentions = false;
-        this.activeMentionType = null;
-        return;
-      }
-
-      const q = mentionQuery.toLowerCase();
-      this.filteredChannels = this.channelsList.filter((c) =>
-        (c.name ?? '').toLowerCase().includes(q)
-      );
-    }
+    this.filterMentions(value);
   }
 
+  private startMention(trigger: string) {
+    this.showMentions = true;
+    this.activeMentionType = trigger === '@' ? 'user' : 'channel';
 
-  onEnter(event: KeyboardEvent | Event) {
-    if ((event as KeyboardEvent).shiftKey) {
+    if (this.activeMentionType === 'user') {
+      this.filteredUsers = this.users;
+    } else {
+      this.filteredChannels = this.channelsList;
+    }
+
+    this.updateMentionPosition();
+  }
+
+  private filterMentions(value: string) {
+    if (this.activeMentionType === 'user') {
+      const result = this.messageService.filterUsersByQuery(
+        this.users,
+        value
+      );
+
+      if (result === null) {
+        this.resetMentions();
+        this.filteredUsers = [];
+        return;
+      }
+
+      this.filteredUsers = result;
       return;
     }
+
+    const result = this.messageService.filterChannelsByQuery(
+      this.channelsList,
+      value
+    );
+
+    if (result === null) {
+      this.resetMentions();
+      this.filteredChannels = [];
+      return;
+    }
+
+    this.filteredChannels = result;
+  }
+
+  private resetMentions() {
+    this.showMentions = false;
+    this.activeMentionType = null;
+  }
+
+  onEnter(event: KeyboardEvent | Event) {
+    if ((event as KeyboardEvent).shiftKey) return;
 
     event.preventDefault();
     this.onSend();
   }
 
   async onSend() {
-    const textarea = this.messageInput.nativeElement;
-    const text = textarea.value.trim();
-
-    if (!text) {
-      return;
-    }
+    const text = this.getTrimmedText();
+    if (!text) return;
 
     if (!this.currentUserUid) {
-      console.warn('Kein aktueller Benutzer (UID) – Nachricht wird nicht gesendet.');
+      console.warn('Kein aktueller Benutzer (UID).');
       return;
     }
 
-    const now = new Date();
-
     try {
-      if (this.contextType === 'channel') {
-        if (!this.channel?.id) {
-          console.warn('Kein Channel gesetzt – Nachricht wird nicht gesendet.');
-          return;
-        }
-
-        const channelId = this.channel.id as string;
-
-        await this.firestoreService.addDocument(
-          `channels/${channelId}/messages`,
-          {
-            text,
-            senderId: this.currentUserUid,
-            createdAt: now,
-            editedAt: now,
-            threadCount: 0,
-            reactions: {
-              emojiName: '',
-              senderId: this.currentUserUid,
-            },
-          }
-        );
-
-        await this.firestoreService.updateDocument(
-          'channels',
-          channelId,
-          {
-            lastMessageAt: now,
-          }
-        );
-
-      } else if (this.contextType === 'conversation') {
-        if (!this.conversationId) {
-          console.warn('Keine Conversation-ID gesetzt – Nachricht wird nicht gesendet.');
-          return;
-        }
-
-        const convId = this.conversationId;
-
-        // Nachricht in conversations/{convId}/messages
-        await this.firestoreService.addDocument(
-          `conversations/${convId}/messages`,
-          {
-            text,
-            senderId: this.currentUserUid,
-            createdAt: now,
-            editedAt: now,
-            threadCount: 0,
-            reactions: {
-              emojiName: '',
-              senderId: this.currentUserUid,
-            },
-          }
-        );
-
-        await this.firestoreService.updateDocument(
-          'conversations',
-          convId,
-          {
-            lastMessageAt: now,
-          }
-        );
-      }
-
-      textarea.value = '';
-      this.showMentions = false;
-      this.activeMentionType = null;
-
+      await this.sendByContext(text, this.currentUserUid);
+      this.afterSend();
     } catch (error) {
       console.error('Fehler beim Senden der Nachricht:', error);
     }
   }
 
-
-
-  private getCurrentTriggerQuery(value: string, trigger: string): string | null {
-    const lastIndex = value.lastIndexOf(trigger);
-    if (lastIndex === -1) return null;
-
-    const after = value.slice(lastIndex + 1);
-    const spaceIndex = after.search(/\s/);
-    const query = spaceIndex === -1 ? after : after.slice(0, spaceIndex);
-
-    return query;
+  private getTrimmedText(): string {
+    const textarea = this.messageInput.nativeElement;
+    return textarea.value.trim();
   }
 
+  private async sendByContext(text: string, senderId: string) {
+    if (this.contextType === 'channel') {
+      if (!this.channel?.id) {
+        console.warn('Kein Channel gesetzt.');
+        return;
+      }
+
+      const channelId = this.channel.id as string;
+      await this.messageService.sendChannelMessage(channelId, text, senderId);
+      return;
+    }
+
+    if (!this.conversationId) {
+      console.warn('Keine Conversation-ID gesetzt.');
+      return;
+    }
+
+    await this.messageService.sendConversationMessage(
+      this.conversationId,
+      text,
+      senderId
+    );
+  }
+
+  private afterSend() {
+    this.messageInput.nativeElement.value = '';
+    this.resetMentions();
+  }
 
   private updateMentionPosition() {
     const textarea = this.messageInput.nativeElement;
     const containerEl = this.container.nativeElement;
-
     const caretIndex = textarea.selectionStart ?? textarea.value.length;
 
+    const mirror = this.createMirror(textarea, caretIndex);
+    containerEl.appendChild(mirror);
+
+    const marker = mirror.lastElementChild as HTMLElement;
+    const markerRect = marker.getBoundingClientRect();
+    const containerRect = containerEl.getBoundingClientRect();
+
+    this.mentionPosition = {
+      top: markerRect.bottom - containerRect.top + 8,
+      left: markerRect.left - containerRect.left,
+      bottom: containerRect.bottom - markerRect.top + 8,
+    };
+
+    containerEl.removeChild(mirror);
+  }
+
+  private createMirror(textarea: HTMLTextAreaElement,caretIndex: number): HTMLDivElement {
     const mirror = document.createElement('div');
     const style = window.getComputedStyle(textarea);
 
@@ -235,7 +210,6 @@ export class MessageInput {
     mirror.style.whiteSpace = 'pre-wrap';
     mirror.style.wordWrap = 'break-word';
     mirror.style.overflow = 'hidden';
-
     mirror.style.top = textarea.offsetTop + 'px';
     mirror.style.left = textarea.offsetLeft + 'px';
     mirror.style.width = textarea.clientWidth + 'px';
@@ -246,18 +220,7 @@ export class MessageInput {
     marker.textContent = '\u200b';
     mirror.appendChild(marker);
 
-    containerEl.appendChild(mirror);
-
-    const markerRect = marker.getBoundingClientRect();
-    const containerRect = containerEl.getBoundingClientRect();
-
-    this.mentionPosition = {
-      top: markerRect.bottom - containerRect.top + 8,
-      left: markerRect.left - containerRect.left,
-      bottom: containerRect.bottom - markerRect.top + 8,
-    };
-
-    containerEl.removeChild(mirror);
+    return mirror;
   }
 
   getListLabel(user: User): string {
@@ -275,37 +238,24 @@ export class MessageInput {
   }
 
   onSelectUser(user: User) {
-    const textarea = this.messageInput.nativeElement;
-    const value = textarea.value;
-
-    const lastAt = value.lastIndexOf('@');
-    if (lastAt === -1) return;
-
-    const before = value.slice(0, lastAt);
-    const newValue = `${before}@${this.getMentionLabel(user)} `;
-
-    textarea.value = newValue;
-    textarea.focus();
-
-    this.showMentions = false;
+    this.replaceTriggerWithText('@', this.getMentionLabel(user));
+    this.resetMentions();
   }
 
   onSelectChannel(channel: Channel) {
-    const textarea = this.messageInput.nativeElement;
-    const value = textarea.value;
-
-    const lastHash = value.lastIndexOf('#');
-    if (lastHash === -1) return;
-
-    const before = value.slice(0, lastHash);
-    const newValue = `${before}#${channel.name} `;
-
-    textarea.value = newValue;
-    textarea.focus();
-
-    this.showMentions = false;
-    this.activeMentionType = null;
+    this.replaceTriggerWithText('#', channel.name ?? '');
+    this.resetMentions();
   }
 
+  private replaceTriggerWithText(trigger: string, text: string) {
+    const textarea = this.messageInput.nativeElement;
+    const value = textarea.value;
+    const lastIndex = value.lastIndexOf(trigger);
 
+    if (lastIndex === -1) return;
+
+    const before = value.slice(0, lastIndex);
+    textarea.value = `${before}${trigger}${text} `;
+    textarea.focus();
+  }
 }
