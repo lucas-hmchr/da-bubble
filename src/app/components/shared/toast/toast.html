@@ -1,0 +1,10 @@
+<div class="toast-wrapper">
+  @if (toast()) {
+    <div class="toast" (click)="hide()" [class.closing]="isClosing()">
+        @if (toast()!.icon) {
+            <img [src]="toast()!.icon" alt="">
+        }
+      <span class="toast-message">{{ toast()!.message }}</span>
+    </div>
+  }
+</div>
