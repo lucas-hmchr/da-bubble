@@ -1,5 +1,5 @@
 import { Injectable, computed, inject, signal } from '@angular/core';
-import { Auth, authState, user } from '@angular/fire/auth';
+import { Auth, user } from '@angular/fire/auth';
 import {
     createUserWithEmailAndPassword,
     signInWithEmailAndPassword,
@@ -9,13 +9,12 @@ import {
     User,
     GoogleAuthProvider,
     signInWithPopup,
-    signInWithRedirect,
-    UserCredential,
     signInAnonymously,
 } from '@angular/fire/auth';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { Firestore, doc, getDoc, serverTimestamp, setDoc } from '@angular/fire/firestore';
 import { Router } from '@angular/router';
+import { ToastService } from '../services/toast.service';
 
 @Injectable({
     providedIn: 'root',
@@ -27,6 +26,7 @@ export class AuthService {
     private firestore = inject(Firestore);
     private router = inject(Router)
     googleProvider = new GoogleAuthProvider();
+    private toast = inject(ToastService);
 
     readonly activeUser = toSignal<User | null>(this.user$, { initialValue: null });
     readonly isLoggedIn = computed(() => !!this.activeUser());
@@ -68,6 +68,7 @@ export class AuthService {
         try {
             await signInWithEmailAndPassword(this.auth, email, password);
             this.router.navigate(['/']);
+            this.toast.show('Du bist jetzt eingeloggt!', 3000 ,'/icons/global/send.svg')
         } catch (error) {
             console.log(error)
         }
@@ -122,5 +123,6 @@ export class AuthService {
             throw error;
         }
     }
+
 
 }
