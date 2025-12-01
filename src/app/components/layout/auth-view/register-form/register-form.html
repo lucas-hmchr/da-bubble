@@ -44,18 +44,18 @@
         <h1>Wähle deinen Avatar</h1>
     </div>
     <form class="auth-form-container" #form="ngForm" (ngSubmit)="submitRegistration()" id="registerForm">
-        <img [src]="avatarUrl(selectedAvatar().name)" class="avatar-image-selected">
+        <img [src]="getAvatarUrl(selectedAvatar().id)" class="avatar-image-selected">
         <span class="user-name">{{ fullName }}</span>
         <span style="font-size: 20px; text-align: left; width: 100%;">Aus der Liste wählen:</span>
         <div class="avatar-selection">
             @for (avatar of avatarList; track $index) {
-            <img [src]="avatarUrl(avatar.name)" class="avatar-icon" (click)="selectAvatar(avatar)"
+            <img [src]="getAvatarUrl(avatar.id)" class="avatar-icon" (click)="selectAvatar(avatar)"
                 [class.selected]="selectedAvatar().id === avatar.id">
             }
         </div>
     </form>
     <button style="margin-left: auto;" type="submit" class="submit-button"
-        [class]="selectedAvatar().id !== 1 ? 'btn-enabled' : 'btn-disabled'" [disabled]="selectedAvatar().id === 1"
+        [class]="selectedAvatar().id !== 'avatar_default' ? 'btn-enabled' : 'btn-disabled'" [disabled]="selectedAvatar().id === 'avatar_default'"
         (click)="submitRegistration()">
         <span>Weiter</span>
     </button>

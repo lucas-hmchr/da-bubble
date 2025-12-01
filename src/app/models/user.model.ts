@@ -1,13 +1,15 @@
+import { AvatarId } from "../../shared/data/avatars";
+
 export type NewUser = {
   fullName: string;
   email: string;
   password: string;
-  selectedAvatarName: string;
+  avatarId: AvatarId;
 };
 
-export interface Avatar {
+export interface User {
   id?: number;
-  avatarUrl?: string;
+  avatarId: AvatarId;
   createdAt?: any;
   displayName?: string;
   email?: string;

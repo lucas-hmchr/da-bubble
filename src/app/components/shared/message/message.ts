@@ -4,7 +4,8 @@ import { FirestoreService } from '../../../services/firestore';
 import { MessageData } from '../../../models/message.interface';
 import { Observable } from 'rxjs';
 import { CommonModule } from '@angular/common';
-import { Avatar } from '../../../models/user.model';
+import { User } from '../../../models/user.model';
+import { getAvatarById } from '../../../../shared/data/avatars';
 
 @Component({
   selector: 'app-message',
@@ -18,12 +19,12 @@ export class Message implements OnChanges {
   @Input() currentUserUid: string | null = null;   // <--- neu
   messages$?: Observable<MessageData[]>;
 
-  users: Avatar[] = [];
-  private userMap = new Map<string, Avatar>();
+  users: User[] = [];
+  private userMap = new Map<string, User>();
 
   constructor(private firestoreService: FirestoreService) {
     // Alle User einmal laden, damit wir später Namen zuordnen können
-    this.firestoreService.getCollection<Avatar>('users').subscribe((users) => {
+    this.firestoreService.getCollection<User>('users').subscribe((users) => {
       this.users = users;
       this.userMap.clear();
       for (const u of users) {
@@ -65,11 +66,10 @@ export class Message implements OnChanges {
     const user = this.userMap.get(senderId);
 
     // Fallback, falls User oder avatarUrl fehlt
-    const avatarName =
-      user?.avatarUrl || 'avatar_default';
+    const avatar = getAvatarById(user?.avatarId);
 
     // passt zu deiner Struktur /public/images/avatars/*.svg
-    return `/images/avatars/${avatarName}.svg`;
+    return avatar.src;
   }
 
 

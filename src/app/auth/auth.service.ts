@@ -15,6 +15,7 @@ import { toSignal } from '@angular/core/rxjs-interop';
 import { Firestore, doc, getDoc, serverTimestamp, setDoc } from '@angular/fire/firestore';
 import { Router } from '@angular/router';
 import { ToastService } from '../services/toast.service';
+import { AvatarId } from '../../shared/data/avatars';
 
 @Injectable({
     providedIn: 'root',
@@ -32,14 +33,14 @@ export class AuthService {
     readonly isLoggedIn = computed(() => !!this.activeUser());
     readonly uid = computed(() => this.activeUser()?.uid ?? null);
 
-    async register(email: string, password: string, displayName: string, avatarName: string): Promise<void> {
+    async register(email: string, password: string, displayName: string, avatarId: AvatarId): Promise<void> {
         try {
             const cred = await createUserWithEmailAndPassword(this.auth, email, password);
             await updateProfile(cred.user, {
                 displayName,
-                photoURL: `/images/avatars/${avatarName}.svg`,
+                photoURL: `/images/avatars/${avatarId}.svg`,
             });
-            await this.createUserDocForNewUser(cred.user, { avatarName });
+            await this.createUserDocForNewUser(cred.user, { avatarId });
             this.toast.show('Konto erfolgreich erstellt!', 4000)
             this.router.navigate(['/'])
         } catch (error) {
@@ -55,15 +56,15 @@ export class AuthService {
 
     private async createUserDocForNewUser(
         user: User,
-        opts?: { avatarName?: string; isGuest?: boolean }
+        opts?: { avatarId?: string; isGuest?: boolean }
     ) {
-        const { avatarName, isGuest } = opts ?? {};
+        const { avatarId, isGuest } = opts ?? {};
         const ref = this.getUserRef(user.uid);
         await setDoc(ref, {
             uid: user.uid,
             email: user.email ?? null,
             displayName: user.displayName ?? (isGuest ? 'Gast' : null),
-            avatarName: avatarName ?? (isGuest ? 'avatar_default' : null),
+            avatarId: avatarId ?? (isGuest ? 'avatar_default' : null),
             isGuest: !!isGuest,
             isOnline: true,
             createdAt: serverTimestamp(),

@@ -14,7 +14,7 @@ import {
   serverTimestamp,
 } from '@angular/fire/firestore';
 import { Observable, BehaviorSubject } from 'rxjs';
-import { Avatar } from '../models/user.model';
+import { User } from '../models/user.model';
 
 export interface ChannelMessage {
   text: string;
@@ -40,8 +40,8 @@ export class FirestoreService {
 
   constructor() { }
 
-  getUsers(): Observable<Avatar[]> {
-    return this.getCollection<Avatar>('users');
+  getUsers(): Observable<User[]> {
+    return this.getCollection<User>('users');
   }
 
   getCollection<T extends object>(path: string): Observable<T[]> {
@@ -82,7 +82,7 @@ export class FirestoreService {
     return collectionData(q, { idField: 'id' }) as Observable<T[]>;
   }
 
-  private usersSubject = new BehaviorSubject<Avatar[] | null>(null);
+  private usersSubject = new BehaviorSubject<User[] | null>(null);
   users$ = this.usersSubject.asObservable();
 
   loadUsersOnce() {
