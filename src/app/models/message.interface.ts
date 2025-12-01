@@ -1,9 +1,12 @@
 export interface MessageData {
-  id: string;
+  id?: string;
   text: string;
   senderId: string;
-  createdAt: any; // Firestore Timestamp
-  editedAt?: any;
-  reactions?: { [key: string]: string[] };
-  threadCount?: number;
+  createdAt: Date;   // du schreibst gerade new Date()
+  editedAt: Date;
+  threadCount: number;
+  reactions: {
+    emojiName: string;
+    senderId: string;
+  };
 }
