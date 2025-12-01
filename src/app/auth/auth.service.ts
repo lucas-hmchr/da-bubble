@@ -1,5 +1,5 @@
 import { Injectable, computed, inject, signal } from '@angular/core';
-import { Auth, authState, user } from '@angular/fire/auth';
+import { Auth, user } from '@angular/fire/auth';
 import {
     createUserWithEmailAndPassword,
     signInWithEmailAndPassword,
@@ -9,13 +9,12 @@ import {
     User,
     GoogleAuthProvider,
     signInWithPopup,
-    signInWithRedirect,
-    UserCredential,
     signInAnonymously,
 } from '@angular/fire/auth';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { Firestore, doc, getDoc, serverTimestamp, setDoc } from '@angular/fire/firestore';
 import { Router } from '@angular/router';
+import { ToastService } from '../services/toast.service';
 
 @Injectable({
     providedIn: 'root',
@@ -27,19 +26,26 @@ export class AuthService {
     private firestore = inject(Firestore);
     private router = inject(Router)
     googleProvider = new GoogleAuthProvider();
+    private toast = inject(ToastService);
 
     readonly activeUser = toSignal<User | null>(this.user$, { initialValue: null });
     readonly isLoggedIn = computed(() => !!this.activeUser());
     readonly uid = computed(() => this.activeUser()?.uid ?? null);
 
     async register(email: string, password: string, displayName: string, avatarName: string): Promise<void> {
-        const cred = await createUserWithEmailAndPassword(this.auth, email, password);
-        await updateProfile(cred.user, {
-            displayName,
-            photoURL: `/images/avatars/${avatarName}.svg`,
-        });
-        await this.createUserDocForNewUser(cred.user, { avatarName });
-        this.router.navigate(['/'])
+        try {
+            const cred = await createUserWithEmailAndPassword(this.auth, email, password);
+            await updateProfile(cred.user, {
+                displayName,
+                photoURL: `/images/avatars/${avatarName}.svg`,
+            });
+            await this.createUserDocForNewUser(cred.user, { avatarName });
+            this.toast.show('Konto erfolgreich erstellt!', 4000)
+            this.router.navigate(['/'])
+        } catch (error) {
+            console.log(error)
+            this.toast.show('Bei der Registrierung ist ein Fehler aufgetreten!')
+        }
     }
 
     getUserRef(uid: string = this.activeUser()!.uid) {
@@ -68,6 +74,7 @@ export class AuthService {
         try {
             await signInWithEmailAndPassword(this.auth, email, password);
             this.router.navigate(['/']);
+            this.toast.show('Du bist jetzt eingeloggt!', 4000, '/icons/global/send.svg')
         } catch (error) {
             console.log(error)
         }
@@ -114,6 +121,7 @@ export class AuthService {
     async resetPassword(email: string): Promise<'ok' | 'user-not-found'> {
         try {
             await sendPasswordResetEmail(this.auth, email);
+            this.toast.show('E-Mail gesendet!', 4000,'/icons/global/send.svg')
             return 'ok';
         } catch (error: any) {
             if (error.code === 'auth/user-not-found') {
@@ -122,5 +130,4 @@ export class AuthService {
             throw error;
         }
     }
-
 }
