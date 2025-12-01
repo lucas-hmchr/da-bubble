@@ -8,63 +8,64 @@
                 </div>
                 <img class="edit-square-icon cp" src="/icons/global/edit_square_default.svg" alt="">
             </div>
-            <mat-accordion>
-                <!-- Channel -->
-                <mat-expansion-panel hideToggle="true" class="channel-panel" (opened)="channelOpen.set(true)"
-                    (closed)="channelOpen.set(false)">
+            <div class="channel-message-add-container">
+                <img class="add-icon cp" src="/icons/global/add_default.svg" alt="">
+                <mat-accordion>
+                    <!-- Channel -->
+                    <mat-expansion-panel hideToggle="true" class="channel-panel" (opened)="channelOpen.set(true)"
+                        (closed)="channelOpen.set(false)">
 
-                    <mat-expansion-panel-header class="arrow-channel-add-container">
-                        <div class="header-left">
-                            <mat-icon class="arrow-icon" [class.open]="channelOpen()">arrow_drop_down</mat-icon>
-                            <div class="three-circle-channels-container">
-                                <img src="/icons/global/workspaces_three_circles_default.svg" alt="">
-                                <span>Channels</span>
+                        <mat-expansion-panel-header class="arrow-channel-add-container">
+                            <div class="header-left">
+                                <mat-icon class="arrow-icon" [class.open]="channelOpen()">arrow_drop_down</mat-icon>
+                                <div class="three-circle-channels-container">
+                                    <img src="/icons/global/workspaces_three_circles_default.svg" alt="">
+                                    <span>Channels</span>
+                                </div>
+                            </div>
+                        </mat-expansion-panel-header>
+
+                        <div class="channel-list ml-16">
+                            <div class="channel-item d-flex mb-16">
+                                <img src="/icons/global/tag.svg" class="mr-8" alt="">
+                                Entwicklerteam
+                            </div>
+
+                            <div class="channel-item d-flex mb-16">
+                                <img src="/icons/global/tag.svg" class="mr-8" alt="">
+                                Office-team
+                            </div>
+
+                            <div class="channel-add">
+                                <img src="/icons/global/add_circle.svg" class="mr-8" alt="">
+                                Channel hinzufügen
                             </div>
                         </div>
-                        <img class="add-icon" src="/icons/global/add_default.svg" alt="">
-                    </mat-expansion-panel-header>
 
-                    <div class="channel-list ml-16">
-                        <div class="channel-item d-flex mb-16">
-                            <img src="/icons/global/tag.svg" class="mr-8" alt="">
-                            Entwicklerteam
-                        </div>
+                    </mat-expansion-panel>
 
-                        <div class="channel-item d-flex mb-16">
-                            <img src="/icons/global/tag.svg" class="mr-8" alt="">
-                            Office-team
-                        </div>
+                    <!-- direktnachrichten -->
+                    <mat-expansion-panel hideToggle="true" class="channel-panel" (opened)="dmOpen.set(true)"
+                        (closed)="dmOpen.set(false)">
 
-                        <div class="channel-add">
-                            <img src="/icons/global/add_circle.svg" class="mr-8" alt="">
-                            Channel hinzufügen
-                        </div>
-                    </div>
-
-                </mat-expansion-panel>
-
-                <!-- direktnachrichten -->
-                <mat-expansion-panel hideToggle="true" class="channel-panel" (opened)="dmOpen.set(true)"
-                    (closed)="dmOpen.set(false)">
-
-                    <mat-expansion-panel-header class="arrow-dMessage-container">
-                        <div class="header-left">
-                            <mat-icon class="arrow-icon" [class.open]="dmOpen()">arrow_drop_down</mat-icon>
-                            <div class="account-directMessage-container">
-                                <img src="/icons/global/account_circle.svg" class="mr-8" alt="">
-                                <span>Direktnachrichten</span>
+                        <mat-expansion-panel-header class="arrow-dMessage-container">
+                            <div class="header-left">
+                                <mat-icon class="arrow-icon" [class.open]="dmOpen()">arrow_drop_down</mat-icon>
+                                <div class="account-directMessage-container">
+                                    <img src="/icons/global/account_circle.svg" class="mr-8" alt="">
+                                    <span>Direktnachrichten</span>
+                                </div>
+                            </div>
+                        </mat-expansion-panel-header>
+                        <div class="account-submenu-container ml-16">
+                            <div class="account-avatar-name">
+                                <img src="/images/avatars/avatar_male_3.svg" class="avatar mr-8" alt="">
+                                <span>Frederick Beck</span>
                             </div>
                         </div>
-                    </mat-expansion-panel-header>
-                    <div class="account-submenu-container ml-16">
-                        <div class="account-avatar-name">
-                            <img src="/images/avatars/avatar_male_3.svg" class="avatar mr-8" alt="">
-                            <span>Frederick Beck</span>
-                        </div>
-                    </div>
-                </mat-expansion-panel>
-            </mat-accordion>
-
+                    </mat-expansion-panel>
+                </mat-accordion>
+            </div>
         </mat-drawer>
     </mat-drawer-container>
     <div class="left-menu-button-icon-container cp fs-20" (click)="drawer.toggle()">

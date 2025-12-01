@@ -6,7 +6,7 @@
     margin-bottom: 16px;
 }
 
-.ml-16{
+.ml-16 {
     margin-left: 16px;
 }
 
@@ -173,15 +173,6 @@
     }
 }
 
-.add-icon {
-    &:hover {
-        content: url(/icons/global/add_hover.svg);
-    }
-
-    &:active {
-        content: url(/icons/global/add_click.svg);
-    }
-}
 
 .arrow-icon {
     margin-right: 16px;
@@ -209,4 +200,23 @@
         width: 50px;
     }
 
+}
+
+.channel-message-add-container {
+    position: relative;
+
+    .add-icon {
+        position: absolute;
+        top: 9px;
+        right: 0px;
+        z-index: 3;
+
+        &:hover {
+            content: url(/icons/global/add_hover.svg);
+        }
+
+        &:active {
+            content: url(/icons/global/add_click.svg);
+        }
+    }
 }
