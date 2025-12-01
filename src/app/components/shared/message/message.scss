@@ -1,45 +1,53 @@
 section {
     font-family: 'Nunito';
-    padding: 0 20px;
 }
 
 .date-separator {
-  display: flex;
-  align-items: center;
-  width: 100%;
-  margin: 20px 0;
-
-  /* Abstand links & rechts für die Linien */
-//   padding: 0 20px;
+    display: flex;
+    align-items: center;
+    width: 100%;
+    margin: 20px 0;
+    padding: 0 24px;
 }
 
 .date-separator::before,
 .date-separator::after {
-  content: "";
-  flex: 1;
-  border-bottom: 1px solid #ccc;
+    content: '';
+    flex: 1;
+    border-bottom: 1px solid #ccc;
 }
 
 .date-separator span {
-//   margin: 0 12px;
-  padding: 6px 14px;
-  border: 1px solid #d0d0e0;
-  border-radius: 20px;
-  background: white;
-  font-family: sans-serif;
-  font-size: 14px;
+    padding: 6px 14px;
+    border: 1px solid #d0d0e0;
+    border-radius: 20px;
+    background: white;
+    font-family: sans-serif;
+    font-size: 14px;
 }
 
 .profile-pic {
     height: 70px;
     width: 70px;
-    border-radius: 100%
+    border-radius: 100%;
 }
-.message-content{
+
+.message-content {
     display: flex;
     gap: 16px;
-    >div{
-        >div{
+    padding: 10px 24px;
+
+    &:hover {
+        cursor: pointer;
+        background-color: var(--bg-clr); // Hover-Hintergrund der ganzen Zeile
+
+        .other-person {
+            background-color: var(--clr-white);
+        }
+    }
+
+    >div {
+        >div {
             display: flex;
             gap: 16px;
             align-items: center;
@@ -47,11 +55,11 @@ section {
     }
 }
 
-.fdrr{
+.fdrr {
     flex-direction: row-reverse;
 }
 
-p{
+p {
     font-size: 18px;
 }
 
@@ -60,9 +68,10 @@ a {
     color: #535AF1;
     font-size: 18px;
 }
-.send-name{
+
+.send-name {
     font-weight: bold;
-    font-size: 18px
+    font-size: 18px;
 }
 
 .send-info {
@@ -75,8 +84,8 @@ a {
     border-radius: 30px;
 }
 
-.other-person{
-    background-color:var(--bg-clr);
+.other-person {
+    background-color: var(--bg-clr);
     color: black;
     border-top-left-radius: 0px;
 }
@@ -88,5 +97,5 @@ a {
 }
 
 .text {
-    margin: 10px 0px;;
+    margin: 10px 0px;
 }

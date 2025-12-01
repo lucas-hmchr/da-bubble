@@ -1,4 +1,4 @@
-import { Component, Input, OnChanges, SimpleChanges } from '@angular/core';
+import { Component, Input, OnChanges, SimpleChanges, ElementRef, ViewChild } from '@angular/core';
 import { Channel } from '../../../models/channel.interface';
 import { FirestoreService } from '../../../services/firestore';
 import { MessageData } from '../../../models/message.interface';
@@ -17,12 +17,12 @@ export class Message implements OnChanges {
   @Input() channel?: Channel;
   @Input() currentUserUid: string | null = null;   // <--- neu
   messages$?: Observable<MessageData[]>;
-
+  messages: MessageData[] = [];
+  @ViewChild('bottom') bottom!: ElementRef<HTMLDivElement>;
   users: Avatar[] = [];
   private userMap = new Map<string, Avatar>();
 
   constructor(private firestoreService: FirestoreService) {
-    // Alle User einmal laden, damit wir später Namen zuordnen können
     this.firestoreService.getCollection<Avatar>('users').subscribe((users) => {
       this.users = users;
       this.userMap.clear();
@@ -41,14 +41,18 @@ export class Message implements OnChanges {
   }
 
   loadMessages() {
-    if (this.channel) {
-      this.messages$ = this.firestoreService.getSubcollection<MessageData>(
-        'channels',
-        this.channel.id,
-        'messages',
-        'createdAt'
-      );
-    }
+    if (!this.channel) return;
+
+    this.firestoreService
+      .getSubcollection<MessageData>('channels', this.channel.id, 'messages', 'createdAt')
+      .subscribe((msgs) => {
+        console.log('Neue Messages vom Firestore:', msgs);
+        this.messages = msgs;
+        // console.log('Listening to messages for channel', this.channel?.id);
+
+        // nach Rendern der neuen Nachrichten nach unten scrollen
+        setTimeout(() => this.scrollToBottom(), 0);
+      });
   }
 
   getSenderName(senderId: string): string {
@@ -77,17 +81,17 @@ export class Message implements OnChanges {
     return !!this.currentUserUid && msg.senderId === this.currentUserUid;
   }
 
-isSameDay(a: any, b: any): boolean {
-  const d1 = this.toDate(a);
-  const d2 = this.toDate(b);
-  if (!d1 || !d2) return false;
+  isSameDay(a: any, b: any): boolean {
+    const d1 = this.toDate(a);
+    const d2 = this.toDate(b);
+    if (!d1 || !d2) return false;
 
-  return (
-    d1.getFullYear() === d2.getFullYear() &&
-    d1.getMonth() === d2.getMonth() &&
-    d1.getDate() === d2.getDate()
-  );
-}
+    return (
+      d1.getFullYear() === d2.getFullYear() &&
+      d1.getMonth() === d2.getMonth() &&
+      d1.getDate() === d2.getDate()
+    );
+  }
 
 
   toDate(value: any): Date | null {
@@ -104,6 +108,11 @@ isSameDay(a: any, b: any): boolean {
 
     // Fallback für alles andere (z.B. String)
     return new Date(value);
+  }
+
+  private scrollToBottom() {
+    if (!this.bottom) return;
+    this.bottom.nativeElement.scrollIntoView({ behavior: 'smooth' });
   }
 
 }
