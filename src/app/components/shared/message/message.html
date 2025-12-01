@@ -1,6 +1,5 @@
 <div class="message-container">
 
-  <!-- Fallback, wenn keine Nachrichten vorhanden sind -->
   <div *ngIf="messages.length === 0" class="empty-channel-info">
     <p>Sei der Erste, der eine Nachricht in diesem Channel schreibt!</p>
   </div>
@@ -9,7 +8,6 @@
     *ngFor="let msg of messages; let i = index"
     class="message-wrapper"
   >
-    <!-- Datum-Separator -->
     <div
       class="date-separator"
       *ngIf="i === 0 || !isSameDay(msg.createdAt, messages[i-1].createdAt)"
@@ -53,6 +51,5 @@
     </div>
   </section>
 
-  <!-- Unsichtbarer Anker zum Runterscrollen -->
   <div #bottom></div>
 </div>

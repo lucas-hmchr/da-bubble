@@ -14,9 +14,9 @@ import { Channel } from '../../../models/channel.interface';
     Message
   ],
   templateUrl: './view.html',
-  styleUrls: ['./view.scss'], // <-- styleUrls (Mehrzahl)
+  styleUrls: ['./view.scss'],
 })
-// ---------------- Klasse direkt NACH dem Decorator -----------------
+
 export class View implements OnInit {
 
   channel?: Channel;
@@ -25,12 +25,6 @@ export class View implements OnInit {
 
   ngOnInit(): void {
     this.loadChannelByName("Devteam");
-    // this.firestoreService
-    //   .getCollectionWhere<Channel>('channels', 'name', 'Devteam')
-    //   .subscribe((result) => {
-    //     this.channel = result[0];
-    //     console.log('Geladener Channel:', this.channel);
-    //   });
   }
 
   loadChannelByName(channelName: string) {
