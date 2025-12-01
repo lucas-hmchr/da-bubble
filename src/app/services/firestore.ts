@@ -89,7 +89,7 @@ export class FirestoreService {
   users$ = this.usersSubject.asObservable();
 
   loadUsersOnce() {
-    if (this.usersSubject.value !== null) return; // schon geladen
+    if (this.usersSubject.value !== null) return;
 
     this.getUsers().subscribe((users) => {
       this.usersSubject.next(users);
@@ -106,7 +106,6 @@ export class FirestoreService {
 
     const now = serverTimestamp();
 
-    // 1. Nachricht in Subcollection "messages" anlegen
     await addDoc(messagesRef, <ChannelMessage>{
       text,
       senderId,
@@ -119,7 +118,6 @@ export class FirestoreService {
       },
     });
 
-    // 2. lastMessageAt im Channel aktualisieren
     await updateDoc(channelRef, {
       lastMessageAt: now,
     });

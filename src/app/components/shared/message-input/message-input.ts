@@ -20,24 +20,12 @@ export class MessageInput {
   @ViewChild('messageInput') messageInput!: ElementRef<HTMLTextAreaElement>;
   @ViewChild('container') container!: ElementRef<HTMLDivElement>;
 
-  // users = [
-  //   'Frederick Beck (Du)',
-  //   'Sofia Müller',
-  //   'Noah Braun',
-  //   'Elise Roth',
-  //   'Elias Neumann',
-  //   'Steffen Hoffmann',
-  // ];
-
   users: User[] = [];
   filteredUsers: User[] = [];
   channelsList: Channel[] = [];
   filteredChannels: Channel[] = [];
 
   activeMentionType: 'user' | 'channel' | null = null;
-
-  // filteredUsers = [...this.users];
-
   showMentions = false;
   mentionPosition = { top: 0, left: 0, bottom: 0 };
 
@@ -45,13 +33,11 @@ export class MessageInput {
   constructor(private firestoreService: FirestoreService) { }
 
   ngOnInit(): void {
-    // Users
     this.firestoreService.getCollection<User>('users').subscribe((users) => {
       this.users = users;
       this.filteredUsers = users;
     });
 
-    // Channels
     this.firestoreService.getCollection<Channel>('channels').subscribe((channels) => {
       this.channelsList = channels;
       this.filteredChannels = channels;
@@ -66,8 +52,6 @@ export class MessageInput {
     const textarea = event.target as HTMLTextAreaElement;
     const value = textarea.value;
     const lastChar = value.slice(-1);
-
-    // --- Trigger erkennen ---
 
     if (lastChar === '@') {
       this.activeMentionType = 'user';
@@ -85,13 +69,9 @@ export class MessageInput {
       return;
     }
 
-    // Wenn kein Dropdown offen ist → fertig
     if (!this.showMentions || !this.activeMentionType) return;
 
-    // Position des Dropdowns aktualisieren, falls Cursor sich bewegt
     this.updateMentionPosition();
-
-    // --- Filter je nach aktivem Typ ---
 
     if (this.activeMentionType === 'user') {
       const mentionQuery = this.getCurrentTriggerQuery(value, '@');
@@ -138,7 +118,6 @@ export class MessageInput {
     const textarea = this.messageInput.nativeElement;
     const text = textarea.value.trim();
 
-    // 1. Nichts senden, wenn leer
     if (!text) {
       return;
     }
@@ -148,11 +127,10 @@ export class MessageInput {
       return;
     }
 
-    const now = new Date(); // optional: später serverTimestamp() in FirestoreService nutzen
+    const now = new Date();
 
     try {
       if (this.contextType === 'channel') {
-        // --- CHANNEL ---
         if (!this.channel?.id) {
           console.warn('Kein Channel gesetzt – Nachricht wird nicht gesendet.');
           return;
@@ -160,7 +138,6 @@ export class MessageInput {
 
         const channelId = this.channel.id as string;
 
-        // Nachricht in channels/{channelId}/messages
         await this.firestoreService.addDocument(
           `channels/${channelId}/messages`,
           {
@@ -176,7 +153,6 @@ export class MessageInput {
           }
         );
 
-        // lastMessageAt im Channel-Dokument aktualisieren
         await this.firestoreService.updateDocument(
           'channels',
           channelId,
@@ -186,7 +162,6 @@ export class MessageInput {
         );
 
       } else if (this.contextType === 'conversation') {
-        // --- CONVERSATION / DIREKTCHAT ---
         if (!this.conversationId) {
           console.warn('Keine Conversation-ID gesetzt – Nachricht wird nicht gesendet.');
           return;
@@ -210,7 +185,6 @@ export class MessageInput {
           }
         );
 
-        // lastMessageAt in conversations/{convId}
         await this.firestoreService.updateDocument(
           'conversations',
           convId,
@@ -220,7 +194,6 @@ export class MessageInput {
         );
       }
 
-      // 5. Eingabefeld leeren & Mentions schließen
       textarea.value = '';
       this.showMentions = false;
       this.activeMentionType = null;
@@ -287,7 +260,6 @@ export class MessageInput {
     containerEl.removeChild(mirror);
   }
 
-  // Name, wie er in der Liste angezeigt wird (mit "(Du)")
   getListLabel(user: User): string {
     const baseName = user.displayName ?? user.name ?? '';
 
@@ -298,7 +270,6 @@ export class MessageInput {
     return baseName;
   }
 
-  // Name, wie er in der Nachricht stehen soll (ohne "(Du)")
   getMentionLabel(user: User): string {
     return user.displayName ?? user.name ?? '';
   }

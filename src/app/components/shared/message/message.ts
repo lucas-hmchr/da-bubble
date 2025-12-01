@@ -50,9 +50,6 @@ export class Message implements OnChanges {
       .subscribe((msgs) => {
         console.log('Neue Messages vom Firestore:', msgs);
         this.messages = msgs;
-        // console.log('Listening to messages for channel', this.channel?.id);
-
-        // nach Rendern der neuen Nachrichten nach unten scrollen
         setTimeout(() => this.scrollToBottom(), 0);
       });
   }
@@ -69,11 +66,7 @@ export class Message implements OnChanges {
 
   getSenderAvatarUrl(senderId: string): string {
     const user = this.userMap.get(senderId);
-
-    // Fallback, falls User oder avatarUrl fehlt
     const avatar = getAvatarById(user?.avatarId);
-
-    // passt zu deiner Struktur /public/images/avatars/*.svg
     return avatar.src;
   }
 
@@ -101,13 +94,10 @@ export class Message implements OnChanges {
     if (value instanceof Date) {
       return value;
     }
-
-    // Firestore Timestamp hat eine toDate()-Methode
     if (value.toDate) {
       return value.toDate();
     }
 
-    // Fallback für alles andere (z.B. String)
     return new Date(value);
   }
 
