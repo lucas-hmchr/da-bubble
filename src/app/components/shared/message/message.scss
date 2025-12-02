@@ -1,5 +1,6 @@
 section {
     font-family: 'Nunito';
+    background-color: yellow;
 }
 
 .date-separator {
@@ -36,6 +37,7 @@ section {
     display: flex;
     gap: 16px;
     padding: 10px 24px;
+    
 
     &:hover {
         cursor: pointer;
@@ -43,6 +45,12 @@ section {
 
         .other-person {
             background-color: var(--clr-white);
+        }
+
+        nav {
+            background-color: black;
+            color: white;
+            display: flex;
         }
     }
 
@@ -98,4 +106,12 @@ a {
 
 .text {
     margin: 10px 0px;
+}
+
+nav {
+    background-color: #535AF1;
+    width: fit-content;
+    position: relative;
+    top: 0px;
+    display: none;
 }
