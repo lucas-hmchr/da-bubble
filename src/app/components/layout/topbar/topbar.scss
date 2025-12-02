@@ -7,10 +7,21 @@
     justify-content: space-between;
     align-items: center;
     padding: 15px 45px;
+
+    @media (max-width: 1630px) {
+        justify-content: flex-start;
+        gap: 20px;
+    }
 }
 
 .search-bar {
     position: relative;
+    flex: 1;
+    max-width: 989px;
+
+    @media (max-width: 1630px) {
+        display: none;
+    }
 
     .search-inputs {
         height: 70px;
@@ -39,6 +50,10 @@
     gap: 20px;
     cursor: pointer;
     position: relative;
+
+    @media (max-width: 1630px) {
+        margin-left: auto;
+    }
 
     h1 {
         transition: color 0.2s ease;
