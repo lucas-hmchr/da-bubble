@@ -1,58 +1,55 @@
 <div class="message-container">
-
-  <div *ngIf="messages.length === 0" class="empty-channel-info">
-    <p>Sei der Erste, der eine Nachricht in diesem Channel schreibt!</p>
-  </div>
-
-  <section
-    *ngFor="let msg of messages; let i = index"
-    class="message-wrapper"
-  >
-    <div
-      class="date-separator"
-      *ngIf="i === 0 || !isSameDay(msg.createdAt, messages[i-1].createdAt)"
-    >
-      <span>
-        {{ toDate(msg.createdAt) | date:'EEEE, d. MMMM' }}
-      </span>
+  <ng-container *ngIf="messages$ | async as msgs">
+    <div *ngIf="msgs.length === 0" class="empty-channel-info">
+      <p>Sei der Erste, der eine Nachricht in diesem Channel schreibt!</p>
     </div>
 
-    <div
-      class="message-content"
-      [ngClass]="{ fdrr: isOwnMessage(msg) }"
-    >
-      <img
-        class="profile-pic"
-        [src]="getSenderAvatarUrl(msg.senderId)"
-        [alt]="getSenderName(msg.senderId)"
-      />
+    <section *ngFor="let msg of msgs; let i = index" class="message-wrapper">
+      <div class="date-separator" *ngIf="i === 0 || !isSameDay(msg.createdAt, msgs[i - 1]?.createdAt)">
+        <span>
+          {{ toDate(msg.createdAt) | date: 'EEEE, d. MMMM' }}
+        </span>
+      </div>
 
-      <div>
-        <div>
-          <span class="send-name">
-            {{ getSenderName(msg.senderId) }}
-          </span>
-          <span class="send-info">
-            {{ toDate(msg.createdAt) | date:'HH:mm' }} Uhr
-          </span>
+      <div class="message-content" [ngClass]="{ fdrr: isOwnMessage(msg) }">
+        <div class="message-actions">
+          <img src="/icons/global/check1.svg" alt="" class="action-btn check-btn">
+          <img src="/icons/global/thumbsup1.svg" alt="" class="action-btn thumbsup-btn">
+          <img src="/icons/global/reaction1.svg" alt="" class="action-btn reaction-btn">
+          <img src="/icons/global/answer1.svg" alt="" class="action-btn answer-btn">
+          <img *ngIf="isOwnMessage(msg)" src="/icons/global/option1.svg" alt="Optionen" class="action-btn option-btn"
+            (click)="onEditMessage(msg)" />
         </div>
 
-        <p
-          class="text bubble"
-          [ngClass]="isOwnMessage(msg) ? 'me-person' : 'other-person'"
-        >
-          {{ msg.text }}
-        </p>
+        <img class="profile-pic" [src]="getSenderAvatarUrl(msg.senderId)" [alt]="getSenderName(msg.senderId)" />
 
-        <div *ngIf="msg.threadCount > 0">
-          <a href="javascript:void(0)">{{ msg.threadCount }} Antworten</a>
+        <div>
+          <div>
+            <span class="send-name">
+              {{ getSenderName(msg.senderId) }}
+            </span>
+            <span class="send-info">
+              {{ toDate(msg.createdAt) | date: 'HH:mm' }} Uhr
+            </span>
+          </div>
+
+          <p class="text bubble" [ngClass]="isOwnMessage(msg) ? 'me-person' : 'other-person'">
+            {{ msg.text }}
+          </p>
+
+          <div *ngIf="msg.threadCount > 0">
+            <a href="javascript:void(0)">
+              {{ msg.threadCount }} Antworten
+            </a>
+            <span class="last-reply-time">
+              Letzte Antwort
+              {{ toDate(msg.lastReplyAt) | date: 'HH:mm' }}
+            </span>
+          </div>
         </div>
       </div>
-      <nav>hallo</nav>
-    </div>
-  </section>
+    </section>
 
-  <div #bottom></div>
-
-  
+    <div #bottom></div>
+  </ng-container>
 </div>

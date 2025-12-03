@@ -4,6 +4,7 @@ import { FirestoreService } from '../../../services/firestore';
 import { MessageInput } from '../../shared/message-input/message-input';
 import { Message } from '../../shared/message/message';
 import { Channel } from '../../../models/channel.interface';
+import { MessageData } from '../../../models/message.interface';
 
 @Component({
   selector: 'app-view',
@@ -20,7 +21,8 @@ import { Channel } from '../../../models/channel.interface';
 export class View implements OnInit {
 
   channel?: Channel;
-  @Input() currentUserUid: string | null = null;  // <--- neu
+  @Input() currentUserUid: string | null = null; 
+  editingMessage?: { id: string; text: string };
   constructor(private firestoreService: FirestoreService) { }
 
   ngOnInit(): void {
@@ -43,4 +45,15 @@ export class View implements OnInit {
         }
       });
   }
+
+    onEditRequested(msg: MessageData) {
+    if (!msg.id) return;
+    this.editingMessage = { id: msg.id as string, text: msg.text };
+  }
+
+  onEditFinished() {
+    this.editingMessage = undefined;
+  }
+
+  
 }
