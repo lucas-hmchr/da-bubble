@@ -189,3 +189,122 @@ a {
     right: auto;
     left: 24px;
 }
+
+.reactions-summary {
+  display: flex;
+  gap: 6px;
+  margin-top: 4px;
+}
+
+.reaction-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 2px 8px;
+  border-radius: 999px;
+  border: 1px solid var(--clr-purple-light);
+  background-color: #fff;
+  font-size: 14px;
+  cursor: pointer;
+
+  &:hover {
+    background-color: var(--bg-clr);
+  }
+}
+
+/* Wenn eigene Reaction drin ist → leicht hervorheben */
+.reaction-chip.mine {
+  border-color: var(--clr-purple-2);
+  background-color: rgba(121, 126, 243, 0.12);
+}
+
+/* eigene Nachricht, andere Farbe */
+.reaction-chip.own-message {
+  border-color: var(--clr-purple-1);
+}
+
+.reaction-icon {
+  width: 18px;
+  height: 18px;
+}
+
+.reaction-count {
+  font-size: 13px;
+}
+
+/* Palette unter dem Hover-Menü */
+.reaction-picker {
+  position: absolute;
+  right: 24px;
+  top: 0;
+  transform: translateY(40px); // unter das Hover-Menü schieben
+  display: flex;
+  gap: 6px;
+  padding: 6px 10px;
+  background: #ffffff;
+  border-radius: 999px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.12);
+  z-index: 15;
+}
+
+.message-content.fdrr .reaction-picker {
+  right: auto;
+  left: 24px;
+}
+
+.reaction-emoji-btn {
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  font-size: 18px;
+  line-height: 1;
+
+  &:hover {
+    transform: translateY(-1px);
+  }
+}
+
+/* Reactions-Chips unter der Bubble */
+.reactions-summary {
+  display: flex;
+  gap: 6px;
+  margin-top: 4px;
+}
+
+.reaction-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 2px 8px;
+  border-radius: 999px;
+  border: 1px solid var(--clr-purple-light);
+  background-color: #fff;
+  font-size: 14px;
+  cursor: pointer;
+
+  &:hover {
+    background-color: var(--bg-clr);
+  }
+}
+
+.reaction-chip.mine {
+  border-color: var(--clr-purple-2);
+  background-color: rgba(121, 126, 243, 0.12);
+}
+
+.reaction-chip.own-message {
+  border-color: var(--clr-purple-1);
+}
+
+.reaction-icon {
+  width: 18px;
+  height: 18px;
+}
+
+.reaction-emoji {
+  font-size: 16px;
+}
+
+.reaction-count {
+  font-size: 13px;
+}
