@@ -29,7 +29,7 @@ export class Topbar {
 
   openProfilEditModal() {
     this.isProfilEditModalOpen = true;
-    this.isProfilModalOpen = false; // ← Schließt das Profil-Modal
+    this.isProfilModalOpen = false;
     document.body.style.overflow = 'hidden';
   }
 
