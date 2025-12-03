@@ -1,10 +1,5 @@
-import {
-  Component,
-  Input,
-  ElementRef,
-  ViewChild,
-  OnInit,
-} from '@angular/core';
+import { Component, Input, ElementRef, ViewChild, OnInit, Output, EventEmitter } from '@angular/core';
+
 import { CommonModule } from '@angular/common';
 import { Channel } from '../../../models/channel.interface';
 import { User } from '../../../models/user.model';
@@ -23,6 +18,10 @@ export class MessageInput implements OnInit {
   @Input() contextType: 'channel' | 'conversation' = 'channel';
   @Input() conversationId?: string;
 
+  @Output() editFinished = new EventEmitter<void>();
+
+  isEditing = false;
+
   @ViewChild('messageInput') messageInput!: ElementRef<HTMLTextAreaElement>;
   @ViewChild('container') container!: ElementRef<HTMLDivElement>;
 
@@ -35,7 +34,7 @@ export class MessageInput implements OnInit {
   showMentions = false;
   mentionPosition = { top: 0, left: 0, bottom: 0 };
 
-  constructor(private messageService: MessageInputService) {}
+  constructor(private messageService: MessageInputService) { }
 
   ngOnInit(): void {
     this.messageService.loadUsers().subscribe((users) => {
@@ -142,6 +141,7 @@ export class MessageInput implements OnInit {
     }
   }
 
+
   private getTrimmedText(): string {
     const textarea = this.messageInput.nativeElement;
     return textarea.value.trim();
@@ -149,32 +149,22 @@ export class MessageInput implements OnInit {
 
   private async sendByContext(text: string, senderId: string) {
     if (this.contextType === 'channel') {
-      if (!this.channel?.id) {
-        console.warn('Kein Channel gesetzt.');
-        return;
-      }
-
-      const channelId = this.channel.id as string;
-      await this.messageService.sendChannelMessage(channelId, text, senderId);
+      await this.handleChannelSend(text, senderId);
       return;
     }
 
-    if (!this.conversationId) {
-      console.warn('Keine Conversation-ID gesetzt.');
-      return;
-    }
-
-    await this.messageService.sendConversationMessage(
-      this.conversationId,
-      text,
-      senderId
-    );
+    await this.handleConversationSend(text, senderId);
   }
+
 
   private afterSend() {
     this.messageInput.nativeElement.value = '';
     this.resetMentions();
+    this.isEditing = false;
+    this._editingMessage = undefined;
+    this.editFinished.emit();
   }
+
 
   private updateMentionPosition() {
     const textarea = this.messageInput.nativeElement;
@@ -197,7 +187,7 @@ export class MessageInput implements OnInit {
     containerEl.removeChild(mirror);
   }
 
-  private createMirror(textarea: HTMLTextAreaElement,caretIndex: number): HTMLDivElement {
+  private createMirror(textarea: HTMLTextAreaElement, caretIndex: number): HTMLDivElement {
     const mirror = document.createElement('div');
     const style = window.getComputedStyle(textarea);
 
@@ -258,4 +248,61 @@ export class MessageInput implements OnInit {
     textarea.value = `${before}${trigger}${text} `;
     textarea.focus();
   }
+
+  private _editingMessage?: { id: string; text: string };
+
+  @Input() set editingMessage(value: { id: string; text: string } | undefined) {
+    this._editingMessage = value;
+    this.isEditing = !!value;
+
+    // Text in Textarea setzen, wenn sie schon referenziert ist
+    if (value && this.messageInput) {
+      this.messageInput.nativeElement.value = value.text;
+    }
+  }
+
+  get editingMessage() {
+    return this._editingMessage;
+  }
+
+  private async handleChannelSend(text: string, senderId: string) {
+    if (!this.channel?.id) {
+      console.warn('Kein Channel gesetzt.');
+      return;
+    }
+
+    const channelId = this.channel.id as string;
+
+    if (this.isEditing && this.editingMessage?.id) {
+      await this.messageService.updateChannelMessage(
+        channelId,
+        this.editingMessage.id,
+        text
+      );
+      return;
+    }
+
+    await this.messageService.sendChannelMessage(channelId, text, senderId);
+  }
+
+  private async handleConversationSend(text: string, senderId: string) {
+    if (!this.conversationId) {
+      console.warn('Keine Conversation-ID gesetzt.');
+      return;
+    }
+
+    const convId = this.conversationId;
+
+    if (this.isEditing && this.editingMessage?.id) {
+      await this.messageService.updateConversationMessage(
+        convId,
+        this.editingMessage.id,
+        text
+      );
+      return;
+    }
+
+    await this.messageService.sendConversationMessage(convId, text, senderId);
+  }
+
 }

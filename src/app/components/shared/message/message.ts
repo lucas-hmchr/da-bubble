@@ -1,8 +1,8 @@
-import { Component, Input, OnChanges, SimpleChanges, ElementRef, ViewChild } from '@angular/core';
+import { Component, Input, OnChanges, SimpleChanges, ElementRef, ViewChild, Output, EventEmitter } from '@angular/core';
 import { Channel } from '../../../models/channel.interface';
 import { FirestoreService } from '../../../services/firestore';
 import { MessageData } from '../../../models/message.interface';
-import { Observable } from 'rxjs';
+import { Observable, tap } from 'rxjs';
 import { CommonModule } from '@angular/common';
 import { User } from '../../../models/user.model';
 import { getAvatarById } from '../../../../shared/data/avatars';
@@ -16,11 +16,12 @@ import { getAvatarById } from '../../../../shared/data/avatars';
 })
 export class Message implements OnChanges {
   @Input() channel?: Channel;
-  @Input() currentUserUid: string | null = null;   // <--- neu
-  messages$?: Observable<MessageData[]>;
+  @Input() currentUserUid: string | null = null;
+  @Output() editRequested = new EventEmitter<MessageData>();
 
+  messages$?: Observable<MessageData[]>;   // <--- wird jetzt benutzt
   users: User[] = [];
-  messages: MessageData[] = [];
+
   @ViewChild('bottom') bottom!: ElementRef<HTMLDivElement>;
   private userMap = new Map<string, User>();
 
@@ -45,21 +46,24 @@ export class Message implements OnChanges {
   loadMessages() {
     if (!this.channel) return;
 
-    this.firestoreService
-      .getSubcollection<MessageData>('channels', this.channel.id, 'messages', 'createdAt')
-      .subscribe((msgs) => {
-        console.log('Neue Messages vom Firestore:', msgs);
-        this.messages = msgs;
-        setTimeout(() => this.scrollToBottom(), 0);
-      });
+    this.messages$ = this.firestoreService
+      .getSubcollection<MessageData>(
+        'channels',
+        this.channel.id,
+        'messages',
+        'createdAt'
+      )
+      .pipe(
+        tap(() => {
+          // nach jedem neuen Snapshot runter scrollen
+          setTimeout(() => this.scrollToBottom(), 0);
+        })
+      );
   }
 
   getSenderName(senderId: string): string {
     const user = this.userMap.get(senderId);
-
-    if (!user) {
-      return 'Unknown user';
-    }
+    if (!user) return 'Unknown user';
 
     return user.displayName ?? user.name ?? 'Unknown user';
   }
@@ -69,7 +73,6 @@ export class Message implements OnChanges {
     const avatar = getAvatarById(user?.avatarId);
     return avatar.src;
   }
-
 
   isOwnMessage(msg: MessageData): boolean {
     return !!this.currentUserUid && msg.senderId === this.currentUserUid;
@@ -87,23 +90,21 @@ export class Message implements OnChanges {
     );
   }
 
-
   toDate(value: any): Date | null {
     if (!value) return null;
-
-    if (value instanceof Date) {
-      return value;
-    }
-    if (value.toDate) {
-      return value.toDate();
-    }
-
+    if (value instanceof Date) return value;
+    if (value.toDate) return value.toDate();
     return new Date(value);
   }
 
   private scrollToBottom() {
     if (!this.bottom) return;
     this.bottom.nativeElement.scrollIntoView({ behavior: 'smooth' });
+  }
+
+  onEditMessage(msg: MessageData) {
+    if (!this.isOwnMessage(msg)) return; // Sicherheit
+    this.editRequested.emit(msg);
   }
 
 }

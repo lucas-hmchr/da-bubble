@@ -89,4 +89,41 @@ export class MessageInputService {
       (c.name ?? '').toLowerCase().includes(q)
     );
   }
+
+  async updateChannelMessage(
+  channelId: string,
+  messageId: string,
+  text: string
+) {
+  const now = new Date();
+
+  return this.firestore.updateDocument(
+    `channels/${channelId}/messages`,
+    messageId,
+    {
+      text,
+      editedAt: now,
+    }
+  );
+}
+
+async updateConversationMessage(
+  convId: string,
+  messageId: string,
+  text: string
+) {
+  const now = new Date();
+
+  return this.firestore.updateDocument(
+    `conversations/${convId}/messages`,
+    messageId,
+    {
+      text,
+      editedAt: now,
+    }
+  );
+}
+
+
+
 }

@@ -9,4 +9,5 @@ export interface MessageData {
     emojiName: string;
     senderId: string;
   };
+  lastReplyAt?: any;
 }

@@ -1,13 +1,13 @@
-section {
-    font-family: 'Nunito';
+.message-container {
+    width: 100%;
 }
 
+/* Datum-Separator oben über Nachrichten */
 .date-separator {
     display: flex;
     align-items: center;
     width: 100%;
     margin: 20px 0;
-    padding: 0 24px;
 }
 
 .date-separator::before,
@@ -26,21 +26,26 @@ section {
     font-size: 14px;
 }
 
+/* Avatar */
 .profile-pic {
     height: 70px;
     width: 70px;
     border-radius: 100%;
 }
 
+/* Wrapper für eine komplette Nachricht */
 .message-content {
     display: flex;
     gap: 16px;
     padding: 10px 24px;
+    position: relative; // für das Reaction-Menü
 
     &:hover {
         cursor: pointer;
-        background-color: var(--bg-clr); // Hover-Hintergrund der ganzen Zeile
+        background-color: var(--bg-clr);
 
+        /* beim Hover die Bubble des anderen Users weiß machen,
+       damit sie sich vom Hintergrund abhebt */
         .other-person {
             background-color: var(--clr-white);
         }
@@ -55,6 +60,7 @@ section {
     }
 }
 
+/* für eigene Nachrichten umdrehen */
 .fdrr {
     flex-direction: row-reverse;
 }
@@ -79,6 +85,13 @@ a {
     color: #686868;
 }
 
+.last-reply-time {
+    margin-left: 12px;
+    font-size: 14px;
+    color: #686868;
+}
+
+/* Sprechblasen */
 .bubble {
     padding: 15px;
     border-radius: 30px;
@@ -98,4 +111,81 @@ a {
 
 .text {
     margin: 10px 0px;
+}
+
+.message-actions {
+    position: absolute;
+    right: 24px;
+    top: 0;
+    transform: translateY(-100%);
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 4px 10px;
+    background-color: #ffffff;
+    border-radius: 999px;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+
+    opacity: 0;
+    pointer-events: none;
+    transition:
+        opacity 0.15s ease,
+        transform 0.15s ease;
+}
+
+.message-content:hover .message-actions {
+    opacity: 1;
+    pointer-events: auto;
+    transform: translateY(calc(-100% + 25px))
+}
+
+.action-btn {
+    border: none;
+    background: transparent;
+    cursor: pointer;
+    font-size: 16px;
+    line-height: 1;
+    padding: 0;
+
+}
+
+.check-btn {
+    &:hover {
+        content: url('/icons/global/check2.svg');
+    }
+}
+
+.thumbsup-btn {
+    &:hover {
+        content: url('/icons/global/thumbsup2.svg');
+    }
+}
+
+.reaction-btn {
+    &:hover {
+        content: url('/icons/global/reaction2.svg');
+    }
+}
+
+.answer-btn {
+    &:hover {
+        content: url('/icons/global/answer2.svg');
+    }
+}
+
+.option-btn {
+    &:hover {
+        content: url('/icons/global/option2.svg');
+    }
+}
+
+.empty-channel-info {
+    padding: 24px;
+    font-size: 16px;
+    color: #686868;
+}
+
+.message-content.fdrr .message-actions {
+    right: auto;
+    left: 24px;
 }
