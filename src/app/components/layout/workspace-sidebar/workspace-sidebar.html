@@ -1,5 +1,5 @@
-<div class="left-menu-container">
-    <mat-drawer-container class="mat-drawer-container" autosize>
+<div class="left-menu-container" [class.closed]="isClosed()">
+    <mat-drawer-container  class="mat-drawer-container" autosize>
         <mat-drawer #drawer class="left-menu-sidenav" mode="side" opened="true">
             <div class="channels-button-container">
                 <div class="workspace-logo-text-container">

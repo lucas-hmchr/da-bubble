@@ -15,17 +15,17 @@ import { AddChannelDialog } from '../../add-channel-dialog/add-channel-dialog';
 export class WorkspaceSidebar {
   readonly channelOpen = signal(false);
   readonly dmOpen = signal(false);
+  isClosed = signal(false);
 
   constructor(private dialog: MatDialog) { }
 
   openAddChannelDialog() {
     this.dialog.open(AddChannelDialog, {
-      width: '872px',      
-      maxWidth: 'none',    
-      height: '539px', 
+      width: '872px',
+      maxWidth: 'none',
+      height: '539px',
     });
   }
-
 
 
 }
