@@ -37,6 +37,9 @@ export class Message implements OnChanges {
 
   messages$?: Observable<MessageData[]>;
   users: User[] = [];
+  hoveredReaction: ReactionId | null = null;
+
+  hoveredMessageId: string | null = null;
 
   @ViewChild('bottom') bottom!: ElementRef<HTMLDivElement>;
   private userMap = new Map<string, User>();
@@ -192,6 +195,45 @@ export class Message implements OnChanges {
     if (this.reactionPickerForMessageId === msg.id) {
       this.reactionPickerForMessageId = null;
     }
+  }
+
+  onHoverReaction(messageId: string, reactionId: ReactionId) {
+    this.hoveredMessageId = messageId;
+    this.hoveredReaction = reactionId;
+  }
+
+  onLeaveReaction() {
+    this.hoveredMessageId = null;
+    this.hoveredReaction = null;
+  }
+
+  getReactionUserIds(msg: MessageData, reactionId: ReactionId): string[] {
+    return msg.reactions?.[reactionId] || [];
+  }
+
+  getUserDisplayName(uid: string): string {
+    const user = this.userMap.get(uid);
+    return user?.displayName ?? user?.name ?? 'Unbekannter Nutzer';
+  }
+
+  getReactionUserLabel(msg: MessageData, reactionId: ReactionId): string {
+    const uids = this.getReactionUserIds(msg, reactionId);
+    if (!uids.length) return '';
+
+    if (uids.length === 1) {
+      return this.getUserDisplayName(uids[0]);
+    }
+
+    if (uids.length === 2) {
+      return (
+        this.getUserDisplayName(uids[0]) +
+        ' und ' +
+        this.getUserDisplayName(uids[1])
+      );
+    }
+
+    const others = uids.length - 1;
+    return `${this.getUserDisplayName(uids[0])} und ${others} weitere`;
   }
 
 }
