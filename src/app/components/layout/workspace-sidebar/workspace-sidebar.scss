@@ -28,7 +28,7 @@
 }
 
 .mat-drawer-container.closed {
-  margin-left: 0 !important;
+    margin-left: 0 !important;
 }
 
 .left-menu-button-icon-container {
@@ -64,6 +64,7 @@
     // margin-left: 20px;
     // margin-bottom: 20px;
     width: 360px;
+    background-color: white;
 }
 
 .show-menu-icon {
@@ -120,6 +121,10 @@
 
 ::ng-deep .mat-expansion-panel-header.mat-focus-indicator {
     padding: 0;
+}
+
+mat-expansion-panel {
+    background-color: white;
 }
 
 .header-left {
@@ -201,8 +206,8 @@
         }
     }
 
-    &:active{
-                color: #000000;
+    &:active {
+        color: #000000;
 
         img {
             content: url(/icons/global/add_circle_hover.svg);
@@ -242,27 +247,16 @@
     }
 }
 
-// ------------------------------------- neu
+.account-submenu-container {
+    border-radius: 25px;
+    height: 58px;
+    display: flex;
+    align-items: center;
+    padding-left: 16px;
 
+    &:hover {
+        background-color: #ECEEFE;
+    }
 
-// .sidebar-wrapper {
-//   width: 366px;
-//   height: 100%;
-//   position: relative;
-//   transition: transform .25s ease;
-//   transform: translateX(0);
-// }
-
-// .sidebar-wrapper.closed {
-//   transform: translateX(-380px);
-// }
-
-// .sidebar {
-//   width: 100%;
-//   height: 100%;
-//   background: #fff;
-//   border-radius: 30px;
-//   overflow-y: auto;
-//   padding: 30px;
-//   box-sizing: border-box;
-// }
+    
+}

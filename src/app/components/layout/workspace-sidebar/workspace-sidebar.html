@@ -10,7 +10,7 @@
             </div>
             <div class="channel-message-add-container">
                 <img class="add-icon cp" src="/icons/global/add_default.svg" (click)="openAddChannelDialog()" alt="">
-                <mat-accordion>
+                <mat-accordion class="mat-accordion-container">
                     <!-- Channel -->
                     <mat-expansion-panel hideToggle="true" class="channel-panel" (opened)="channelOpen.set(true)"
                         (closed)="channelOpen.set(false)">
@@ -20,7 +20,7 @@
                                 <mat-icon class="arrow-icon" [class.open]="channelOpen()">arrow_drop_down</mat-icon>
                                 <div class="three-circle-channels-container">
                                     <img src="/icons/global/workspaces_three_circles_default.svg" alt="">
-                                    <span>Channels</span>
+                                    <span class="fs-20">Channels</span>
                                 </div>
                             </div>
                         </mat-expansion-panel-header>
@@ -53,11 +53,11 @@
                                 <mat-icon class="arrow-icon" [class.open]="dmOpen()">arrow_drop_down</mat-icon>
                                 <div class="account-directMessage-container">
                                     <img src="/icons/global/account_circle.svg" class="mr-8" alt="">
-                                    <span>Direktnachrichten</span>
+                                    <span class="fs-20">Direktnachrichten</span>
                                 </div>
                             </div>
                         </mat-expansion-panel-header>
-                        <div class="account-submenu-container ml-16">
+                        <div class="account-submenu-container">
                             <div class="account-avatar-name">
                                 <img src="/images/avatars/avatar_male_3.svg" class="avatar mr-8" alt="">
                                 <span>Frederick Beck</span>
