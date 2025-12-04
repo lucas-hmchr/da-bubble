@@ -38,8 +38,8 @@ export class Message implements OnChanges {
   messages$?: Observable<MessageData[]>;
   users: User[] = [];
   hoveredReaction: ReactionId | null = null;
-
   hoveredMessageId: string | null = null;
+  lastMessageCount = 0;
 
   @ViewChild('bottom') bottom!: ElementRef<HTMLDivElement>;
   private userMap = new Map<string, User>();
@@ -76,11 +76,19 @@ export class Message implements OnChanges {
         'createdAt'
       )
       .pipe(
-        tap(() => {
-          setTimeout(() => this.scrollToBottom(), 0);
+        tap((msgs) => {
+          const currentCount = msgs.length;
+
+          if (currentCount > this.lastMessageCount) {
+            setTimeout(() => this.scrollToBottom(), 0);
+          }
+
+          this.lastMessageCount = currentCount;
         })
       );
   }
+
+
 
   getSenderName(senderId: string): string {
     const user = this.userMap.get(senderId);
@@ -117,10 +125,17 @@ export class Message implements OnChanges {
     return new Date(value);
   }
 
-  private scrollToBottom() {
-    if (!this.bottom) return;
+  private scrollToBottom(retry: boolean = true) {
+    if (!this.bottom) {
+      if (retry) {
+        setTimeout(() => this.scrollToBottom(false), 50);
+      }
+      return;
+    }
+
     this.bottom.nativeElement.scrollIntoView({ behavior: 'smooth' });
   }
+
 
   onEditMessage(msg: MessageData) {
     if (!this.isOwnMessage(msg)) return;
