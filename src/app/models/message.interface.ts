@@ -1,13 +1,13 @@
+import type { ReactionId } from '../../shared/data/reactions';
+
+
 export interface MessageData {
   id?: string;
   text: string;
   senderId: string;
-  createdAt: Date;   // du schreibst gerade new Date()
+  createdAt: Date;
   editedAt: Date;
   threadCount: number;
-  reactions: {
-    emojiName: string;
-    senderId: string;
-  };
+  reactions?: { [key in ReactionId]?: string[] };
   lastReplyAt?: any;
 }

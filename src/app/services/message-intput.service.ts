@@ -23,7 +23,7 @@ export class MessageInputService {
       createdAt: now,
       editedAt: now,
       threadCount: 0,
-      reactions: { emojiName: '', senderId },
+      reactions: {}, 
     };
   }
 
@@ -54,8 +54,6 @@ export class MessageInputService {
       lastMessageAt: now,
     });
   }
-
-  // ---- Mention-Helfer ----
 
   private getTriggerQuery(value: string, trigger: string): string | null {
     const lastIndex = value.lastIndexOf(trigger);
@@ -123,7 +121,5 @@ async updateConversationMessage(
     }
   );
 }
-
-
 
 }
