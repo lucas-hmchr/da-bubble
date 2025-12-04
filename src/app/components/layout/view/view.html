@@ -13,13 +13,11 @@
   </header>
 
   <div id="chat-container" *ngIf="channel">
-    <!-- Scrollbarer Bereich für Nachrichten -->
     <div class="messages-scroll">
       <app-message [channel]="channel" [currentUserUid]="currentUserUid"
         (editRequested)="onEditRequested($event)"></app-message>
     </div>
 
-    <!-- Eingabefeld bleibt immer unten sichtbar -->
     <app-message-input [channel]="channel" [currentUserUid]="currentUserUid" [editingMessage]="editingMessage"
       (editFinished)="onEditFinished()"></app-message-input>
   </div>
