@@ -12,14 +12,12 @@
       </div>
 
       <div class="message-content" [ngClass]="{ fdrr: isOwnMessage(msg) }" (mouseleave)="onMessageMouseLeave(msg)">
-        <!-- Hover-Menü -->
         <div class="message-actions">
           <img src="/icons/global/check1.svg" alt="" class="action-btn check-btn"
             (click)="toggleReaction(msg, 'check')" />
           <img src="/icons/global/thumbsup1.svg" alt="" class="action-btn thumbsup-btn"
             (click)="toggleReaction(msg, 'thumbsup')" />
 
-          <!-- Reactions-Palette öffnen -->
           <img src="/icons/global/reaction1.svg" alt="" class="action-btn reaction-btn"
             (click)="onToggleReactionPicker(msg)" />
 
@@ -29,7 +27,6 @@
             (click)="onEditMessage(msg)" />
         </div>
 
-        <!-- Emoji-Reactions-Palette (unter dem Hover-Menü) -->
         <div class="reaction-picker" *ngIf="reactionPickerForMessageId === msg.id">
           <button class="reaction-emoji-btn" *ngFor="let r of emojiReactions" (click)="onEmojiReaction(msg, r.id)">
             {{ r.icon }}
@@ -48,12 +45,10 @@
             </span>
           </div>
 
-          <!-- Bubble -->
           <p class="text bubble" [ngClass]="isOwnMessage(msg) ? 'me-person' : 'other-person'">
             {{ msg.text }}
           </p>
 
-          <!-- Reactions-Übersicht unter der Message -->
           <div class="reactions-summary" *ngIf="msg.reactions && hasReactions(msg)">
             <button class="reaction-chip" *ngFor="let rid of getReactionIds(msg)" [ngClass]="{
     'mine': hasCurrentUserReaction(msg, rid),

@@ -255,7 +255,6 @@ export class MessageInput implements OnInit {
     this._editingMessage = value;
     this.isEditing = !!value;
 
-    // Text in Textarea setzen, wenn sie schon referenziert ist
     if (value && this.messageInput) {
       this.messageInput.nativeElement.value = value.text;
     }
