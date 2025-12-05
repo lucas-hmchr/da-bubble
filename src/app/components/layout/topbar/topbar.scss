@@ -118,13 +118,27 @@
         border-bottom-left-radius: 0;
         border-bottom-right-radius: 0;
         transform: translateY(100%);
-        padding: 20px 0;
+        padding: 20px 30px 30px 30px;
     }
 
     &.show {
         opacity: 1;
         visibility: visible;
         transform: translateY(0);
+    }
+
+    &::before {
+        @media (max-width: 375px) {
+            content: '';
+            position: absolute;
+            top: 12px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 62px;
+            height: 6px;
+            background: #D1D5DB;
+            border-radius: 23px;
+        }
     }
 
     .menu-name {
@@ -136,21 +150,51 @@
         cursor: pointer;
         font-size: 24px;
         transition: background-color 0.2s;
+        gap: 15px;
 
         @media (max-width: 375px) {
             width: 100%;
-            padding: 15px 0;
+            padding: 15px 20px;
+            justify-content: flex-start;
+            font-size: 20px;
+            border-radius: 0;
+            margin: 0;
+        }
+
+        .menu-icon {
+            width: 24px;
+            height: 24px;
+            display: none;
+
+            @media (max-width: 375px) {
+                display: block;
+                width: 30px;
+                height: 30px;
+            }
+        }
+
+        &.active {
+            @media (max-width: 375px) {
+                background-color: #EEF2FF;
+                color: #6366F1;
+
+                .menu-icon {
+                    filter: invert(44%) sepia(89%) saturate(2131%) hue-rotate(226deg) brightness(98%) contrast(93%);
+                }
+            }
         }
 
         &:first-child {
             border-radius: 8px 8px 0 0;
 
             @media (max-width: 375px) {
-                background-color: #ECEEFE;
-                color: #444DF2;
-                border-radius: 100px;
-                margin: 0 20px;
-                width: calc(100% - 40px);
+                background-color: transparent;
+                color: inherit;
+                border-radius: 0;
+
+                .menu-icon {
+                    filter: none;
+                }
             }
         }
 
@@ -159,12 +203,17 @@
 
             @media (max-width: 375px) {
                 margin-top: 10px;
+                border-radius: 0;
             }
 
-            @media (min-width: 1631px) {
+            @media (min-width: 376px) {
                 &:hover {
                     background-color: #ECEEFE;
                     color: #444DF2;
+
+                    .menu-icon {
+                        filter: invert(29%) sepia(78%) saturate(3527%) hue-rotate(235deg) brightness(94%) contrast(92%);
+                    }
                 }
             }
         }

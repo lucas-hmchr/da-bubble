@@ -15,9 +15,16 @@
             </div>
             <img src="icons/global/keyboard_arrow_down.svg" (click)="toggleDropdownMenu($event)" alt="arrow-drop-down">
 
-            <div class="dropdown-menu" [class.show]="isDropdownMenuOpen">
-                <div class="menu-name" (click)="openProfilModal()">Profil</div>
-                <div class="menu-name">Log out</div>
+            <div class="dropdown-menu" [class.show]="isDropdownMenuOpen" (click)="$event.stopPropagation()">
+                <div class="menu-name" [class.active]="activeProfilName === 'profil'" (click)="openProfilModal()">
+                    <img src="icons/global/account_circle.svg" alt="profil-icon" class="menu-icon">
+                    <span>Profil</span>
+                </div>
+
+                <div class="menu-name">
+                    <img src="icons/global/logout.svg" alt="logout-icon" class="menu-icon">
+                    <span>Log out</span>
+                </div>
             </div>
 
             <div class="profil-modal" [class.show]="isProfilModalOpen" (click)="$event.stopPropagation()">
@@ -86,6 +93,6 @@
     </div>
 </section>
 
-<div class="profil-modal-overlay" [class.show]="isProfilModalOpen" (click)="closeProfilModal()"></div>
+<div class="profil-modal-overlay" [class.show]="isProfilModalOpen" (click)="closeProfilModalOnly()"></div>
 
-<div class="profil-modal-overlay" [class.show]="isProfilEditModalOpen" (click)="closeProfilEditModal()"></div>
+<div class="profil-modal-overlay" [class.show]="isProfilEditModalOpen" (click)="closeProfilEditModalOnly()"></div>
