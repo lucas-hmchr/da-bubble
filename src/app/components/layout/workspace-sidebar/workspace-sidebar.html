@@ -1,5 +1,5 @@
 <div class="left-menu-container" [class.closed]="isClosed()">
-    <mat-drawer-container  class="mat-drawer-container" autosize>
+    <mat-drawer-container class="mat-drawer-container" autosize>
         <mat-drawer #drawer class="left-menu-sidenav" mode="side" opened="true">
             <div class="channels-button-container">
                 <div class="workspace-logo-text-container">
@@ -58,10 +58,13 @@
                             </div>
                         </mat-expansion-panel-header>
                         <div class="account-submenu-container">
+
+                            @for (user of users(); track user.uid) {
                             <div class="account-avatar-name">
                                 <img src="/images/avatars/avatar_male_3.svg" class="avatar mr-8" alt="">
-                                <span>Frederick Beck</span>
+                                <span>{{ user.displayName }}</span>
                             </div>
+                            }
                         </div>
                     </mat-expansion-panel>
                 </mat-accordion>

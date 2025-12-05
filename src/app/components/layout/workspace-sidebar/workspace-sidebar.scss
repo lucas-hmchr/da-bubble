@@ -219,6 +219,7 @@ mat-expansion-panel {
 .account-avatar-name {
     display: flex;
     align-items: center;
+    margin-bottom: 16px;
 
     img {
         border-radius: 50%;
@@ -251,12 +252,14 @@ mat-expansion-panel {
     border-radius: 25px;
     height: 58px;
     display: flex;
-    align-items: center;
+    align-items: start;
     padding-left: 16px;
+    flex-direction: column;
+    height: auto;
 
     &:hover {
         background-color: #ECEEFE;
     }
 
-    
+
 }
