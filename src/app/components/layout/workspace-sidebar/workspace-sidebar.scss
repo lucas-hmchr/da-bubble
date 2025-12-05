@@ -24,8 +24,12 @@
 .mat-drawer-container {
     height: 100%;
     background-color: #ECEEFE;
+    margin-left: 16px;
 }
 
+.mat-drawer-container.closed {
+    margin-left: 0 !important;
+}
 
 .left-menu-button-icon-container {
     position: absolute;
@@ -57,9 +61,10 @@
     padding: 30px;
     border-radius: 30px;
     // margin-top: 16px;
-    margin-left: 20px;
+    // margin-left: 20px;
     // margin-bottom: 20px;
-    width: 326px;
+    width: 360px;
+    background-color: white;
 }
 
 .show-menu-icon {
@@ -116,6 +121,10 @@
 
 ::ng-deep .mat-expansion-panel-header.mat-focus-indicator {
     padding: 0;
+}
+
+mat-expansion-panel {
+    background-color: white;
 }
 
 .header-left {
@@ -197,8 +206,8 @@
         }
     }
 
-    &:active{
-                color: #000000;
+    &:active {
+        color: #000000;
 
         img {
             content: url(/icons/global/add_circle_hover.svg);
@@ -210,6 +219,7 @@
 .account-avatar-name {
     display: flex;
     align-items: center;
+    margin-bottom: 16px;
 
     img {
         border-radius: 50%;
@@ -236,4 +246,20 @@
             content: url(/icons/global/add_click.svg);
         }
     }
+}
+
+.account-submenu-container {
+    border-radius: 25px;
+    height: 58px;
+    display: flex;
+    align-items: start;
+    padding-left: 16px;
+    flex-direction: column;
+    height: auto;
+
+    &:hover {
+        background-color: #ECEEFE;
+    }
+
+
 }
