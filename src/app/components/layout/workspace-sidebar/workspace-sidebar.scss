@@ -110,6 +110,14 @@
     box-shadow: none;
 }
 
+.channel-item:hover {
+    background-color: #ECEEFE;
+    padding: 8px;
+    border-radius: 30px;
+    color: #535AF1;
+    font-weight: 700;
+}
+
 ::ng-deep .channel-panel .mat-content.mat-content-hide-toggle {
     display: flex;
     justify-content: space-between;
@@ -219,7 +227,7 @@ mat-expansion-panel {
 .account-avatar-name {
     display: flex;
     align-items: center;
-    margin-bottom: 16px;
+    // margin-bottom: 16px;
 
     img {
         border-radius: 50%;
@@ -249,11 +257,12 @@ mat-expansion-panel {
 }
 
 .account-submenu-container {
-    border-radius: 25px;
+    position: relative;
+    border-radius: 50px;
     height: 58px;
     display: flex;
     align-items: start;
-    padding-left: 16px;
+    padding: 4px 16px;
     flex-direction: column;
     height: auto;
 
@@ -261,5 +270,11 @@ mat-expansion-panel {
         background-color: #ECEEFE;
     }
 
-
+    .online-status-container {
+        position: absolute;
+        bottom: 4px;
+        left: 50px;
+        height: 14px;
+        width: 14px;
+    }
 }
