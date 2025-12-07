@@ -8,6 +8,7 @@ import { AddChannelDialog } from '../../add-channel-dialog/add-channel-dialog';
 import { Channel } from '../../../models/channel.interface';
 import { User } from '../../../models/user.model';
 import { FirestoreService } from '../../../services/firestore';
+import { getAvatarById } from '../../../../shared/data/avatars';
 
 @Component({
   selector: 'app-workspace-sidebar',
@@ -46,5 +47,17 @@ export class WorkspaceSidebar {
     });
   }
 
+  getAvatarPath(user: User) {
+    return getAvatarById(user.avatarId).src;
+  }
 
+
+  getOnlineStatus(user: User) {
+    if (user.isOnline) {
+      return `/icons/global/Online.svg`;
+    } else {
+      return `/icons/global/Offline.svg`;
+
+    }
+  }
 }
