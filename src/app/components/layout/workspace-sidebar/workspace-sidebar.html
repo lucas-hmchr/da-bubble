@@ -27,7 +27,7 @@
 
                         <div class="channel-list">
                             @for (channel of channels(); track channel.id) {
-                            <div class="channel-item d-flex cp">
+                            <div class="channel-item d-flex cp" (click)="channelSelected.emit(channel)">
                                 <img src="/icons/global/tag.svg" class="mr-8" alt="">
                                 {{ channel.name }}
                             </div>

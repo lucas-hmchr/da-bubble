@@ -1,4 +1,4 @@
-import { Component, inject, signal, Input } from '@angular/core';
+import { Component, EventEmitter, inject, Input, Output, signal } from '@angular/core';
 import { MatSidenavModule } from '@angular/material/sidenav';
 import { MatButtonModule } from '@angular/material/button';
 import { MatExpansionModule } from '@angular/material/expansion';
@@ -21,6 +21,7 @@ import { UserService } from '../../../services/user.service';
 export class WorkspaceSidebar {
   @Input() users: User[] = [];
   @Input() currentUserUid: string | null = null;
+  @Output() channelSelected = new EventEmitter<Channel>();
 
   public userService = inject(UserService)
   channels = signal<Channel[]>([]);
@@ -31,6 +32,7 @@ export class WorkspaceSidebar {
 
   constructor(private dialog: MatDialog, private firestore: FirestoreService) {
 
+    console.log(this.channelSelected);
 
     //CHANNELS LADEN
     this.firestore.getCollection<Channel>('channels').subscribe(chs => {

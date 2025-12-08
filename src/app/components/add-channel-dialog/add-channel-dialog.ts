@@ -26,7 +26,7 @@ export class AddChannelDialog {
   }
 
   creatChannel() {
-    if (!this.channelName.trim()) return; // Pflichtfeld prüfen
+    if (!this.channelName.trim()) return;
 
     const newChannel: Channel = {
       name: this.channelName.trim(),
