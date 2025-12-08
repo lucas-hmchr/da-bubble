@@ -17,7 +17,7 @@
 
             <div class="dropdown-menu" [class.show]="isDropdownMenuOpen">
                 <div class="menu-name" (click)="openProfilModal()">Profil</div>
-                <div class="menu-name">Log out</div>
+                <div class="menu-name" (click)="onLogout($event)">Log out</div>
             </div>
 
             <div class="profil-modal" [class.show]="isProfilModalOpen" (click)="$event.stopPropagation()">

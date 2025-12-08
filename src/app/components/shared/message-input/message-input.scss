@@ -59,19 +59,15 @@
         border-radius: 50%; // Rundheit aufs Bild legen
         object-fit: cover;
     }
-}
 
-.status-dot {
-    position: absolute;
-    right: -1px; // leicht nach außen
-    bottom: -1px;
-    width: 10px;
-    height: 10px;
-    border-radius: 50%;
-    background: #22c55e;
-    border: 2px solid #ffffff;
+    .status-dot {
+        position: absolute;
+        right: -1px; // leicht nach außen
+        bottom: -1px;
+        width: 10px;
+        height: 10px;
+    }
 }
-
 
 .mention-hash {
     font-weight: 600;

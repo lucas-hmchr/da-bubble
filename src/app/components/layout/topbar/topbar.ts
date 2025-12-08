@@ -1,4 +1,5 @@
 import { Component } from '@angular/core';
+import { AuthService } from '../../../auth/auth.service'; // Pfad ggf. anpassen
 
 @Component({
   selector: 'app-topbar',
@@ -10,6 +11,8 @@ export class Topbar {
   isDropdownMenuOpen = false;
   isProfilModalOpen = false;
   isProfilEditModalOpen = false;
+
+  constructor(private auth: AuthService) {}   // 👈 AuthService injizieren
 
   toggleDropdownMenu(event: Event) {
     event.stopPropagation();
@@ -29,13 +32,19 @@ export class Topbar {
 
   openProfilEditModal() {
     this.isProfilEditModalOpen = true;
-    this.isProfilModalOpen = false; // ← Schließt das Profil-Modal
+    this.isProfilModalOpen = false;
     document.body.style.overflow = 'hidden';
   }
 
   closeProfilEditModal() {
     this.isProfilEditModalOpen = false;
     document.body.style.overflow = '';
+  }
+
+  async onLogout(event: Event) {
+    event.stopPropagation();          // verhindert, dass der globale Click-Handler triggert
+    this.isDropdownMenuOpen = false;  // Menü schließen
+    await this.auth.logout();         // 👈 verwendet deine AuthService-Logout-Logik
   }
 
   ngOnInit() {

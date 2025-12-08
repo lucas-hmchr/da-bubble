@@ -1,4 +1,4 @@
-import { Component, Input, signal } from '@angular/core';
+import { Component, inject, signal, Input } from '@angular/core';
 import { MatSidenavModule } from '@angular/material/sidenav';
 import { MatButtonModule } from '@angular/material/button';
 import { MatExpansionModule } from '@angular/material/expansion';
@@ -9,6 +9,7 @@ import { Channel } from '../../../models/channel.interface';
 import { User } from '../../../models/user.model';
 import { FirestoreService } from '../../../services/firestore';
 import { getAvatarById } from '../../../../shared/data/avatars';
+import { UserService } from '../../../services/user.service';
 
 @Component({
   selector: 'app-workspace-sidebar',
@@ -21,6 +22,7 @@ export class WorkspaceSidebar {
   @Input() users: User[] = [];
   @Input() currentUserUid: string | null = null;
 
+  public userService = inject(UserService)
   channels = signal<Channel[]>([]);
 
   readonly channelOpen = signal(false);
@@ -48,15 +50,5 @@ export class WorkspaceSidebar {
 
   getAvatarPath(user: User) {
     return getAvatarById(user.avatarId).src;
-  }
-
-
-  getOnlineStatus(user: User) {
-    if (user.isOnline) {
-      return `/icons/global/Online.svg`;
-    } else {
-      return `/icons/global/Offline.svg`;
-
-    }
   }
 }

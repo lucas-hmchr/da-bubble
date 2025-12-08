@@ -1,10 +1,11 @@
-import { Component, Input, ElementRef, ViewChild, OnInit, Output, EventEmitter } from '@angular/core';
+import { Component, Input, ElementRef, ViewChild, OnInit, Output, EventEmitter, inject } from '@angular/core';
 
 import { CommonModule } from '@angular/common';
 import { Channel } from '../../../models/channel.interface';
 import { User } from '../../../models/user.model';
 import { AvatarId, getAvatarById } from '../../../../shared/data/avatars';
 import { MessageInputService } from '../../../services/message-intput.service';
+import { UserService } from '../../../services/user.service';
 
 @Component({
   selector: 'app-message-input',
@@ -24,6 +25,8 @@ export class MessageInput implements OnInit {
 
   @ViewChild('messageInput') messageInput!: ElementRef<HTMLTextAreaElement>;
   @ViewChild('container') container!: ElementRef<HTMLDivElement>;
+
+  public userService = inject(UserService)
 
   users: User[] = [];
   filteredUsers: User[] = [];
