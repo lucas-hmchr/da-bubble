@@ -28,7 +28,6 @@ export class View implements OnInit {
 
   constructor(private firestoreService: FirestoreService) {
 
-    // reagiert immer, wenn in der Sidebar ein anderer Channel gewählt wird
     effect(() => {
       const id = this.channelSelection.activeChannelId();
       if (id) {
@@ -38,11 +37,8 @@ export class View implements OnInit {
   }
 
   ngOnInit(): void {
-    // Optional: default Channel setzen, falls noch keiner ausgewählt
-    // z.B. ersten Channel automatisch wählen – kann man später ergänzen
   }
 
-  /** Channel-Dokument per ID laden (inkl. Live-Updates) */
   private loadChannelById(channelId: string) {
     this.firestoreService
       .getDocument<Channel>(`channels/${channelId}`)
@@ -51,13 +47,11 @@ export class View implements OnInit {
           console.log('Channel nicht gefunden:', channelId);
           return;
         }
-        // id vom Pfad behalten
         this.channel = { ...ch, id: channelId };
         this.loadChannelMembers(this.channel);
       });
   }
 
-  /** User laden, deren UID im Channel.members steht */
   private loadChannelMembers(channel: Channel) {
     const memberIds = new Set<string>(channel.members ?? []);
 
