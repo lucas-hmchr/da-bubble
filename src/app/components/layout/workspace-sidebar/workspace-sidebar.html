@@ -25,18 +25,13 @@
                             </div>
                         </mat-expansion-panel-header>
 
-                        <div class="channel-list ml-16">
+                        <div class="channel-list">
                             @for (channel of channels(); track channel.id) {
-                            <div class="channel-item d-flex mb-16">
+                            <div class="channel-item d-flex cp">
                                 <img src="/icons/global/tag.svg" class="mr-8" alt="">
                                 {{ channel.name }}
                             </div>
                             }
-
-                            <!-- <div class="channel-item d-flex mb-16">
-                                <img src="/icons/global/tag.svg" class="mr-8" alt="">
-                                Office-team
-                            </div> -->
 
                             <div class="channel-add cp" (click)="openAddChannelDialog()">
                                 <img src="/icons/global/add_circle.svg" class="mr-8" alt="">
@@ -60,12 +55,15 @@
                             </div>
                         </mat-expansion-panel-header>
 
-                        @for (user of users(); track user.uid) {
+                        @for (user of users; track user.uid) {
                         <div class="account-submenu-container cp" id="user.id">
 
                             <div class="account-avatar-name">
                                 <img [src]="getAvatarPath(user)" class="avatar mr-8" alt="">
                                 <span>{{ user.displayName }}</span>
+                                @if (user.uid === currentUserUid) {
+                                <ng-container>(Du)</ng-container>
+                                }
                             </div>
                             <div class="online-status-container">
                                 <img [src]="getOnlineStatus(user)" alt="">

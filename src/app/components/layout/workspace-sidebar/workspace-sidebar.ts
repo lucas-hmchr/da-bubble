@@ -1,4 +1,4 @@
-import { Component, signal } from '@angular/core';
+import { Component, Input, signal } from '@angular/core';
 import { MatSidenavModule } from '@angular/material/sidenav';
 import { MatButtonModule } from '@angular/material/button';
 import { MatExpansionModule } from '@angular/material/expansion';
@@ -18,8 +18,10 @@ import { getAvatarById } from '../../../../shared/data/avatars';
 })
 
 export class WorkspaceSidebar {
+  @Input() users: User[] = [];
+  @Input() currentUserUid: string | null = null;
+
   channels = signal<Channel[]>([]);
-  users = signal<User[]>([]);
 
   readonly channelOpen = signal(false);
   readonly dmOpen = signal(false);
@@ -27,14 +29,10 @@ export class WorkspaceSidebar {
 
   constructor(private dialog: MatDialog, private firestore: FirestoreService) {
 
+
     //CHANNELS LADEN
     this.firestore.getCollection<Channel>('channels').subscribe(chs => {
       this.channels.set(chs);
-    });
-
-    //USERS LADEN
-    this.firestore.getCollection<User>('users').subscribe(us => {
-      this.users.set(us);
     });
 
   }
@@ -44,6 +42,7 @@ export class WorkspaceSidebar {
       width: '872px',
       maxWidth: 'none',
       height: '539px',
+      data: { uid: this.currentUserUid }
     });
   }
 

@@ -110,12 +110,23 @@
     box-shadow: none;
 }
 
-.channel-item:hover {
-    background-color: #ECEEFE;
-    padding: 8px;
-    border-radius: 30px;
-    color: #535AF1;
-    font-weight: 700;
+.channel-item {
+    background-color: #FFFFFF;
+    padding: 8px 16px;
+    margin-bottom: 8px;
+
+    &:hover {
+        background-color: #ECEEFE;
+        color: #535AF1;
+        border-radius: 30px;
+        font-weight: 700;
+
+        img {
+            content: url(/icons/global/tag_hover.svg);
+
+        }
+    }
+
 }
 
 ::ng-deep .channel-panel .mat-content.mat-content-hide-toggle {
