@@ -1,5 +1,5 @@
 export interface Channel {
-  id?: any;
+  id?: string;
   name: string;
   members: string[];
   createdAt?: any;

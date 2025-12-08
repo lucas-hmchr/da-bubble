@@ -66,12 +66,16 @@ export class Message implements OnChanges {
   }
 
   loadMessages() {
-    if (!this.channel) return;
+    // if (!this.channel) return;
 
+    if (!this.channel?.id) {
+      console.warn("Channel hat noch keine ID → Nachrichten können nicht geladen werden.");
+      return;
+    }
     this.messages$ = this.firestoreService
       .getSubcollection<MessageData>(
         'channels',
-        this.channel.id,
+        this.channel.id!,
         'messages',
         'createdAt'
       )
