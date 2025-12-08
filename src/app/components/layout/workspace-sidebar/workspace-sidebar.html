@@ -68,7 +68,7 @@
                                 <span>{{ user.displayName }}</span>
                             </div>
                             <div class="online-status-container">
-                                <img [src]="getOnlineStatus(user)" alt="">
+                                <img [src]="userService.getOnlineStatusIcon(user)" alt="">
                             </div>
                         </div>
                         }
