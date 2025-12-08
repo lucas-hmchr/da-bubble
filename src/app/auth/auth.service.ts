@@ -63,6 +63,7 @@ export class AuthService {
             avatarId: avatarId ?? (isGuest ? 'avatar_default' : null),
             isGuest: !!isGuest,
             isOnline: true,
+            lastActiveAt: serverTimestamp(),
             createdAt: serverTimestamp(),
         });
     }
@@ -137,6 +138,17 @@ export class AuthService {
                 displayName: newName.trim(),
             });
             this.toast.show('Dein Name ist erfolgreich geändert worden!');
+        } catch (err) {
+            console.log(err);
+        }
+    }
+
+    public async pingUser() {
+        if (!this.activeUser()) return;
+        try {
+            await updateDoc(this.getUserRef(), {
+                lastActiveAt: serverTimestamp(),
+            });
         } catch (err) {
             console.log(err);
         }

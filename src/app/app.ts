@@ -15,6 +15,9 @@ export class App {
 
   constructor(private authService: AuthService) {
     // this.authService.logout();
+    setInterval(() => {
+      this.authService.pingUser();
+    }, 60_000)
   }
 
 }
