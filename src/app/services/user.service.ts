@@ -29,6 +29,14 @@ export class UserService {
     public isOnline(user: User) {
         return this.isUserOnline(user);
     }
+
+    public getOnlineStatusIcon(user: User) {
+        if (this.isOnline(user)) {
+            return `/icons/global/Online.svg`;
+        } else {
+            return `/icons/global/Offline.svg`;
+        }
+    }
 }
 
 
