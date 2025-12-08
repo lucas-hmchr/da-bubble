@@ -27,7 +27,7 @@
 
                         <div class="channel-list ml-16">
                             @for (channel of channels(); track channel.id) {
-                            <div class="channel-item d-flex mb-16">
+                            <div class="channel-item d-flex mb-16" (click)="selectChannel(channel)">
                                 <img src="/icons/global/tag.svg" class="mr-8" alt="">
                                 {{ channel.name }}
                             </div>

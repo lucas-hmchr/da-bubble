@@ -10,6 +10,7 @@ import { User } from '../../../models/user.model';
 import { FirestoreService } from '../../../services/firestore';
 import { getAvatarById } from '../../../../shared/data/avatars';
 import { UserService } from '../../../services/user.service';
+import { ChannelSelectionService } from '../../../services/channel-selection.service';
 
 @Component({
   selector: 'app-workspace-sidebar',
@@ -27,7 +28,11 @@ export class WorkspaceSidebar {
   readonly dmOpen = signal(false);
   isClosed = signal(false);
 
-  constructor(private dialog: MatDialog, private firestore: FirestoreService) {
+  constructor(
+    private dialog: MatDialog,
+    private firestore: FirestoreService,
+    private channelSelection: ChannelSelectionService   // 👈 neu
+  ) {
 
     //CHANNELS LADEN
     this.firestore.getCollection<Channel>('channels').subscribe(chs => {
@@ -51,5 +56,10 @@ export class WorkspaceSidebar {
 
   getAvatarPath(user: User) {
     return getAvatarById(user.avatarId).src;
+  }
+
+  selectChannel(channel: Channel) {
+    if (!channel.id) return;
+    this.channelSelection.setActiveChannelId(channel.id as string);
   }
 }

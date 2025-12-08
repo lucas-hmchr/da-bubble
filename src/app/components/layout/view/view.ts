@@ -1,4 +1,4 @@
-import { Component, OnInit, Input } from '@angular/core';
+import { Component, OnInit, Input, effect, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FirestoreService } from '../../../services/firestore';
 import { MessageInput } from '../../shared/message-input/message-input';
@@ -7,6 +7,7 @@ import { Channel } from '../../../models/channel.interface';
 import { MessageData } from '../../../models/message.interface';
 import { User } from '../../../models/user.model';
 import { getAvatarById } from '../../../../shared/data/avatars';
+import { ChannelSelectionService } from '../../../services/channel-selection.service';
 
 @Component({
   selector: 'app-view',
@@ -16,49 +17,47 @@ import { getAvatarById } from '../../../../shared/data/avatars';
   styleUrls: ['./view.scss'],
 })
 export class View implements OnInit {
+
   channel?: Channel;
   channelMembers: User[] = [];
 
   @Input() currentUserUid: string | null = null;
   editingMessage?: { id: string; text: string };
 
-  constructor(private firestoreService: FirestoreService) {}
+  private channelSelection = inject(ChannelSelectionService);
 
-  ngOnInit(): void {
-    this.loadChannelByName('Devteam');
+  constructor(private firestoreService: FirestoreService) {
+
+    // reagiert immer, wenn in der Sidebar ein anderer Channel gewählt wird
+    effect(() => {
+      const id = this.channelSelection.activeChannelId();
+      if (id) {
+        this.loadChannelById(id);
+      }
+    });
   }
 
-  loadChannelByName(channelName: string) {
-  this.firestoreService
-    .getCollectionWhere<Channel>('channels', 'name', channelName)
-    .subscribe({
-      next: (channels) => {
-        if (!channels.length) {
-          console.log(`Kein Channel mit dem Namen "${channelName}" gefunden.`);
+  ngOnInit(): void {
+    // Optional: default Channel setzen, falls noch keiner ausgewählt
+    // z.B. ersten Channel automatisch wählen – kann man später ergänzen
+  }
+
+  /** Channel-Dokument per ID laden (inkl. Live-Updates) */
+  private loadChannelById(channelId: string) {
+    this.firestoreService
+      .getDocument<Channel>(`channels/${channelId}`)
+      .subscribe((ch) => {
+        if (!ch) {
+          console.log('Channel nicht gefunden:', channelId);
           return;
         }
+        // id vom Pfad behalten
+        this.channel = { ...ch, id: channelId };
+        this.loadChannelMembers(this.channel);
+      });
+  }
 
-        const baseChannel = channels[0]; // enthält id
-        this.channel = baseChannel;
-
-        // Channel-Dokument live beobachten
-        this.firestoreService
-          .getDocument<Channel>(`channels/${baseChannel.id}`)
-          .subscribe((ch) => {
-            if (!ch) return;
-
-            // ✅ id vom ersten Resultat erhalten
-            this.channel = { ...ch, id: baseChannel.id };
-
-            this.loadChannelMembers(this.channel);
-          });
-      },
-      error: (err) => console.error('Fehler beim Laden:', err),
-    });
-}
-
-
-  /** Lädt alle Users, deren UID im Channel.members steht */
+  /** User laden, deren UID im Channel.members steht */
   private loadChannelMembers(channel: Channel) {
     const memberIds = new Set<string>(channel.members ?? []);
 
@@ -69,7 +68,7 @@ export class View implements OnInit {
     });
   }
 
-  getAvatarSrc(user: User): string {
+  getAvatarSrc(user: User) {
     if (user.avatarId) {
       return getAvatarById(user.avatarId).src;
     }
