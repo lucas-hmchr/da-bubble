@@ -1,16 +1,29 @@
 <section>
 
-  <header>
-    <div>
-      <h2># DevTeam </h2>
-      <img src="/icons/global/keyboard_arrow_down.svg" alt="">
+<header>
+  <div>
+    <h2># {{ channel?.name || 'DevTeam' }}</h2>
+    <img src="/icons/global/keyboard_arrow_down.svg" alt="">
+  </div>
+
+  <div class="channel-members">
+    <div class="member-avatars">
+      <!-- max. 3 Avatare anzeigen -->
+      <ng-container *ngFor="let u of channelMembers | slice:0:3">
+        <img
+          class="member-avatar"
+          [src]="getAvatarSrc(u)"
+          [alt]="u.displayName || u.name || 'User'"
+        />
+      </ng-container>
     </div>
-    <div>
-      <img src="/images/avatars/avatar_default.svg" alt="">
-      <span>1</span>
-      <img class="add-person" src="/icons/global/person_add1.svg" alt="">
-    </div>
-  </header>
+
+    <span>{{ channelMembers.length }}</span>
+
+    <img class="add-person" src="/icons/global/person_add1.svg" alt="">
+  </div>
+</header>
+
 
   <div id="chat-container" *ngIf="channel">
     <div class="messages-scroll">

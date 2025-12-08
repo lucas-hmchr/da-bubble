@@ -1,15 +1,37 @@
 #message-container {
-    position: relative;
-    border: 1px solid var(--clr-purple-light);
-    border-radius: 20px;
-    padding: 10px 10px;
-    width: calc(100% - 2 * 35px);
-    height: 200px;
-    background-color: transparent;
-    margin: 0px 35px;
-    margin-bottom: 30px;
-    position: relative; // wichtig für absolute Position
+  border: 1px solid var(--clr-purple-light);
+  border-radius: 20px;
+  padding: 10px 10px;
+  width: calc(100% - 2 * 35px);
+  height: 200px;
+  background-color: transparent;
+  margin: 0 35px 30px;
+  position: relative;
 }
+
+/* Zustand für Nicht-Mitglieder */
+.message-container.readonly {
+  background-color: #f5f5f5;          // grauer Hintergrund für den ganzen Block
+  border-color: #e0e0e0;
+}
+
+.message-container.readonly textarea {
+  background-color: transparent;      // gleiche Farbe wie Container
+  cursor: not-allowed;
+}
+
+.message-container.readonly .form-input-icon,
+.message-container.readonly .icon-send {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+/* optional: auch Send-Icon generell disabled style */
+.icon-send.disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
 
 
 
@@ -99,6 +121,11 @@ textarea {
     }
 }
 
+textarea:disabled {
+  background-color: #f5f5f5;
+  cursor: not-allowed;
+}
+
 #message-actions {
     height: 50px;
     width: 100%;
@@ -149,4 +176,9 @@ textarea {
     &:hover {
         content: url('/icons/global/send2.svg');
     }
+}
+
+.icon-send.disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
 }

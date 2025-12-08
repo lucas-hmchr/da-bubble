@@ -26,6 +26,7 @@ header {
     padding-right: 16px;
     box-shadow: 0 5px 5px -2px rgba(100, 100, 100, 0.1);
     flex-shrink: 0;
+    align-items: center;
 
     >div:nth-child(1) {
         font-size: 24px;
@@ -49,6 +50,38 @@ header {
         }
     }
 
+      .channel-members {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+
+    .member-avatars {
+      display: flex;
+
+      .member-avatar {
+        width: 32px;
+        height: 32px;
+        border-radius: 50%;
+        border: 2px solid #fff;
+        object-fit: cover;
+        /* leicht überlappen */
+        margin-left: -8px;
+
+        &:first-child {
+          margin-left: 0;
+        }
+      }
+    }
+
+    span {
+      font-size: 16px;
+    }
+
+    .add-person {
+      cursor: pointer;
+    }
+  }
+  
 }
 
 .add-person {
