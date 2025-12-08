@@ -113,6 +113,20 @@ export class AuthService {
     }
 
     async logout(): Promise<void> {
+        const user = this.activeUser();
+
+        if (user) {
+            const ref = this.getUserRef(user.uid);
+            await setDoc(
+                ref,
+                {
+                    isOnline: false,
+                    lastActiveAt: serverTimestamp(),
+                },
+                { merge: true }
+            );
+        }
+
         await signOut(this.auth);
         this.router.navigate(['/auth']);
     }
