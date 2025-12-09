@@ -1,6 +1,15 @@
 <app-topbar></app-topbar>
+
 <section>
-    <app-workspace-sidebar [users]="users" [currentUserUid]="currentUserUid" (channelSelected)="activeChannel.set($event)"></app-workspace-sidebar>
-    <app-view [currentUserUid]="currentUserUid"></app-view>
-    <app-thread-menu></app-thread-menu>
+  <!-- Sidebar bekommt nur noch die aktuelle UID -->
+  <app-workspace-sidebar
+    [currentUserUid]="currentUserUid"
+  ></app-workspace-sidebar>
+
+  <!-- View braucht ebenfalls die UID -->
+  <app-view
+    [currentUserUid]="currentUserUid"
+  ></app-view>
+
+  <app-thread-menu></app-thread-menu>
 </section>
