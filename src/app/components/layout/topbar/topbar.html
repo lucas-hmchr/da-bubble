@@ -7,10 +7,10 @@
             <input type="text" id="name" name="name" placeholder="Devspace durchsuchen" class="search-inputs">
             <img src="/icons/global/search.svg" alt="search" class="search-icon-right">
         </div>
-        <div class="profil">
+        <div class="profil" (click)="toggleDropdownMenu($event)">
             <h1>Frederik Beck</h1>
             <div class="profil-image">
-                <img src="icons/global/Avatar.svg" alt="avatar-profil">
+                <img src="icons/global/avatar.svg" alt="avatar-profil">
                 <img src="icons/global/Online.svg" alt="avatar-online-icon" class="online-icon">
             </div>
             <img src="icons/global/keyboard_arrow_down.svg" (click)="toggleDropdownMenu($event)" alt="arrow-drop-down">
@@ -30,7 +30,7 @@
 
                 <div class="modal-content">
                     <div class="avatar-large">
-                        <img src="icons/global/Avatar.svg" alt="avatar-profil">
+                        <img src="icons/global/avatar.svg" alt="avatar-profil">
                     </div>
 
                     <div class="profil-info">
@@ -65,7 +65,7 @@
 
                 <div class="modal-content">
                     <div class="avatar-large">
-                        <img src="icons/global/Avatar.svg" alt="avatar-profil">
+                        <img src="icons/global/avatar.svg" alt="avatar-profil">
                     </div>
 
                     <div class="form-section">
@@ -86,6 +86,6 @@
     </div>
 </section>
 
-<div class="profil-modal-overlay" [class.show]="isProfilModalOpen" (click)="closeProfilModal()"></div>
+<div class="profil-modal-overlay" [class.show]="isProfilModalOpen" (click)="closeProfilModalOnly()"></div>
 
-<div class="profil-modal-overlay" [class.show]="isProfilEditModalOpen" (click)="closeProfilEditModal()"></div>
+<div class="profil-modal-overlay" [class.show]="isProfilEditModalOpen" (click)="closeProfilEditModalOnly()"></div>
