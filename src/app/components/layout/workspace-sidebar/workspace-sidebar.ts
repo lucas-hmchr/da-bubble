@@ -67,4 +67,8 @@ export class WorkspaceSidebar {
     if (!channel.id) return;
     this.channelSelection.setActiveChannelId(channel.id as string);
   }
+
+  openNewMessage() {
+    this.channelSelection.setMode('newMessage');
+  }
 }

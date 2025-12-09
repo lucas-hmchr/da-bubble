@@ -1,39 +1,112 @@
 <section>
 
-<header>
-  <div>
-    <!-- <h2># {{ channel?.name || 'DevTeam' }}</h2> -->
-    <h2># {{ channel?.name }}</h2>
-    <img src="/icons/global/keyboard_arrow_down.svg" alt="">
-  </div>
+  <!-- ========================================= -->
+  <!--   CHANNEL-ANSICHT                        -->
+  <!-- ========================================= -->
+  <ng-container *ngIf="!isNewMessageView && channel; else newMessageView">
 
-  <div class="channel-members">
-    <div class="member-avatars">
-      <!-- max. 3 Avatare anzeigen -->
-      <ng-container *ngFor="let u of channelMembers | slice:0:3">
-        <img
-          class="member-avatar"
-          [src]="getAvatarSrc(u)"
-          [alt]="u.displayName || u.name || 'User'"
+    <header>
+      <div>
+        <h2># {{ channel?.name }}</h2>
+        <img src="/icons/global/keyboard_arrow_down.svg" alt="">
+      </div>
+
+      <div class="channel-members">
+        <div class="member-avatars">
+          <!-- max. 3 Avatare anzeigen -->
+          <ng-container *ngFor="let u of channelMembers | slice: 0:3">
+            <img
+              class="member-avatar"
+              [src]="getAvatarSrc(u)"
+              [alt]="u.displayName || u.name || 'User'"
+            />
+          </ng-container>
+        </div>
+
+        <span>{{ channelMembers.length }}</span>
+
+        <img class="add-person" src="/icons/global/person_add1.svg" alt="">
+      </div>
+    </header>
+
+    <div id="chat-container">
+      <div class="messages-scroll">
+        <app-message
+          [channel]="channel"
+          [currentUserUid]="currentUserUid"
+          (editRequested)="onEditRequested($event)"
+        ></app-message>
+      </div>
+
+      <app-message-input
+        [channel]="channel"
+        [currentUserUid]="currentUserUid"
+        [editingMessage]="editingMessage"
+        (editFinished)="onEditFinished()"
+      ></app-message-input>
+    </div>
+
+  </ng-container>
+
+  <!-- ========================================= -->
+  <!--   NEUE-NACHRICHT-ANSICHT                 -->
+  <!-- ========================================= -->
+  <ng-template #newMessageView>
+    <section class="new-message-view">
+
+      <header class="new-message-header">
+        <h2>Neue Nachricht</h2>
+      </header>
+
+      <!-- „An: …“ mit Autocomplete -->
+      <div class="recipient-input-wrapper">
+        <input
+          type="text"
+          class="recipient-input"
+          placeholder="An: #channel oder @jemand oder E-Mail Adresse"
+          [value]="recipientInputValue"
+          (input)="onRecipientInput($event)"
         />
-      </ng-container>
-    </div>
 
-    <span>{{ channelMembers.length }}</span>
+        <div
+          class="recipient-suggestions"
+          *ngIf="showRecipientSuggestions"
+        >
+          <div
+            class="recipient-suggestion"
+            *ngFor="let s of recipientSuggestions"
+            (click)="onSelectRecipient(s)"
+          >
+            <span class="suggestion-prefix">
+              {{ s.type === 'channel' ? '#' : (s.type === 'user' ? '@' : '') }}
+            </span>
 
-    <img class="add-person" src="/icons/global/person_add1.svg" alt="">
-  </div>
-</header>
+            <div class="suggestion-texts">
+              <span class="suggestion-label">
+                {{ s.label }}
+              </span>
+              <span
+                class="suggestion-detail"
+                *ngIf="s.detail"
+              >
+                {{ s.detail }}
+              </span>
+            </div>
+          </div>
+        </div>
+      </div>
 
+      <!-- großer freier Bereich (wie im Design) -->
+      <div class="new-message-body"></div>
 
-  <div id="chat-container" *ngIf="channel">
-    <div class="messages-scroll">
-      <app-message [channel]="channel" [currentUserUid]="currentUserUid"
-        (editRequested)="onEditRequested($event)"></app-message>
-    </div>
-
-    <app-message-input [channel]="channel" [currentUserUid]="currentUserUid" [editingMessage]="editingMessage"
-      (editFinished)="onEditFinished()"></app-message-input>
-  </div>
+      <!-- Eingabe unten: nutzt deine vorhandene MessageInput-Component -->
+<app-message-input
+  [currentUserUid]="currentUserUid"
+  [contextType]="selectedRecipient?.type === 'channel' ? 'channel' : 'conversation'"
+  [channel]="selectedRecipient?.type === 'channel' ? channel : undefined"
+  [conversationId]="selectedRecipient?.type === 'user' ? selectedRecipient?.id : undefined"
+></app-message-input>
+    </section>
+  </ng-template>
 
 </section>
