@@ -1,4 +1,4 @@
-<div id="message-container" class="message-container" #container>
+<div id="message-container" class="message-container" #container [class.readonly]="isReadOnly">
 
   <div class="mention-dropdown" *ngIf="showMentions && activeMentionType === 'user'" [ngStyle]="{
       left: mentionPosition.left + 'px',
@@ -7,7 +7,8 @@
     <div class="mention-item" *ngFor="let user of filteredUsers" (click)="onSelectUser(user)">
       <span class="mention-avatar">
         <img [src]="(getAvatarSrc(user.avatarId) || 'avatar_default')" [alt]="getListLabel(user)" />
-        <span *ngIf="user.isOnline" class="status-dot"></span>
+        <img [src]="userService.getOnlineStatusIcon(user)" class="status-dot">
+        <!-- <span *ngIf="userService.isOnline(user)" class="status-dot"></span> -->
       </span>
       <span class="mention-name">
         {{ getListLabel(user) }}
@@ -26,14 +27,15 @@
 
   </div>
 
-  <textarea #messageInput placeholder="Antworten..." (keyup)="onKeyup($event)"
-    (keydown.enter)="onEnter($event)"></textarea>
+  <textarea #messageInput [placeholder]="isReadOnly ? 'Du bist kein Mitglied dieses Channels' : 'Antworten...'"
+    [disabled]="isReadOnly" (keyup)="onKeyup($event)" (keydown.enter)="onEnter($event)"></textarea>
 
   <div id="message-actions">
     <div>
       <img src="/icons/global/smile1.svg" alt="Emoji" class="form-input-icon icon-smile" />
       <img src="/icons/global/at1.svg" alt="Mention" class="form-input-icon icon-at" />
     </div>
-    <img src="/icons/global/send1.svg" alt="Send" class="icon-send" (click)="onSend()" />
+
+    <img src="/icons/global/send1.svg" alt="Send" class="icon-send" [class.disabled]="isReadOnly" (click)="onSend()" />
   </div>
 </div>

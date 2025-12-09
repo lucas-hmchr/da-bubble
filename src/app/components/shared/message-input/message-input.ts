@@ -1,10 +1,11 @@
-import { Component, Input, ElementRef, ViewChild, OnInit, Output, EventEmitter } from '@angular/core';
+import { Component, Input, ElementRef, ViewChild, OnInit, Output, EventEmitter, inject } from '@angular/core';
 
 import { CommonModule } from '@angular/common';
 import { Channel } from '../../../models/channel.interface';
 import { User } from '../../../models/user.model';
 import { AvatarId, getAvatarById } from '../../../../shared/data/avatars';
 import { MessageInputService } from '../../../services/message-intput.service';
+import { UserService } from '../../../services/user.service';
 
 @Component({
   selector: 'app-message-input',
@@ -24,6 +25,8 @@ export class MessageInput implements OnInit {
 
   @ViewChild('messageInput') messageInput!: ElementRef<HTMLTextAreaElement>;
   @ViewChild('container') container!: ElementRef<HTMLDivElement>;
+
+  public userService = inject(UserService)
 
   users: User[] = [];
   filteredUsers: User[] = [];
@@ -120,9 +123,16 @@ export class MessageInput implements OnInit {
   onEnter(event: KeyboardEvent | Event) {
     if ((event as KeyboardEvent).shiftKey) return;
 
+    // wenn kein Member, Enter komplett ignorieren
+    if (this.contextType === 'channel' && !this.isChannelMember) {
+      event.preventDefault();
+      return;
+    }
+
     event.preventDefault();
     this.onSend();
   }
+
 
   async onSend() {
     const text = this.getTrimmedText();
@@ -133,6 +143,12 @@ export class MessageInput implements OnInit {
       return;
     }
 
+    // 🚫 Nicht senden, wenn kein Channel-Member
+    if (this.contextType === 'channel' && !this.isChannelMember) {
+      console.warn('Du bist kein Mitglied dieses Channels – Nachricht wird nicht gesendet.');
+      return;
+    }
+
     try {
       await this.sendByContext(text, this.currentUserUid);
       this.afterSend();
@@ -140,6 +156,7 @@ export class MessageInput implements OnInit {
       console.error('Fehler beim Senden der Nachricht:', error);
     }
   }
+
 
 
   private getTrimmedText(): string {
@@ -303,5 +320,19 @@ export class MessageInput implements OnInit {
 
     await this.messageService.sendConversationMessage(convId, text, senderId);
   }
+
+
+  get isChannelMember(): boolean {
+    if (this.contextType !== 'channel') return true;
+    if (!this.channel || !this.currentUserUid) return false;
+    const members = this.channel.members ?? [];
+    return members.includes(this.currentUserUid);
+  }
+
+  get isReadOnly(): boolean {
+    return this.contextType === 'channel' && !this.isChannelMember;
+  }
+
+
 
 }

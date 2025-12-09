@@ -1,5 +1,6 @@
 import { Component, HostListener, inject } from '@angular/core';
 import { BreakpointObserver } from '@angular/cdk/layout';
+import { AuthService } from '../../../auth/auth.service'; // Pfad ggf. anpassen
 
 @Component({
   selector: 'app-topbar',
@@ -16,7 +17,7 @@ export class Topbar {
   activeProfilName: string | null = null;
   MobileProfil = false;
 
-  constructor() {
+  constructor(private auth: AuthService) {
     this.breakpointObserver.observe(['(max-width: 375px)']).subscribe((result) => {
       this.MobileProfil = result.matches;
     });
@@ -69,5 +70,17 @@ export class Topbar {
     this.activeProfilName = null;
     this.isProfilEditModalOpen = false;
     document.body.style.overflow = '';
+  }
+
+  async onLogout(event: Event) {
+    event.stopPropagation();
+    this.isDropdownMenuOpen = false;
+    await this.auth.logout();
+  }
+
+  ngOnInit() {
+    document.addEventListener('click', () => {
+      this.isDropdownMenuOpen = false;
+    });
   }
 }

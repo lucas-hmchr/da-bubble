@@ -1,52 +1,75 @@
-import { Component, OnInit, Input } from '@angular/core';
+import { Component, OnInit, Input, effect, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FirestoreService } from '../../../services/firestore';
 import { MessageInput } from '../../shared/message-input/message-input';
 import { Message } from '../../shared/message/message';
 import { Channel } from '../../../models/channel.interface';
 import { MessageData } from '../../../models/message.interface';
+import { User } from '../../../models/user.model';
+import { getAvatarById } from '../../../../shared/data/avatars';
+import { ChannelSelectionService } from '../../../services/channel-selection.service';
 
 @Component({
   selector: 'app-view',
   standalone: true,
-  imports: [
-    CommonModule,
-    MessageInput,
-    Message
-  ],
+  imports: [CommonModule, MessageInput, Message],
   templateUrl: './view.html',
   styleUrls: ['./view.scss'],
 })
-
 export class View implements OnInit {
 
   channel?: Channel;
-  @Input() currentUserUid: string | null = null; 
-  editingMessage?: { id: string; text: string };
-  constructor(private firestoreService: FirestoreService) { }
+  channelMembers: User[] = [];
 
-  ngOnInit(): void {
-    this.loadChannelByName("Devteam");
+  @Input() currentUserUid: string | null = null;
+  editingMessage?: { id: string; text: string };
+
+  private channelSelection = inject(ChannelSelectionService);
+
+  constructor(private firestoreService: FirestoreService) {
+
+    effect(() => {
+      const id = this.channelSelection.activeChannelId();
+      if (id) {
+        this.loadChannelById(id);
+      }
+    });
   }
 
-  loadChannelByName(channelName: string) {
+  ngOnInit(): void {
+  }
+
+  private loadChannelById(channelId: string) {
     this.firestoreService
-      .getCollectionWhere<Channel>('channels', 'name', channelName)
-      .subscribe({
-        next: (channels) => {
-          if (channels.length === 0) {
-            console.log(`Kein Channel mit dem Namen "${channelName}" gefunden.`);
-          } else {
-            this.channel = channels[0];
-          }
-        },
-        error: (err) => {
-          console.error('Fehler beim Laden:', err);
+      .getDocument<Channel>(`channels/${channelId}`)
+      .subscribe((ch) => {
+        if (!ch) {
+          console.log('Channel nicht gefunden:', channelId);
+          return;
         }
+        this.channel = { ...ch, id: channelId };
+        this.loadChannelMembers(this.channel);
       });
   }
 
-    onEditRequested(msg: MessageData) {
+  private loadChannelMembers(channel: Channel) {
+    const memberIds = new Set<string>(channel.members ?? []);
+
+    this.firestoreService.getCollection<User>('users').subscribe((users) => {
+      this.channelMembers = users.filter(
+        (u) => !!u.uid && memberIds.has(u.uid!)
+      );
+    });
+  }
+
+  getAvatarSrc(user: User) {
+    if (user.avatarId) {
+      return getAvatarById(user.avatarId).src;
+    }
+    return '/images/avatars/avatar_default.svg';
+  }
+
+  onEditRequested(msg: MessageData) {
     if (!msg.id) return;
     this.editingMessage = { id: msg.id as string, text: msg.text };
   }
@@ -54,6 +77,4 @@ export class View implements OnInit {
   onEditFinished() {
     this.editingMessage = undefined;
   }
-
-  
 }
