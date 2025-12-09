@@ -31,12 +31,17 @@ export class WorkspaceSidebar {
   constructor(
     private dialog: MatDialog,
     private firestore: FirestoreService,
-    private channelSelection: ChannelSelectionService   // 👈 neu
+    private channelSelection: ChannelSelectionService
   ) {
 
     //CHANNELS LADEN
     this.firestore.getCollection<Channel>('channels').subscribe(chs => {
       this.channels.set(chs);
+
+      const first = chs[0];
+      if (first && !this.channelSelection.activeChannelId()) {
+        this.channelSelection.setActiveChannelId(first.id as string);
+      }
     });
 
     //USERS LADEN
