@@ -9,16 +9,16 @@
     </p>
     <div class="text-input-container">
         <h3 class="text">Channel-Name</h3>
-        <input placeholder="#    z.B. Kooperationsprojekt" />
+        <input placeholder="#    z.B. Kooperationsprojekt" [(ngModel)]="channelName" />
     </div>
     <div class="text-input-container">
         <div class="">
             <h3 class="text">Beschreibung <span class="optional">(optional)</span> </h3>
 
         </div>
-        <input placeholder="Dein Text hier" />
+        <input placeholder="Dein Text hier" [(ngModel)]="descriptionName" />
     </div>
     <div class="button-add-container">
-        <button class="button-add-channel cp">Erstellen</button>
+        <button class="button-add-channel cp" (click)="creatChannel()">Erstellen</button>
     </div>
 </div>

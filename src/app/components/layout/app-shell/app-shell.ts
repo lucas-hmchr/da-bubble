@@ -6,6 +6,7 @@ import { AuthService } from '../../../auth/auth.service';
 import { FirestoreService } from '../../../services/firestore';
 import { User } from '../../../models/user.model';
 import { ThreadMenu } from '../thread-menu/thread-menu';
+import { Channel } from '../../../models/channel.interface';
 
 @Component({
   selector: 'app-app-shell',
@@ -18,7 +19,8 @@ export class AppShell {
   users: User[] = [];
   usersJson = '';
   currentUserUid: string | null = null;
-  
+  activeChannel = signal<Channel | null>(null);
+
   constructor(
     private authService: AuthService,
     private firestoreService: FirestoreService,

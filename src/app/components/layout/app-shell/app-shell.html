@@ -1,6 +1,6 @@
 <app-topbar></app-topbar>
 <section>
-    <app-workspace-sidebar></app-workspace-sidebar>
+    <app-workspace-sidebar [users]="users" [currentUserUid]="currentUserUid" (channelSelected)="activeChannel.set($event)"></app-workspace-sidebar>
     <app-view [currentUserUid]="currentUserUid"></app-view>
     <app-thread-menu></app-thread-menu>
 </section>

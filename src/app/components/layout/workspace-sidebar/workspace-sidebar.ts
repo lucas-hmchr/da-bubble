@@ -1,4 +1,4 @@
-import { Component, inject, signal } from '@angular/core';
+import { Component, EventEmitter, inject, Input, Output, signal } from '@angular/core';
 import { MatSidenavModule } from '@angular/material/sidenav';
 import { MatButtonModule } from '@angular/material/button';
 import { MatExpansionModule } from '@angular/material/expansion';
@@ -20,9 +20,12 @@ import { ChannelSelectionService } from '../../../services/channel-selection.ser
 })
 
 export class WorkspaceSidebar {
+  @Input() users: User[] = [];
+  @Input() currentUserUid: string | null = null;
+  @Output() channelSelected = new EventEmitter<Channel>();
+
   public userService = inject(UserService)
   channels = signal<Channel[]>([]);
-  users = signal<User[]>([]);
 
   readonly channelOpen = signal(false);
   readonly dmOpen = signal(false);
@@ -34,6 +37,8 @@ export class WorkspaceSidebar {
     private channelSelection: ChannelSelectionService
   ) {
 
+    console.log(this.channelSelected);
+
     //CHANNELS LADEN
     this.firestore.getCollection<Channel>('channels').subscribe(chs => {
       this.channels.set(chs);
@@ -44,11 +49,6 @@ export class WorkspaceSidebar {
       }
     });
 
-    //USERS LADEN
-    this.firestore.getCollection<User>('users').subscribe(us => {
-      this.users.set(us);
-    });
-
   }
 
   openAddChannelDialog() {
@@ -56,6 +56,7 @@ export class WorkspaceSidebar {
       width: '872px',
       maxWidth: 'none',
       height: '539px',
+      data: { uid: this.currentUserUid }
     });
   }
 
