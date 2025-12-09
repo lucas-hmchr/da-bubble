@@ -1,4 +1,4 @@
-import { Component, EventEmitter, inject, Input, Output, signal } from '@angular/core';
+import { Component, inject, signal } from '@angular/core';
 import { MatSidenavModule } from '@angular/material/sidenav';
 import { MatButtonModule } from '@angular/material/button';
 import { MatExpansionModule } from '@angular/material/expansion';
@@ -14,18 +14,16 @@ import { ChannelSelectionService } from '../../../services/channel-selection.ser
 
 @Component({
   selector: 'app-workspace-sidebar',
+  standalone: true,
   imports: [MatSidenavModule, MatButtonModule, MatExpansionModule, MatIconModule],
   templateUrl: './workspace-sidebar.html',
   styleUrl: './workspace-sidebar.scss',
 })
 
 export class WorkspaceSidebar {
-  @Input() users: User[] = [];
-  @Input() currentUserUid: string | null = null;
-  @Output() channelSelected = new EventEmitter<Channel>();
-
-  public userService = inject(UserService)
+  public userService = inject(UserService);
   channels = signal<Channel[]>([]);
+  users = signal<User[]>([]);
 
   readonly channelOpen = signal(false);
   readonly dmOpen = signal(false);
@@ -36,19 +34,15 @@ export class WorkspaceSidebar {
     private firestore: FirestoreService,
     private channelSelection: ChannelSelectionService
   ) {
-
-    console.log(this.channelSelected);
-
-    //CHANNELS LADEN
-    this.firestore.getCollection<Channel>('channels').subscribe(chs => {
+    // CHANNELS LADEN
+    this.firestore.getCollection<Channel>('channels').subscribe((chs) => {
       this.channels.set(chs);
-
-      const first = chs[0];
-      if (first && !this.channelSelection.activeChannelId()) {
-        this.channelSelection.setActiveChannelId(first.id as string);
-      }
     });
 
+    // USERS LADEN
+    this.firestore.getCollection<User>('users').subscribe((us) => {
+      this.users.set(us);
+    });
   }
 
   openAddChannelDialog() {
@@ -56,16 +50,25 @@ export class WorkspaceSidebar {
       width: '872px',
       maxWidth: 'none',
       height: '539px',
-      data: { uid: this.currentUserUid }
     });
+  }
+
+  /** Klick auf einen Channel in der Liste */
+  selectChannel(ch: Channel) {
+    this.channelSelection.selectChannel(ch); // setzt Modus = 'channel'
+  }
+
+  /** Klick auf das Stift-Icon → "Neue Nachricht" */
+  openNewMessage() {
+    this.channelSelection.openNewMessage();
   }
 
   getAvatarPath(user: User) {
     return getAvatarById(user.avatarId).src;
   }
 
-  selectChannel(channel: Channel) {
-    if (!channel.id) return;
-    this.channelSelection.setActiveChannelId(channel.id as string);
+    openDirectMessage(user: User) {
+    if (!user.uid) return;
+    this.channelSelection.openDirectMessage(user.uid);
   }
 }
