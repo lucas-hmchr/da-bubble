@@ -7,7 +7,7 @@ import { Channel } from '../../../models/channel.interface';
 import { MessageData } from '../../../models/message.interface';
 import { getAvatarById } from '../../../../shared/data/avatars';
 import { User } from '../../../models/user.model';
-import { ChannelSelectionService } from '../../../services/channel-selection.service';
+import { ChannelSelectionService, ViewMode } from '../../../services/channel-selection.service';
 
 type RecipientType = 'channel' | 'user' | null;
 
@@ -25,22 +25,26 @@ interface RecipientSuggestion {
   templateUrl: './view.html',
   styleUrls: ['./view.scss'],
 })
-
 export class View implements OnInit {
 
-
-  channel?: Channel;
   @Input() currentUserUid: string | null = null;
+
+  // aktueller Channel (für Channel-Modus)
+  channel?: Channel;
   editingMessage?: { id: string; text: string };
-
-  // Modus
-  isNewMessageView = false;
-
-  // Daten für Autocomplete
-  allChannels: Channel[] = [];
-  allUsers: User[] = [];
   channelMembers: User[] = [];
 
+  // global
+  allChannels: Channel[] = [];
+  allUsers: User[] = [];
+
+  /** aktueller View-Modus */
+  viewMode: ViewMode = 'channel';
+
+  /** Direktnachrichten-Partner (für DM-Modus) */
+  selectedDmUser: User | null = null;
+
+  // „Neue Nachricht“-View
   recipientInputValue = '';
   recipientSuggestions: RecipientSuggestion[] = [];
   showRecipientSuggestions = false;
@@ -48,26 +52,41 @@ export class View implements OnInit {
 
   constructor(
     private firestoreService: FirestoreService,
-    private channelSelection: ChannelSelectionService
+    private channelSelection: ChannelSelectionService,
   ) {
 
+    // Users für Members & DMs laden
     this.firestoreService.getCollection<User>('users').subscribe(users => {
       this.allUsers = users;
-      this.updateChannelMembers();   // falls der Channel schon da ist
+      this.updateChannelMembers();
+      this.updateSelectedDmUser();
     });
-    // auf Mode + activeChannelId reagieren
+
+    // auf Änderungen des Auswahl-Service reagieren
     effect(() => {
       const mode = this.channelSelection.mode();
       const channelId = this.channelSelection.activeChannelId();
+      const dmUserId = this.channelSelection.activeDmUserId();
 
-      this.isNewMessageView = mode === 'newMessage';
+      this.viewMode = mode;
 
       if (mode === 'channel' && channelId) {
         this.loadChannelById(channelId);
+        this.selectedDmUser = null;
+      }
+
+      if (mode === 'dm' && dmUserId) {
+        this.channel = undefined;
+        this.selectedRecipient = null;
+        this.recipientInputValue = '';
+        this.showRecipientSuggestions = false;
+        this.selectedDmUser =
+          this.allUsers.find(u => u.uid === dmUserId) ?? null;
       }
 
       if (mode === 'newMessage') {
         this.channel = undefined;
+        this.selectedDmUser = null;
         this.selectedRecipient = null;
         this.recipientInputValue = '';
         this.recipientSuggestions = [];
@@ -76,44 +95,68 @@ export class View implements OnInit {
     });
   }
 
+  ngOnInit(): void {
+    this.firestoreService.getCollection<Channel>('channels')
+      .subscribe(chs => this.allChannels = chs);
+  }
+
+  // ---------- Channel-Helpers ----------
+
+loadChannelById(channelId: string) {
+  this.firestoreService
+    .getDocument<Channel>(`channels/${channelId}`)
+    .subscribe(ch => {
+      if (!ch) {
+        this.channel = undefined;
+        return;
+      }
+
+      // ID wieder dranhängen
+      this.channel = { ...ch, id: channelId } as Channel;
+
+      // wir sind im Channel-Modus
+      this.viewMode = 'channel';
+
+      this.updateChannelMembers();
+    });
+}
+
+
   private updateChannelMembers() {
     if (!this.channel?.members || this.allUsers.length === 0) {
       this.channelMembers = [];
       return;
     }
-
-    const memberIds = this.channel.members as string[]; // Feld in deinem Channel-Model
-
-    this.channelMembers = this.allUsers.filter(u =>
-      u.uid && memberIds.includes(u.uid)
-    );
+    const memberIds = this.channel.members as string[];
+    this.channelMembers = this.allUsers.filter(u => u.uid && memberIds.includes(u.uid));
   }
 
-
-  ngOnInit(): void {
-    // alle Channels laden (für Autocomplete)
-    this.firestoreService.getCollection<Channel>('channels').subscribe(chs => {
-      this.allChannels = chs;
-    });
-
-    // alle User laden (für Autocomplete)
-    this.firestoreService.getCollection<User>('users').subscribe(users => {
-      this.allUsers = users;
-    });
+  getAvatarSrc(user: User): string {
+    if (user.avatarId) {
+      return getAvatarById(user.avatarId).src;
+    }
+    return '/images/avatars/avatar_default.svg';
   }
 
-  loadChannelById(channelId: string) {
-    this.firestoreService
-      .getDocument<Channel>(`channels/${channelId}`)
-      .subscribe(ch => {
-        this.channel = ch;
-        // HIER ergänzen:
-        this.updateChannelMembers();
-      });
+  // ---------- DM-Helpers ----------
+
+  private updateSelectedDmUser() {
+    const dmUserId = this.channelSelection.activeDmUserId();
+    if (!dmUserId) {
+      this.selectedDmUser = null;
+      return;
+    }
+    this.selectedDmUser = this.allUsers.find(u => u.uid === dmUserId) ?? null;
   }
 
+  /** Conversation-ID aus currentUserUid + dmUserUid bauen */
+  get currentConversationId(): string | undefined {
+    if (!this.currentUserUid || !this.selectedDmUser?.uid) return undefined;
+    const ids = [this.currentUserUid, this.selectedDmUser.uid].sort();
+    return ids.join('_');
+  }
 
-  // --------- Autocomplete „An:“ ---------
+  // ---------- Autocomplete „Neue Nachricht“ ----------
 
   onRecipientInput(event: Event) {
     const value = (event.target as HTMLInputElement).value;
@@ -134,7 +177,7 @@ export class View implements OnInit {
         (c.name ?? '').toLowerCase().includes(q)
       );
       this.recipientSuggestions = matches.map(c => ({
-        type: 'channel',
+        type: 'channel' as const,
         id: c.id as string,
         label: `#${c.name}`,
         detail: 'Channel',
@@ -152,7 +195,7 @@ export class View implements OnInit {
           .includes(q)
       );
       this.recipientSuggestions = matches.map(u => ({
-        type: 'user',
+        type: 'user' as const,
         id: u.uid!,
         label: u.displayName ?? u.name ?? u.email ?? 'Unbekannter Nutzer',
         detail: 'Mitglied',
@@ -161,7 +204,7 @@ export class View implements OnInit {
       return;
     }
 
-    // sonst (z.B. E-Mail): hier könnt ihr später erweitern
+    // sonst nichts
     this.recipientSuggestions = [];
     this.showRecipientSuggestions = false;
   }
@@ -170,15 +213,11 @@ export class View implements OnInit {
     this.selectedRecipient = s;
     this.recipientInputValue = s.label;
     this.showRecipientSuggestions = false;
-
-    if (s.type === 'channel') {
-      // wir können direkt in den Channel-Modus springen
-      this.channelSelection.setMode('channel');
-      this.channelSelection.setActiveChannelId(s.id);
-    }
-
-    // bei 'user' könntet ihr später eine Conversation öffnen/erstellen
+    // Wichtig: hier keinen Channel / DM umschalten – das passiert
+    // erst nach dem Senden der Nachricht.
   }
+
+  // ---------- Sonstiges ----------
 
   onEditRequested(msg: MessageData) {
     if (!msg.id) return;
@@ -189,14 +228,24 @@ export class View implements OnInit {
     this.editingMessage = undefined;
   }
 
-  getAvatarSrc(user: User): string {
-  // falls avatarId vorhanden → aus dem Avatar-Config holen
-  if (user.avatarId) {
-    return getAvatarById(user.avatarId).src;
+  onNewMessageSent(evt: {
+    contextType: 'channel' | 'conversation';
+    channelId?: string;
+    conversationId?: string;
+  }) {
+    // Wenn aus "Neue Nachricht" eine Channel-Nachricht wurde → in diesen Channel springen
+    if (evt.contextType === 'channel' && evt.channelId) {
+      this.channelSelection.setActiveChannelId(evt.channelId);
+    }
+    // Bei DM (conversation) bleiben wir einfach in der aktuellen Ansicht.
   }
 
-  // Fallback, wenn etwas fehlt
-  return '/images/avatars/avatar_default.svg';
-}
+  getSelectedRecipientChannel(): Channel | undefined {
+    if (!this.selectedRecipient || this.selectedRecipient.type !== 'channel') {
+      return undefined;
+    }
+
+    return this.allChannels.find(c => c.id === this.selectedRecipient!.id);
+  }
 
 }
