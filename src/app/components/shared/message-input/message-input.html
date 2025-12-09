@@ -8,7 +8,6 @@
       <span class="mention-avatar">
         <img [src]="(getAvatarSrc(user.avatarId) || 'avatar_default')" [alt]="getListLabel(user)" />
         <img [src]="userService.getOnlineStatusIcon(user)" class="status-dot">
-        <!-- <span *ngIf="userService.isOnline(user)" class="status-dot"></span> -->
       </span>
       <span class="mention-name">
         {{ getListLabel(user) }}

@@ -6,14 +6,12 @@
       mode="side"
       opened="true"
     >
-      <!-- Kopf: Logo + Stift (Neue Nachricht) -->
       <div class="channels-button-container">
         <div class="workspace-logo-text-container">
           <img src="/icons/global/workspace_logo.svg" alt="" />
           <span class="devspace-txt">Devspace</span>
         </div>
 
-        <!-- Stift-Icon → Neue Nachricht -->
         <img
           class="edit-square-icon cp"
           src="/icons/global/edit_square_default.svg"
@@ -23,7 +21,6 @@
       </div>
 
       <div class="channel-message-add-container">
-        <!-- Plus-Icon oben rechts (Channel hinzufügen) -->
         <img
           class="add-icon cp"
           src="/icons/global/add_default.svg"
@@ -32,7 +29,6 @@
         />
 
         <mat-accordion class="mat-accordion-container">
-          <!-- CHANNELS -------------------------------------------------->
           <mat-expansion-panel
             hideToggle="true"
             class="channel-panel"
@@ -74,7 +70,6 @@
             </div>
           </mat-expansion-panel>
 
-          <!-- DIREKTNACHRICHTEN ---------------------------------------->
           <mat-expansion-panel
             hideToggle="true"
             class="channel-panel"
@@ -112,7 +107,6 @@
                 />
                 <span>
                   {{ user.displayName || user.name || 'Unbekannter Nutzer' }}
-                  <!-- Optional: (Du) anzeigen -->
                   @if (user.uid === currentUserUid) {
                     <span>&nbsp;(Du)</span>
                   }
@@ -129,7 +123,6 @@
     </mat-drawer>
   </mat-drawer-container>
 
-  <!-- Button zum Ein-/Ausklappen -->
   <div
     class="left-menu-button-icon-container cp fs-20"
     (click)="drawer.toggle()"

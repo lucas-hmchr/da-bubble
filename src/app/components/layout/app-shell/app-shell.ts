@@ -18,7 +18,6 @@ export class AppShell {
   private authService = inject(AuthService);
 
   constructor() {
-    // Auth-Signal beobachten und UID ableiten
     effect(() => {
       const active = this.authService.activeUser();
       console.log('activeUser in AppShell:', active);

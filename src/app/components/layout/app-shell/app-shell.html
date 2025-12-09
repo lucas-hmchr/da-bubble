@@ -1,12 +1,10 @@
 <app-topbar></app-topbar>
 
 <section>
-  <!-- Sidebar bekommt nur noch die aktuelle UID -->
   <app-workspace-sidebar
     [currentUserUid]="currentUserUid"
   ></app-workspace-sidebar>
 
-  <!-- View braucht ebenfalls die UID -->
   <app-view
     [currentUserUid]="currentUserUid"
   ></app-view>

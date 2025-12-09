@@ -1,11 +1,9 @@
 <section>
 
-  <!-- CHANNEL-VIEW ---------------------------------------------------->
   <ng-container *ngIf="viewMode === 'channel' && channel as activeChannel; else notChannelView">
 
     <header>
       <div>
-        <!-- activeChannel ist hier garantiert NICHT null -->
         <h2># {{ activeChannel.name }}</h2>
         <img src="/icons/global/keyboard_arrow_down.svg" alt="">
       </div>
@@ -35,10 +33,8 @@
 
   </ng-container>
 
-  <!-- NICHT-CHANNEL: DM oder Neue Nachricht ---------------------------->
   <ng-template #notChannelView>
 
-    <!-- DM-VIEW -->
     <ng-container *ngIf="viewMode === 'dm' && selectedDmUser; else newMessageView">
 
       <header class="dm-header">
@@ -71,7 +67,6 @@
 
     </ng-container>
 
-    <!-- NEUE NACHRICHT-VIEW ------------------------------------------->
     <ng-template #newMessageView>
       <section class="new-message-view">
 

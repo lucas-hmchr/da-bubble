@@ -147,12 +147,10 @@ export class MessageInput implements OnInit {
     this.activeMentionType = null;
   }
 
-  // ---------- Senden ----------
 
   onEnter(event: KeyboardEvent | Event) {
     if ((event as KeyboardEvent).shiftKey) return;
 
-    // wenn kein Member, Enter ignorieren
     if (this.contextType === 'channel' && !this.isChannelMember) {
       event.preventDefault();
       return;
@@ -176,7 +174,6 @@ export class MessageInput implements OnInit {
 
       this.afterSend();
 
-      // nur HIER nach außen melden
       this.messageSent.emit(ctx);
     } catch (error) {
       console.error('Fehler beim Senden der Nachricht:', error);
@@ -212,14 +209,12 @@ private async handleChannelSend(text: string, senderId: string): Promise<string>
   const channelId = this.channel.id as string;
 
   if (this.isEditing && this.editingMessage?.id) {
-    // Nachricht bearbeiten
     await this.messageService.updateChannelMessage(
       channelId,
       this.editingMessage.id,
       text
     );
   } else {
-    // neue Nachricht
     await this.messageService.sendChannelMessage(channelId, text, senderId);
   }
 
@@ -257,7 +252,6 @@ private async handleConversationSend(text: string, senderId: string): Promise<st
     this.editFinished.emit();
   }
 
-  // ---------- Mention-Hilfen ----------
 
   private updateMentionPosition() {
     const textarea = this.messageInput.nativeElement;
@@ -345,7 +339,6 @@ private async handleConversationSend(text: string, senderId: string): Promise<st
     textarea.focus();
   }
 
-  // ---------- Permissions ----------
 
   get isChannelMember(): boolean {
     if (this.contextType !== 'channel') return true;
