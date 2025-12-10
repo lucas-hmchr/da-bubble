@@ -1,6 +1,7 @@
 <div class="message-container">
   <ng-container *ngIf="messages$ | async as msgs">
     <div *ngIf="msgs.length === 0" class="empty-channel-info">
+      <span class="fw-700 fs-24"># {{channel?.name}}</span>
       <p>Sei der Erste, der eine Nachricht in diesem Channel schreibt!</p>
     </div>
 
