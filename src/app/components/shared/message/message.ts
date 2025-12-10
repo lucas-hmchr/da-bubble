@@ -35,6 +35,10 @@ export class Message implements OnChanges {
   @Input() messages: MessageData[] | null = null;
   @Input() users: User[] = [];
 
+  // neu: Kontext (Channel vs. Conversation)
+  @Input() contextType: 'channel' | 'conversation' = 'channel';
+  @Input() conversationId?: string;
+
   @Output() editRequested = new EventEmitter<MessageData>();
 
   @ViewChild('bottom') bottom!: ElementRef<HTMLDivElement>;
@@ -81,7 +85,10 @@ export class Message implements OnChanges {
 
   getSenderAvatarUrl(senderId: string): string {
     const user = this.userMap.get(senderId);
-    const avatar = getAvatarById(user?.avatarId);
+    if (!user) {
+      return '/images/avatars/avatar_default.svg';
+    }
+    const avatar = getAvatarById(user.avatarId);
     return avatar.src;
   }
 
@@ -125,6 +132,8 @@ export class Message implements OnChanges {
   }
 
   toggleReaction(msg: MessageData, reactionId: ReactionId) {
+    // Reaktionen nur in Channels, nicht in DMs
+    if (this.contextType !== 'channel') return;
     if (!this.channel?.id || !msg.id || !this.currentUserUid) return;
 
     const reactions = { ...(msg.reactions || {}) };

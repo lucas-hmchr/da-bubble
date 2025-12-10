@@ -52,13 +52,17 @@ export class View implements OnInit, OnChanges {
   @Input() channel: Channel | null = null;
   @Input() currentUserUid: string | null = null;
 
-  // Für DM-Ansicht
-  @Input() selectedDmUser: User | null = null;
+  // DM / Conversations
+  private _selectedDmUserOverride: User | null = null;
+  @Input() set selectedDmUser(value: User | null) {
+    // Falls ein Parent explizit einen User übergibt, bevorzugen wir diesen
+    this._selectedDmUserOverride = value;
+  }
   @Input() currentConversationId?: string;
 
   messages$: Observable<MessageData[]> = of([]);
 
-  // Editier-Status für Channel-Nachrichten
+  // Editier-Status für Nachrichten
   editingMessage?: { id: string; text: string };
 
   // Neue Nachricht (ViewMode 'newMessage')
@@ -72,7 +76,6 @@ export class View implements OnInit, OnChanges {
   private messageService = inject(MessageService);
   private userStore = inject(UserStoreService);
   private channelStore = inject(ChannelStoreService);
-
 
   get viewMode(): ViewMode {
     return this.channelSelection.mode();
@@ -102,6 +105,20 @@ export class View implements OnInit, OnChanges {
     return this.channelStore.getById(activeId) ?? null;
   }
 
+  /**
+   * Aktueller DM-User:
+   * - bevorzugt expliziter @Input() selectedDmUser (z. B. wenn Parent bindet)
+   * - sonst über activeDmUserId + UserStore aufgelöst
+   */
+  get selectedDmUserResolved(): User | null {
+    if (this._selectedDmUserOverride) return this._selectedDmUserOverride;
+
+    const dmId = this.channelSelection.activeDmUserId();
+    if (!dmId) return null;
+
+    return this.users.find((u) => u.uid === dmId) ?? null;
+  }
+
   // Mitglieder des aktuellen Channels (aus Channel.members + UserStore)
   get channelMembers(): User[] {
     const ch = this.currentChannel;
@@ -116,23 +133,6 @@ export class View implements OnInit, OnChanges {
     );
   }
 
-    get isChannelCreatedToday(): boolean {
-    const ch = this.currentChannel;
-    if (!ch || !ch.createdAt) return false;
-
-    const created = this.toDate(ch.createdAt);
-    if (!created) return false;
-
-    const now = new Date();
-
-    return (
-      created.getFullYear() === now.getFullYear() &&
-      created.getMonth() === now.getMonth() &&
-      created.getDate() === now.getDate()
-    );
-  }
-
-  
   get isCurrentUserMember(): boolean {
     const ch = this.currentChannel;
     if (!ch || !this.currentUserUid) return false;
@@ -141,14 +141,30 @@ export class View implements OnInit, OnChanges {
     return memberIds.includes(this.currentUserUid);
   }
 
+  get isChannelCreatedToday(): boolean {
+    const ch = this.currentChannel;
+    if (!ch || !ch.createdAt) return false;
+
+    const created = this.toDate(ch.createdAt);
+    if (!created) return false;
+
+    const now = new Date();
+    return (
+      created.getFullYear() === now.getFullYear() &&
+      created.getMonth() === now.getMonth() &&
+      created.getDate() === now.getDate()
+    );
+  }
+
   constructor() {
-    // Reagiere auf Änderungen an Modus oder activeChannelId
+    // Reagiere auf Änderungen an Modus oder aktiver ID
     effect(() => {
       const _mode = this.channelSelection.mode();
-      const _activeId = this.channelSelection.activeChannelId();
-      // Nutzung der Werte sorgt dafür, dass das Effect reagiert
+      const _activeChannelId = this.channelSelection.activeChannelId();
+      const _activeDmId = this.channelSelection.activeDmUserId();
       void _mode;
-      void _activeId;
+      void _activeChannelId;
+      void _activeDmId;
       this.updateMessagesStream();
     });
   }
@@ -164,19 +180,42 @@ export class View implements OnInit, OnChanges {
   }
 
   private updateMessagesStream() {
-    const ch = this.currentChannel;
-    if (ch?.id) {
-      this.messages$ = this.messageService.watchChannelMessages(ch.id);
-    } else {
-      this.messages$ = of([]);
+    if (this.viewMode === 'channel') {
+      const ch = this.currentChannel;
+      if (ch?.id) {
+        this.messages$ = this.messageService.watchChannelMessages(ch.id);
+      } else {
+        this.messages$ = of([]);
+      }
+      return;
     }
+
+    if (this.viewMode === 'dm' && this.currentConversationId) {
+      this.messages$ = this.messageService.watchConversationMessages(
+        this.currentConversationId
+      );
+      return;
+    }
+
+    // newMessage oder kein Kontext
+    this.messages$ = of([]);
+  }
+
+  // --- Helper: Datums-Konvertierung ---
+
+  private toDate(value: any): Date | null {
+    if (!value) return null;
+    if (value instanceof Date) return value;
+    if (typeof value === 'number') return new Date(value);
+    if (typeof value === 'string') return new Date(value);
+    if (value.toDate) return value.toDate(); // Firestore Timestamp
+    return null;
   }
 
   // --- Header / Avatare ---
 
   getAvatarSrc(user: User | null | undefined): string {
     if (!user) {
-      // Fallback – ggf. auf euren Default-Avatar anpassen
       return '/images/avatars/avatar_default.svg';
     }
     const avatar = getAvatarById(user.avatarId);
@@ -308,14 +347,4 @@ export class View implements OnInit, OnChanges {
       this.channelSelection.setActiveChannelId(event.channelId);
     }
   }
-
-    private toDate(value: any): Date | null {
-    if (!value) return null;
-    if (value instanceof Date) return value;
-    if (typeof value === 'number') return new Date(value);
-    if (typeof value === 'string') return new Date(value);
-    if (value.toDate) return value.toDate(); // Firestore Timestamp
-    return null;
-  }
-
 }
