@@ -15,7 +15,7 @@
 <div class="auth-window">
     <div class="top-row">
         <!-- <app-logo></app-logo> -->
-         <img src="/icons/global/logo-header.svg" alt="" class="logo-static">
+        <img src="/icons/global/logo-header.svg" alt="" class="logo-static">
         @if (showRegistrationLink() && !isMobile()) {
         <div>
             <span>Neu bei DABubble?</span>
@@ -33,7 +33,7 @@
     </div>
     } @else if (!isMobile()) {
     <div class="links">
-        <span class="linked-text">Impressum</span>
+        <span class="linked-text" routerLink="/policy-view">Impressum</span>
         <span class="linked-text">Datenschutz</span>
     </div>
     }
