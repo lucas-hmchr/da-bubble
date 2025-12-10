@@ -1,16 +1,30 @@
-import { Component, OnInit, Input, effect } from '@angular/core';
+import {
+  Component,
+  Input,
+  OnChanges,
+  OnInit,
+  SimpleChanges,
+  inject,
+} from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FirestoreService } from '../../../services/firestore';
-import { MessageInput } from '../../shared/message-input/message-input';
-import { Message } from '../../shared/message/message';
-import { Channel } from '../../../models/channel.interface';
-import { MessageData } from '../../../models/message.interface';
-import { getAvatarById } from '../../../../shared/data/avatars';
-import { User } from '../../../models/user.model';
-import { ChannelSelectionService, ViewMode } from '../../../services/channel-selection.service';
-import { UserService } from '../../../services/user.service';
 
-type RecipientType = 'channel' | 'user' | null;
+import { Channel } from '../../../models/channel.interface';
+import { User } from '../../../models/user.model';
+import { MessageData } from '../../../models/message.interface';
+
+import { Message } from '../../shared/message/message';
+import { MessageInput } from '../../shared/message-input/message-input';
+
+import { UserService } from '../../../services/user.service';
+import { ChannelSelectionService, ViewMode } from '../../../services/channel-selection.service';
+import { MessageService } from '../../../services/message.service';
+import { UserStoreService } from '../../../services/user-store.service';
+import { ChannelStoreService } from '../../../services/channel-store.service';
+
+import { getAvatarById } from '../../../../shared/data/avatars';
+import { Observable, of } from 'rxjs';
+
+type RecipientType = 'channel' | 'user' | 'email';
 
 interface RecipientSuggestion {
   type: RecipientType;
@@ -22,201 +36,168 @@ interface RecipientSuggestion {
 @Component({
   selector: 'app-view',
   standalone: true,
-  imports: [CommonModule, MessageInput, Message],
+  imports: [CommonModule, Message, MessageInput],
   templateUrl: './view.html',
-  styleUrls: ['./view.scss'],
+  styleUrl: './view.scss',
 })
-export class View implements OnInit {
-
+export class View implements OnInit, OnChanges {
+  @Input() channel: Channel | null = null;
+  @Input() channelMembers: User[] = [];
   @Input() currentUserUid: string | null = null;
 
-  channel?: Channel;
+  @Input() selectedDmUser: User | null = null;
+  @Input() currentConversationId?: string;
+
+  messages$: Observable<MessageData[]> = of([]);
+
   editingMessage?: { id: string; text: string };
-  channelMembers: User[] = [];
-  allChannels: Channel[] = [];
-  allUsers: User[] = [];
-
-  viewMode: ViewMode = 'channel';
-
-  selectedDmUser: User | null = null;
 
   recipientInputValue = '';
-  recipientSuggestions: RecipientSuggestion[] = [];
   showRecipientSuggestions = false;
+  recipientSuggestions: RecipientSuggestion[] = [];
   selectedRecipient: RecipientSuggestion | null = null;
 
-  constructor(
-    private firestoreService: FirestoreService,
-    private channelSelection: ChannelSelectionService,
-    public userService: UserService,
-  ) {
+  readonly userService = inject(UserService);
+  private channelSelection = inject(ChannelSelectionService);
+  private messageService = inject(MessageService);
+  private userStore = inject(UserStoreService);
+  private channelStore = inject(ChannelStoreService);
 
-    this.firestoreService.getCollection<User>('users').subscribe(users => {
-      this.allUsers = users;
-      this.updateChannelMembers();
-      this.updateSelectedDmUser();
-    });
+  get viewMode(): ViewMode {
+    return this.channelSelection.mode();
+  }
 
-    effect(() => {
-      const mode = this.channelSelection.mode();
-      const channelId = this.channelSelection.activeChannelId();
-      const dmUserId = this.channelSelection.activeDmUserId();
+  get users(): User[] {
+    return this.userStore.users();
+  }
 
-      this.viewMode = mode;
-
-      if (mode === 'channel' && channelId) {
-        this.loadChannelById(channelId);
-        this.selectedDmUser = null;
-      }
-
-      if (mode === 'dm' && dmUserId) {
-        this.channel = undefined;
-        this.selectedRecipient = null;
-        this.recipientInputValue = '';
-        this.showRecipientSuggestions = false;
-        this.selectedDmUser =
-          this.allUsers.find(u => u.uid === dmUserId) ?? null;
-      }
-
-      if (mode === 'newMessage') {
-        this.channel = undefined;
-        this.selectedDmUser = null;
-        this.selectedRecipient = null;
-        this.recipientInputValue = '';
-        this.recipientSuggestions = [];
-        this.showRecipientSuggestions = false;
-      }
-    });
+  private get channels(): Channel[] {
+    return this.channelStore.channels();
   }
 
   ngOnInit(): void {
-    this.firestoreService.getCollection<Channel>('channels')
-      .subscribe(chs => this.allChannels = chs);
+    this.updateMessagesStream();
   }
 
-
-loadChannelById(channelId: string) {
-  this.firestoreService
-    .getDocument<Channel>(`channels/${channelId}`)
-    .subscribe(ch => {
-      if (!ch) {
-        this.channel = undefined;
-        return;
-      }
-
-      this.channel = { ...ch, id: channelId } as Channel;
-
-      this.viewMode = 'channel';
-
-      this.updateChannelMembers();
-    });
-}
-
-
-  private updateChannelMembers() {
-    if (!this.channel?.members || this.allUsers.length === 0) {
-      this.channelMembers = [];
-      return;
+  ngOnChanges(changes: SimpleChanges): void {
+    if (changes['channel']) {
+      this.updateMessagesStream();
     }
-    const memberIds = this.channel.members as string[];
-    this.channelMembers = this.allUsers.filter(u => u.uid && memberIds.includes(u.uid));
   }
+
+  private updateMessagesStream() {
+    if (this.channel?.id) {
+      this.messages$ = this.messageService.watchChannelMessages(this.channel.id);
+    } else {
+      this.messages$ = of([]);
+    }
+  }
+
 
   getAvatarSrc(user: User): string {
-    if (user.avatarId) {
-      return getAvatarById(user.avatarId).src;
-    }
-    return '/images/avatars/avatar_default.svg';
-  }
-
-
-  private updateSelectedDmUser() {
-    const dmUserId = this.channelSelection.activeDmUserId();
-    if (!dmUserId) {
-      this.selectedDmUser = null;
-      return;
-    }
-    this.selectedDmUser = this.allUsers.find(u => u.uid === dmUserId) ?? null;
-  }
-
-  get currentConversationId(): string | undefined {
-    if (!this.currentUserUid || !this.selectedDmUser?.uid) return undefined;
-    const ids = [this.currentUserUid, this.selectedDmUser.uid].sort();
-    return ids.join('_');
-  }
-
-
-  onRecipientInput(event: Event) {
-    const value = (event.target as HTMLInputElement).value;
-    this.recipientInputValue = value;
-    this.selectedRecipient = null;
-
-    const trimmed = value.trim();
-    if (!trimmed) {
-      this.recipientSuggestions = [];
-      this.showRecipientSuggestions = false;
-      return;
-    }
-
-    if (trimmed.startsWith('#')) {
-      const q = trimmed.slice(1).toLowerCase();
-      const matches = this.allChannels.filter(c =>
-        (c.name ?? '').toLowerCase().includes(q)
-      );
-      this.recipientSuggestions = matches.map(c => ({
-        type: 'channel' as const,
-        id: c.id as string,
-        label: `#${c.name}`,
-        detail: 'Channel',
-      }));
-      this.showRecipientSuggestions = this.recipientSuggestions.length > 0;
-      return;
-    }
-
-    if (trimmed.startsWith('@')) {
-      const q = trimmed.slice(1).toLowerCase();
-      const matches = this.allUsers.filter(u =>
-        (u.displayName ?? u.name ?? u.email ?? '')
-          .toLowerCase()
-          .includes(q)
-      );
-      this.recipientSuggestions = matches.map(u => ({
-        type: 'user' as const,
-        id: u.uid!,
-        label: u.displayName ?? u.name ?? u.email ?? 'Unbekannter Nutzer',
-        detail: 'Mitglied',
-      }));
-      this.showRecipientSuggestions = this.recipientSuggestions.length > 0;
-      return;
-    }
-
-    this.recipientSuggestions = [];
-    this.showRecipientSuggestions = false;
-  }
-
-  onSelectRecipient(s: RecipientSuggestion) {
-    this.selectedRecipient = s;
-    this.recipientInputValue = s.label;
-    this.showRecipientSuggestions = false;
+    const avatar = getAvatarById(user.avatarId);
+    return avatar.src;
   }
 
 
   onEditRequested(msg: MessageData) {
     if (!msg.id) return;
-    this.editingMessage = { id: msg.id as string, text: msg.text };
+    this.editingMessage = { id: msg.id, text: msg.text };
   }
 
   onEditFinished() {
     this.editingMessage = undefined;
   }
 
-  onNewMessageSent(evt: {
-    contextType: 'channel' | 'conversation';
-    channelId?: string;
-    conversationId?: string;
-  }) {
-    if (evt.contextType === 'channel' && evt.channelId) {
-      this.channelSelection.setActiveChannelId(evt.channelId);
+
+  onRecipientInput(event: Event) {
+    const value = (event.target as HTMLInputElement).value;
+    this.recipientInputValue = value;
+
+    const term = value.trim();
+    if (!term) {
+      this.showRecipientSuggestions = false;
+      this.recipientSuggestions = [];
+      this.selectedRecipient = null;
+      return;
+    }
+
+    const suggestions: RecipientSuggestion[] = [];
+
+    if (term.startsWith('#')) {
+      const q = term.slice(1).toLowerCase();
+      this.channels
+        .filter((c) => (c.name ?? '').toLowerCase().includes(q))
+        .forEach((c) =>
+          suggestions.push({
+            type: 'channel',
+            id: c.id ?? '',
+            label: c.name,
+            detail: 'Channel',
+          })
+        );
+    } else if (term.startsWith('@')) {
+      const q = term.slice(1).toLowerCase();
+      this.users
+        .filter((u) =>
+          (u.displayName ?? u.name ?? '').toLowerCase().includes(q)
+        )
+        .forEach((u) =>
+          suggestions.push({
+            type: 'user',
+            id: u.uid ?? '',
+            label: u.displayName ?? u.name,
+            detail: u.email,
+          })
+        );
+    } else if (term.includes('@')) {
+      suggestions.push({
+        type: 'email',
+        id: term,
+        label: term,
+        detail: 'E-Mail',
+      });
+    } else {
+      const q = term.toLowerCase();
+      this.channels
+        .filter((c) => (c.name ?? '').toLowerCase().includes(q))
+        .forEach((c) =>
+          suggestions.push({
+            type: 'channel',
+            id: c.id ?? '',
+            label: c.name,
+            detail: 'Channel',
+          })
+        );
+
+      this.users
+        .filter((u) =>
+          (u.displayName ?? u.name ?? '').toLowerCase().includes(q)
+        )
+        .forEach((u) =>
+          suggestions.push({
+            type: 'user',
+            id: u.uid ?? '',
+            label: u.displayName ?? u.name,
+            detail: u.email,
+          })
+        );
+    }
+
+    this.recipientSuggestions = suggestions;
+    this.showRecipientSuggestions = suggestions.length > 0;
+  }
+
+  onSelectRecipient(s: RecipientSuggestion) {
+    this.selectedRecipient = s;
+    this.showRecipientSuggestions = false;
+
+    if (s.type === 'channel') {
+      this.recipientInputValue = `#${s.label}`;
+    } else if (s.type === 'user') {
+      this.recipientInputValue = `@${s.label}`;
+    } else {
+      this.recipientInputValue = s.label;
     }
   }
 
@@ -224,8 +205,21 @@ loadChannelById(channelId: string) {
     if (!this.selectedRecipient || this.selectedRecipient.type !== 'channel') {
       return undefined;
     }
-
-    return this.allChannels.find(c => c.id === this.selectedRecipient!.id);
+    return this.channels.find((c) => c.id === this.selectedRecipient!.id);
   }
 
+  onNewMessageSent(event: {
+    contextType: 'channel' | 'conversation';
+    channelId?: string;
+    conversationId?: string;
+  }) {
+    this.recipientInputValue = '';
+    this.selectedRecipient = null;
+    this.recipientSuggestions = [];
+    this.showRecipientSuggestions = false;
+
+    if (event.contextType === 'channel' && event.channelId) {
+      this.channelSelection.setActiveChannelId(event.channelId);
+    }
+  }
 }

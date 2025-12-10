@@ -9,10 +9,8 @@ import {
   EventEmitter,
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { Observable, tap } from 'rxjs';
 
 import { Channel } from '../../../models/channel.interface';
-import { FirestoreService } from '../../../services/firestore';
 import { MessageData } from '../../../models/message.interface';
 import { User } from '../../../models/user.model';
 import { getAvatarById } from '../../../../shared/data/avatars';
@@ -22,6 +20,7 @@ import {
   getReactionDef,
   emojiReactions as EMOJI_REACTIONS,
 } from '../../../../shared/data/reactions';
+import { MessageService } from '../../../services/message.service';
 
 @Component({
   selector: 'app-message',
@@ -33,64 +32,46 @@ import {
 export class Message implements OnChanges {
   @Input() channel?: Channel;
   @Input() currentUserUid: string | null = null;
+  @Input() messages: MessageData[] | null = null;
+  @Input() users: User[] = [];
+
   @Output() editRequested = new EventEmitter<MessageData>();
 
-  messages$?: Observable<MessageData[]>;
-  users: User[] = [];
+  @ViewChild('bottom') bottom!: ElementRef<HTMLDivElement>;
+
   hoveredReaction: ReactionId | null = null;
   hoveredMessageId: string | null = null;
   lastMessageCount = 0;
 
-  @ViewChild('bottom') bottom!: ElementRef<HTMLDivElement>;
-  private userMap = new Map<string, User>();
-
   reactionPickerForMessageId: string | null = null;
   emojiReactions: ReactionDef[] = EMOJI_REACTIONS as ReactionDef[];
 
-  constructor(private firestoreService: FirestoreService) {
-    this.firestoreService.getCollection<User>('users').subscribe((users) => {
-      this.users = users;
-      this.userMap.clear();
-      for (const u of users) {
-        if (u.uid) {
-          this.userMap.set(u.uid, u);
-        }
-      }
-    });
-  }
+  private userMap = new Map<string, User>();
+
+  constructor(private messageService: MessageService) {}
 
   ngOnChanges(changes: SimpleChanges): void {
-    if (changes['channel'] && this.channel) {
-      this.loadMessages();
+    if (changes['users']) {
+      this.buildUserMap();
+    }
+
+    if (changes['messages']) {
+      const currentCount = this.messages?.length ?? 0;
+      if (currentCount > this.lastMessageCount) {
+        setTimeout(() => this.scrollToBottom(), 0);
+      }
+      this.lastMessageCount = currentCount;
     }
   }
 
-  loadMessages() {
-    if (!this.channel?.id) {
-      console.warn("Channel hat noch keine ID → Nachrichten können nicht geladen werden.");
-      return;
+  private buildUserMap() {
+    this.userMap.clear();
+    for (const u of this.users) {
+      if (u.uid) {
+        this.userMap.set(u.uid, u);
+      }
     }
-    this.messages$ = this.firestoreService
-      .getSubcollection<MessageData>(
-        'channels',
-        this.channel.id!,
-        'messages',
-        'createdAt'
-      )
-      .pipe(
-        tap((msgs) => {
-          const currentCount = msgs.length;
-
-          if (currentCount > this.lastMessageCount) {
-            setTimeout(() => this.scrollToBottom(), 0);
-          }
-
-          this.lastMessageCount = currentCount;
-        })
-      );
   }
-
-
 
   getSenderName(senderId: string): string {
     const user = this.userMap.get(senderId);
@@ -138,7 +119,6 @@ export class Message implements OnChanges {
     this.bottom.nativeElement.scrollIntoView({ behavior: 'smooth' });
   }
 
-
   onEditMessage(msg: MessageData) {
     if (!this.isOwnMessage(msg)) return;
     this.editRequested.emit(msg);
@@ -163,11 +143,7 @@ export class Message implements OnChanges {
       reactions[reactionId] = users;
     }
 
-    this.firestoreService.updateDocument(
-      `channels/${this.channel.id}/messages`,
-      msg.id as string,
-      { reactions }
-    );
+    this.messageService.updateReactions(this.channel.id!, msg.id!, reactions);
   }
 
   getReactionIds(msg: MessageData): ReactionId[] {
@@ -252,5 +228,4 @@ export class Message implements OnChanges {
     const others = uids.length - 1;
     return `${this.getUserDisplayName(uids[0])} und ${others} weitere`;
   }
-
 }
