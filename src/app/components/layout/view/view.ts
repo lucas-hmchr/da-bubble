@@ -8,6 +8,7 @@ import { MessageData } from '../../../models/message.interface';
 import { getAvatarById } from '../../../../shared/data/avatars';
 import { User } from '../../../models/user.model';
 import { ChannelSelectionService, ViewMode } from '../../../services/channel-selection.service';
+import { UserService } from '../../../services/user.service';
 
 type RecipientType = 'channel' | 'user' | null;
 
@@ -47,6 +48,7 @@ export class View implements OnInit {
   constructor(
     private firestoreService: FirestoreService,
     private channelSelection: ChannelSelectionService,
+    public userService: UserService,
   ) {
 
     this.firestoreService.getCollection<User>('users').subscribe(users => {

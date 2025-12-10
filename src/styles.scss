@@ -86,6 +86,14 @@ body {
   font-size: 20px;
 }
 
+.fs-24 {
+  font-size: 24px;
+}
+
+.fw-700{
+  font-weight: 700;
+}
+
 @media (max-width: $bp-phone-lg) {
   .fs-20 {
     font-size: 17px;
