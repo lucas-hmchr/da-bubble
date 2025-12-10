@@ -9,7 +9,7 @@ section {
 }
 
 #chat-container {
-  height: calc(100% - 96px);
+  height: calc(100% - 96px); // dein Original
   padding-bottom: 10px;
   display: flex;
   justify-content: space-between;
@@ -33,7 +33,7 @@ section {
     gap: 16px;
     height: 50px;
 
-    >div {
+    > div {
       position: relative;
       height: 100%;
 
@@ -91,7 +91,6 @@ section {
       cursor: pointer;
     }
   }
-
 }
 
 .add-person {
@@ -107,12 +106,36 @@ section {
   }
 }
 
+/* Nachrichtenbereich / Empty-State */
 .messages-scroll {
   flex: 1;
   min-height: 0;
   overflow-y: auto;
   padding: 16px 35px;
   scroll-behavior: smooth;
+
+  /* wichtig für Empty-State-Positionierung */
+  display: flex;
+  flex-direction: column;
+}
+
+/* Wrapper, damit der Empty-State unten im Chatbereich sitzt */
+.empty-channel-wrapper {
+  flex: 1;
+  display: flex;
+  align-items: flex-end; // Text am unteren Rand der Nachrichtenfläche
+}
+
+/* Feintuning für den Textblock */
+.empty-channel-info {
+  margin-bottom: 32px; // Abstand zur Input-Box
+}
+
+/* Link-Stil wie in der Vorlage */
+.channel-link {
+  color: var(--clr-purple-3);
+  cursor: pointer;
+  text-decoration: none;
 }
 
 .blackborder {
@@ -204,7 +227,7 @@ app-message-input {
     flex-direction: column;
     justify-content: end;
 
-    >div {
+    > div {
       display: flex;
       align-items: end;
       gap: 32px;
@@ -216,14 +239,14 @@ app-message-input {
         aspect-ratio: 1/1;
       }
 
-      >h2 {
+      > h2 {
         padding-bottom: 12px;
         font-size: 24px;
         font-weight: 700;
       }
     }
 
-    >p {
+    > p {
       font-size: 20px;
       color: var(--clr-gray);
 
