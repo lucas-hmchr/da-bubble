@@ -17,8 +17,11 @@ export class LoginForm {
   email = '';
   password = '';
 
-  submitLogin() {
-    this.authService.login(this.email, this.password)
+  showEmailLoginError: boolean = false;
+
+  async submitLogin() {
+    const loginSuccess = await this.authService.login(this.email, this.password)
+    this.showEmailLoginError = loginSuccess ? false : this.resetLoginForm();
   }
 
   triggerGoogleLogin() {
@@ -26,10 +29,12 @@ export class LoginForm {
   }
 
   continueAsGuest() {
-    try {
       this.authService.loginAsGuest();
-    } catch (err) {
-      console.error(err);
-    } 
+  }
+
+  resetLoginForm() {
+    this.password = '';
+    this.email = '';
+    return true;
   }
 }

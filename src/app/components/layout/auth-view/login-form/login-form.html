@@ -12,7 +12,7 @@
         <div class="form-input">
             <img src="/icons/login/lock_passive.svg" alt="" class="form-input-icon">
             <input name="password" type="password" placeholder="Passwort" [(ngModel)]="password" required>
-            @if (false) {
+            @if (showEmailLoginError) {
             <span class="error-message">Falsches Passwort oder E-Mail. Bitte erneut versuchen.</span>
             }
         </div>

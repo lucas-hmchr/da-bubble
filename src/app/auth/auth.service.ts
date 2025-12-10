@@ -68,13 +68,15 @@ export class AuthService {
         });
     }
 
-    async login(email: string, password: string): Promise<void> {
+    async login(email: string, password: string): Promise<boolean> {
         try {
             await signInWithEmailAndPassword(this.auth, email, password);
             this.router.navigate(['/']);
-            this.toast.show('Du bist jetzt eingeloggt!', 4000, '/icons/global/send.svg')
+            this.toast.show('Du bist jetzt eingeloggt!', 4000, '/icons/global/send.svg');
+            return true;
         } catch (error) {
             console.log(error)
+            return false;
         }
     }
 
