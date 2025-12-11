@@ -2,6 +2,7 @@ import { Routes } from '@angular/router';
 import { AppShell } from './components/layout/app-shell/app-shell';
 import { redirectUnauthorizedTo, redirectLoggedInTo, canActivate } from '@angular/fire/auth-guard';
 import { environment } from '../environments/environment';
+import { PolicyView } from './components/layout/policy-view/policy-view';
 
 const redirectUnauthorizedToAuth = () => redirectUnauthorizedTo(['auth']);
 const redirectLoggedInToApp = () => redirectLoggedInTo(['']);
@@ -15,4 +16,6 @@ export const routes: Routes = [
   {
     path: 'auth', loadChildren: () =>
       import('./auth/auth.routes').then(m => m.AUTH_ROUTES), ...guardIfEnabled(redirectLoggedInToApp)},
+    { path: 'impressum', component: PolicyView },
+    { path: 'datenschutz', component: PolicyView },
 ];

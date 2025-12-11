@@ -1,0 +1,40 @@
+<div class="logo-imprint">
+    <img src="icons/global/logo.svg" alt="logo-name" class="which_class_name_i_give_you">
+    <img src="icons/global/logo_name.svg" alt="logo-name">
+</div>
+<div class="imprint-container-main">
+    @if (pageType === 'impressum') {
+    <div class="imprint-section">
+        <div class="imprint-container">
+            <div class="imprint-arrow-back-wrapper" (click)="previousSite()">
+                <img src="\icons\global\arrow_back.svg" alt="arrow-back" class="imprint-arrow-back">
+            </div>
+
+            <div class="imprint-details">
+                <h1>Impressum</h1>
+                <p>[Lucas Hamacher, Steven Bracke, Boban J., Belal Noori]</p>
+                <p>[Deutschland]</p>
+                <p>[20000 Hamburg]</p><br>
+            </div>
+        </div>
+
+        <div class="imprint-container">
+            <div class="imprint-details-contact">
+                <h2>Contact:</h2>
+                <p>Email: [info@belalnoori.de]</p>
+            </div>
+        </div>
+    </div>
+    }
+
+    @if (pageType === 'datenschutz') {
+        <div class="datenschutz-container">
+            <div class="imprint-arrow-back-wrapper" (click)="previousSite()">
+                <img src="\icons\global\arrow_back.svg" alt="arrow-back" class="imprint-arrow-back">
+            </div>
+        </div>
+        <div class="datenschutz-construction">
+            <p>In construction</p>
+        </div>
+    }
+</div>
