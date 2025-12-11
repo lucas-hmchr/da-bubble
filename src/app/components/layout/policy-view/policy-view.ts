@@ -1,39 +1,31 @@
-import { Component, computed, inject, signal } from '@angular/core';
-import { FormsModule, NgForm } from '@angular/forms';
-import { Router, RouterLink } from '@angular/router';
-import { AuthService } from '../../../auth/auth.service';
+import { Component, OnInit } from '@angular/core';
+import { Router, ActivatedRoute } from '@angular/router';
+import { Location } from '@angular/common';
+import { CommonModule } from '@angular/common';
 
 @Component({
   selector: 'app-policy-view',
-  imports: [FormsModule, RouterLink],
+  standalone: true,
+  imports: [],
   templateUrl: './policy-view.html',
   styleUrl: './policy-view.scss',
 })
-export class PolicyView {
-  private router = inject(Router);
-  private authService = inject(AuthService);
+export class PolicyView implements OnInit {
+  pageType: 'impressum' | 'datenschutz' = 'impressum';
 
-  email = '';
-  password = '';
+  constructor(private route: ActivatedRoute, private location: Location) {}
 
-  showEmailLoginError: boolean = false;
+  ngOnInit() {
+    const currentPath = this.route.snapshot.url[0]?.path;
 
-  async submitLogin() {
-    const loginSuccess = await this.authService.login(this.email, this.password);
-    this.showEmailLoginError = loginSuccess ? false : this.resetLoginForm();
+    if (currentPath === 'datenschutz') {
+      this.pageType = 'datenschutz';
+    } else if (currentPath === 'impressum') {
+      this.pageType = 'impressum';
+    }
   }
 
-  triggerGoogleLogin() {
-    this.authService.signInWithGoogle();
-  }
-
-  continueAsGuest() {
-    this.authService.loginAsGuest();
-  }
-
-  resetLoginForm() {
-    this.password = '';
-    this.email = '';
-    return true;
+  previousSite() {
+    this.location.back();
   }
 }

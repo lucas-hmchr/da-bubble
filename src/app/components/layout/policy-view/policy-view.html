@@ -1,44 +1,40 @@
-<p>policy-view works!</p>
-<div class="test">
-    <div class="dialog-container">
-        <div class="auth-form-container">
-            <h1>Anmeldung</h1>
-            <span class="fs-20 text-center">Wir empfehlen dir, die E-Mail-Adresse zu nutzen, die du bei der Arbeit
-                verwendest.</span>
-        </div>
-        <form class="auth-form-container" #form="ngForm" (ngSubmit)="submitLogin()" id="loginForm">
-            <div class="form-input">
-                <img src="/icons/login/mail_passive.svg" alt="" class="form-input-icon">
-                <input name="email" type="email" placeholder="beispielname@email.com" [(ngModel)]="email" required
-                    email>
+<div class="logo-imprint">
+    <img src="icons/global/logo.svg" alt="logo-name" class="which_class_name_i_give_you">
+    <img src="icons/global/logo_name.svg" alt="logo-name">
+</div>
+<div class="imprint-container-main">
+    @if (pageType === 'impressum') {
+    <div class="imprint-section">
+        <div class="imprint-container">
+            <div class="imprint-arrow-back-wrapper" (click)="previousSite()">
+                <img src="\icons\global\arrow_back.svg" alt="arrow-back" class="imprint-arrow-back">
             </div>
-            <div class="form-input">
-                <img src="/icons/login/lock_passive.svg" alt="" class="form-input-icon">
-                <input name="password" type="password" placeholder="Passwort" [(ngModel)]="password" required>
-                @if (showEmailLoginError) {
-                <span class="error-message">Falsches Passwort oder E-Mail. Bitte erneut versuchen.</span>
-                }
+
+            <div class="imprint-details">
+                <h1>Impressum</h1>
+                <p>[Lucas Hamacher, Steven Bracke, Boban J., Belal Noori]</p>
+                <p>[Deutschland]</p>
+                <p>[20000 Hamburg]</p><br>
             </div>
-            <span class="linked-text" routerLink="/auth/password-forgot">Passwort vergessen?</span>
-        </form>
-        <div class="form-divider">
-            <div></div>
-            <span>ODER</span>
         </div>
-        <div class="auth-form-container">
-            <button class="login-google-btn" (click)="triggerGoogleLogin()">
-                <img src="/icons/login/google.svg" alt="">
-                <span>Anmelden mit Google</span>
-            </button>
-        </div>
-        <div class="auth-form-container flex-hor">
-            <button type="submit" class="submit-button" [class]="form.valid ? 'btn-enabled' : 'btn-disabled'"
-                [disabled]="!form.valid" form="loginForm">
-                <span>Anmelden</span>
-            </button>
-            <button class="guest-login-btn" (click)="continueAsGuest()">
-                <span>Gäste-Login</span>
-            </button>
+
+        <div class="imprint-container">
+            <div class="imprint-details-contact">
+                <h2>Contact:</h2>
+                <p>Email: [info@belalnoori.de]</p>
+            </div>
         </div>
     </div>
+    }
+
+    @if (pageType === 'datenschutz') {
+        <div class="datenschutz-container">
+            <div class="imprint-arrow-back-wrapper" (click)="previousSite()">
+                <img src="\icons\global\arrow_back.svg" alt="arrow-back" class="imprint-arrow-back">
+            </div>
+        </div>
+        <div class="datenschutz-construction">
+            <p>In construction</p>
+        </div>
+    }
 </div>

@@ -1,6 +1,6 @@
 import { Component, HostListener, inject } from '@angular/core';
 import { BreakpointObserver } from '@angular/cdk/layout';
-import { AuthService } from '../../../auth/auth.service'; // Pfad ggf. anpassen
+import { AuthService } from '../../../auth/auth.service';
 
 @Component({
   selector: 'app-topbar',
