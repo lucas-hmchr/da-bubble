@@ -15,6 +15,7 @@ import { User } from '../../../models/user.model';
 import { AvatarId, getAvatarById } from '../../../../shared/data/avatars';
 import { MessageInputService } from '../../../services/message-intput.service';
 import { UserService } from '../../../services/user.service';
+// import { getAvatarSrc } from '../../../../shared/data/avatars';
 
 @Component({
   selector: 'app-message-input',
@@ -24,10 +25,11 @@ import { UserService } from '../../../services/user.service';
   styleUrl: './message-input.scss',
 })
 export class MessageInput implements OnInit {
+
   @Input() channel?: Channel;
   @Input() currentUserUid: string | null = null;
   @Input() contextType: 'channel' | 'conversation' = 'channel';
-  @Input() conversationId?: string;
+  @Input() conversationId?: string | null;
 
   @Input() set editingMessage(value: { id: string; text: string } | undefined) {
     this._editingMessage = value;

@@ -53,7 +53,7 @@
             </mat-expansion-panel-header>
 
             <div class="channel-list ml-16">
-              @for (ch of channels(); track ch.id) {
+              @for (ch of allChannels; track ch.id) {
               <div
                 class="channel-item d-flex mb-16 cp"
                 (click)="selectChannel(ch)"
@@ -94,7 +94,7 @@
               </div>
             </mat-expansion-panel-header>
 
-            @for (user of users(); track user.uid) {
+            @for (user of allUsers; track user.uid) {
             <div
               class="account-submenu-container cp"
               (click)="openDirectMessage(user)"

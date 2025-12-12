@@ -27,3 +27,7 @@ export const defaultAvatarId: AvatarId = 'avatar_default';
 export function getAvatarById(id: AvatarId | null | undefined): Avatar {
   return avatars.find(a => a.id === id) ?? avatars.find(a => a.id === defaultAvatarId)!;
 }
+
+export function getAvatarSrc(id: AvatarId): String {
+  return getAvatarById(id).src;
+}
