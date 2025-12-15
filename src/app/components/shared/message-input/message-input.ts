@@ -30,6 +30,7 @@ export class MessageInput implements OnInit {
   @Input() currentUserUid: string | null = null;
   @Input() contextType: 'channel' | 'conversation' = 'channel';
   @Input() conversationId?: string | null;
+  @Input() placeholderText?: string;
 
   @Input() set editingMessage(value: { id: string; text: string } | undefined) {
     this._editingMessage = value;
