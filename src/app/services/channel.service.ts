@@ -51,7 +51,8 @@ export class ChannelService {
     subscribeSelectedChannel(id: string) {
         this.cleanUp();
         this.activeChannelSub = this.getChannel(id).subscribe(ch => {
-            this.activeChannel.set(ch ?? null);
+            // this.activeChannel.set(ch ?? null);
+            this.activeChannel.set(ch ? ({ ...ch, id } as Channel) : null);
             this.updateChannelMembers();
         });
         this.activeMessagesSub = this.getChannelMessages(id).subscribe(msgs => {

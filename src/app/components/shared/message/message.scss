@@ -39,6 +39,8 @@
     gap: 16px;
     padding: 10px 24px;
     position: relative; // für das Reaction-Menü
+    // 14.12. new:
+    z-index: 2;
 
     &:hover {
         cursor: pointer;
@@ -113,31 +115,16 @@ a {
     margin: 10px 0px;
 }
 
-.message-actions {
-    position: absolute;
-    right: 24px;
-    top: 0;
-    transform: translateY(-100%);
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    padding: 4px 10px;
-    background-color: #ffffff;
-    border-radius: 999px;
-    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
 
-    opacity: 0;
-    pointer-events: none;
-    transition:
-        opacity 0.15s ease,
-        transform 0.15s ease;
-}
+
+
 
 .message-content:hover .message-actions {
     opacity: 1;
     pointer-events: auto;
-    transform: translateY(calc(-100% + 25px))
+    transform: translateY(calc(-100% + 25px));
 }
+
 
 .action-btn {
     border: none;
@@ -185,10 +172,8 @@ a {
     gap: 16px;
 }
 
-.message-content.fdrr .message-actions {
-    right: auto;
-    left: 24px;
-}
+
+
 
 .reactions-summary {
     display: flex;
@@ -361,4 +346,86 @@ a {
 
 .reaction-count {
     font-size: 13px;
+}
+
+.message-options-menu {
+    position: absolute;
+    top: 46px; // je nach Höhe eurer Action-Bar ggf. 42–52px
+    //right: 10px; // sitzt unter den drei Punkten rechts
+    right: 0px;
+    width: 250px; // Vorlage wirkt recht breit
+    background: #fff;
+    border-radius: 22px;
+    padding: 10px;
+    box-shadow: 0 18px 50px rgba(0, 0, 0, 0.18);
+    z-index: 9999;
+
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    // 14.12. new:
+    pointer-events: auto;
+}
+
+.message-options-menu.open-up {
+    top: auto;
+    bottom: 46px; // klappt nach oben, Abstand zur Action-Bar
+}
+
+
+.message-options-menu .menu-item {
+    width: 100%;
+    border: 0;
+    background: transparent;
+
+    padding: 18px 16px; // groß wie Vorlage
+    border-radius: 18px; // sehr rund
+    font-size: 16px; // größer wie Vorlage
+    font-weight: 600;
+
+    text-align: center; // Vorlage wirkt zentriert
+    cursor: pointer;
+
+    color: #1f1f1f;
+    transition: background-color 120ms ease, color 120ms ease;
+}
+
+.message-options-menu .menu-item:hover {
+    background: rgba(83, 95, 255, 0.12); // leichtes "lila/blau" Feld wie Vorlage
+    color: #535FFF; // blau/lila Text wie Screenshot 3
+}
+
+.message-wrapper,
+.message-content {
+    overflow: visible;
+}
+
+/* Default: fremde Nachricht (links) -> Action-Bar RECHTS */
+.message-actions {
+    position: absolute;
+    top: 0px;
+    z-index: 50;
+
+    right: 24px;
+    left: auto;
+
+    width: max-content;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 4px 10px;
+    background-color: #ffffff;
+    border-radius: 999px;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+
+    transform: translateY(-100%);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.15s ease, transform 0.15s ease;
+}
+
+/* Eigene Nachricht (fdrr = rechts) -> Action-Bar LINKS */
+.message-content.fdrr .message-actions {
+    left: 24px;
+    right: auto;
 }

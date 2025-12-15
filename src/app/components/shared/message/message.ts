@@ -67,6 +67,9 @@ export class Message implements OnChanges {
 
   reactionPickerForMessageId: string | null = null;
   emojiReactions: ReactionDef[] = EMOJI_REACTIONS as ReactionDef[];
+  optionsMenuForMessageId: string | null = null;
+  openOptionsUp = false;
+  isOptionsMenuHovered = false;
 
   constructor(
     private firestoreService: FirestoreService,
@@ -263,9 +266,64 @@ export class Message implements OnChanges {
     this.reactionPickerForMessageId = null;
   }
 
+  toggleOptionsMenu(msg: MessageData, index: number, total: number, ev?: MouseEvent) {
+    ev?.stopPropagation();
+    if (!msg?.id) return;
+
+    const isSame = this.optionsMenuForMessageId === msg.id;
+    this.optionsMenuForMessageId = isSame ? null : msg.id;
+
+    // nur wenn wir wirklich öffnen:
+    if (!isSame) {
+      const isLastMessage = index === total - 1;
+      this.openOptionsUp = isLastMessage;
+    }
+  }
+
+  closeOverlays() {
+    this.reactionPickerForMessageId = null;
+    this.optionsMenuForMessageId = null;
+    this.hoveredReaction = null;
+    this.hoveredMessageId = null;
+  }
+
+  async onDeleteMessage(msg: any) {
+    if (!msg?.id) return;
+    if (!this.isOwnMessage(msg)) return;
+
+    if (this.contextType === 'channel' && this.channel?.id) {
+      await this.messageService.deleteChannelMessage(this.channel.id, msg.id);
+      return;
+    }
+
+    if (this.contextType === 'conversation' && this.conversationId) {
+      await this.messageService.deleteConversationMessage(this.conversationId, msg.id);
+      return;
+    }
+  }
+
+
+  // onMessageMouseLeave(msg: MessageData) {
+  //   if (this.reactionPickerForMessageId === msg.id) {
+  //     this.reactionPickerForMessageId = null;
+  //   }
+  // }
+
   onMessageMouseLeave(msg: MessageData) {
+    // Wenn die Maus gerade im Options-Menü ist, NICHT schließen
+    if (this.isOptionsMenuHovered) return;
+
     if (this.reactionPickerForMessageId === msg.id) {
       this.reactionPickerForMessageId = null;
+    }
+
+    this.closeOverlays();
+  }
+
+
+  closeOptionsIfNeeded() {
+    if (!this.isOptionsMenuHovered) {
+      this.optionsMenuForMessageId = null;
     }
   }
 

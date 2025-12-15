@@ -17,6 +17,16 @@ export class MessageService {
         private firestore: FirestoreService
     ) { }
 
+    // new 14.12.:
+    deleteChannelMessage(channelId: string, messageId: string) {
+        return this.firestore.deleteDocument(`channels/${channelId}/messages`, messageId);
+    }
+
+    // new 14.12.:
+    deleteConversationMessage(conversationId: string, messageId: string) {
+        return this.firestore.deleteDocument(`conversations/${conversationId}/messages`, messageId);
+    }
+
     private createMessage(text: string, senderId: string, now: Date): MessageData {
         return {
             text,

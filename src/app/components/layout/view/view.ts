@@ -138,8 +138,13 @@ export class View {
     return this.allChannels.find(c => c.id === this.selectedRecipient!.id);
   }
 
-  onEditRequested(payload: { id: string; text: string }) {
-    this.editingMessage = payload;
+  // onEditRequested(payload: { id: string; text: string }) {
+  //   this.editingMessage = payload;
+  // }
+
+  onEditRequested(msg: MessageData) {
+    if (!msg.id) return;
+    this.editingMessage = { id: msg.id, text: msg.text };
   }
 
   onEditFinished() {

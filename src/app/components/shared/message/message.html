@@ -1,7 +1,7 @@
 <div class="message-container">
   <ng-container *ngIf="messages$ | async as msgs">
     <div *ngIf="msgs.length === 0" class="empty-channel-info">
-      <span class="fw-700 fs-24"># {{channel?.name}}</span>
+      <span class="fw-700 fs-24"># {{ channel?.name }}</span>
       <p>Sei der Erste, der eine Nachricht in diesem Channel schreibt!</p>
     </div>
 
@@ -12,6 +12,7 @@
         </span>
       </div>
 
+      <!-- WICHTIG: mouseleave bleibt, aber das Options-Menü setzt einen "hover lock" -->
       <div class="message-content" [ngClass]="{ fdrr: isOwnMessage(msg) }" (mouseleave)="onMessageMouseLeave(msg)">
         <div class="message-actions">
           <img src="/icons/global/check1.svg" alt="" class="action-btn check-btn"
@@ -22,10 +23,25 @@
           <img src="/icons/global/reaction1.svg" alt="" class="action-btn reaction-btn"
             (click)="onToggleReactionPicker(msg)" />
 
-          <img src="/icons/global/answer1.svg" alt="" class="action-btn answer-btn" />
+          <img *ngIf="contextType === 'channel'" src="/icons/global/answer1.svg" alt="" class="action-btn answer-btn" />
 
+          <!-- 3-Punkte nur bei eigener Message -->
           <img *ngIf="isOwnMessage(msg)" src="/icons/global/option1.svg" alt="" class="action-btn option-btn"
-            (click)="onEditMessage(msg)" />
+            (click)="toggleOptionsMenu(msg, i, msgs.length, $event)" />
+
+
+          <!-- Options-Menü (Hover lock, damit darunter nichts reagiert) -->
+          <div class="message-options-menu" [class.open-up]="openOptionsUp"
+            *ngIf="isOwnMessage(msg) && optionsMenuForMessageId === msg.id" (mouseenter)="isOptionsMenuHovered = true"
+            (mouseleave)="isOptionsMenuHovered = false; closeOverlays()" (click)="$event.stopPropagation()">
+            <button class="menu-item" type="button" (click)="onEditMessage(msg); closeOverlays()">
+              Nachricht bearbeiten
+            </button>
+
+            <button class="menu-item" type="button" (click)="onDeleteMessage(msg); closeOverlays()">
+              Nachricht löschen
+            </button>
+          </div>
         </div>
 
         <div class="reaction-picker" *ngIf="reactionPickerForMessageId === msg.id">
@@ -51,17 +67,11 @@
           </p>
 
           <div class="reactions-summary" *ngIf="msg.reactions && hasReactions(msg)">
-            <button
-              class="reaction-chip"
-              *ngFor="let rid of getReactionIds(msg)"
-              [ngClass]="{
+            <button class="reaction-chip" *ngFor="let rid of getReactionIds(msg)" [ngClass]="{
                 'mine': hasCurrentUserReaction(msg, rid),
                 'own-message': isOwnMessage(msg)
-              }"
-              (click)="toggleReaction(msg, rid)"
-              (mouseenter)="onHoverReaction(msg.id!, rid)"
-              (mouseleave)="onLeaveReaction()"
-            >
+              }" (click)="toggleReaction(msg, rid)" (mouseenter)="onHoverReaction(msg.id!, rid)"
+              (mouseleave)="onLeaveReaction()">
               <ng-container *ngIf="getReactionDefById(rid) as def">
                 <img *ngIf="!def.isEmoji" [src]="def.icon" alt="" class="reaction-icon" />
                 <span *ngIf="def.isEmoji" class="reaction-emoji">
@@ -86,7 +96,6 @@
                   hat reagiert
                 </div>
               </div>
-
             </button>
           </div>
 
