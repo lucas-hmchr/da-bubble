@@ -30,6 +30,7 @@ export class MessageInput implements OnInit {
   @Input() currentUserUid: string | null = null;
   @Input() contextType: 'channel' | 'conversation' = 'channel';
   @Input() conversationId?: string | null;
+  @Input() forceEditable = false;
   @Input() placeholderText?: string;
 
   @Input() set editingMessage(value: { id: string; text: string } | undefined) {
@@ -154,7 +155,11 @@ export class MessageInput implements OnInit {
   onEnter(event: KeyboardEvent | Event) {
     if ((event as KeyboardEvent).shiftKey) return;
 
-    if (this.contextType === 'channel' && !this.isChannelMember) {
+    // if (this.contextType === 'channel' && !this.isChannelMember) {
+    //   event.preventDefault();
+    //   return;
+    // }
+    if (this.isReadOnly) {
       event.preventDefault();
       return;
     }
@@ -203,48 +208,48 @@ export class MessageInput implements OnInit {
   }
 
 
-private async handleChannelSend(text: string, senderId: string): Promise<string> {
-  if (!this.channel?.id) {
-    console.warn('Kein Channel gesetzt.');
-    return '';
+  private async handleChannelSend(text: string, senderId: string): Promise<string> {
+    if (!this.channel?.id) {
+      console.warn('Kein Channel gesetzt.');
+      return '';
+    }
+
+    const channelId = this.channel.id as string;
+
+    if (this.isEditing && this.editingMessage?.id) {
+      await this.messageService.updateChannelMessage(
+        channelId,
+        this.editingMessage.id,
+        text
+      );
+    } else {
+      await this.messageService.sendChannelMessage(channelId, text, senderId);
+    }
+
+    return channelId;
   }
 
-  const channelId = this.channel.id as string;
 
-  if (this.isEditing && this.editingMessage?.id) {
-    await this.messageService.updateChannelMessage(
-      channelId,
-      this.editingMessage.id,
-      text
-    );
-  } else {
-    await this.messageService.sendChannelMessage(channelId, text, senderId);
+  private async handleConversationSend(text: string, senderId: string): Promise<string> {
+    if (!this.conversationId) {
+      console.warn('Keine Conversation-ID gesetzt.');
+      return '';
+    }
+
+    const convId = this.conversationId;
+
+    if (this.isEditing && this.editingMessage?.id) {
+      await this.messageService.updateConversationMessage(
+        convId,
+        this.editingMessage.id,
+        text
+      );
+    } else {
+      await this.messageService.sendConversationMessage(convId, text, senderId);
+    }
+
+    return convId;
   }
-
-  return channelId;
-}
-
-
-private async handleConversationSend(text: string, senderId: string): Promise<string> {
-  if (!this.conversationId) {
-    console.warn('Keine Conversation-ID gesetzt.');
-    return '';
-  }
-
-  const convId = this.conversationId;
-
-  if (this.isEditing && this.editingMessage?.id) {
-    await this.messageService.updateConversationMessage(
-      convId,
-      this.editingMessage.id,
-      text
-    );
-  } else {
-    await this.messageService.sendConversationMessage(convId, text, senderId);
-  }
-
-  return convId;
-}
 
 
   private afterSend() {
@@ -343,14 +348,31 @@ private async handleConversationSend(text: string, senderId: string): Promise<st
   }
 
 
+  // get isChannelMember(): boolean {
+  //   if (this.contextType !== 'channel') return true;
+  //   if (!this.channel || !this.currentUserUid) return false;
+  //   const members = (this.channel.members ?? []) as string[];
+  //   return members.includes(this.currentUserUid);
+  // }
   get isChannelMember(): boolean {
     if (this.contextType !== 'channel') return true;
+
+    // Public Default-Channel
+    if (this.channel?.id === 'general') return true;
     if (!this.channel || !this.currentUserUid) return false;
+
     const members = (this.channel.members ?? []) as string[];
     return members.includes(this.currentUserUid);
   }
 
+
+  // get isReadOnly(): boolean {
+  //   return this.contextType === 'channel' && !this.isChannelMember;
+  // }
+
   get isReadOnly(): boolean {
+    // NEW MESSAGE VIEW / freier Modus: niemals read-only
+    if (this.forceEditable) return false;
     return this.contextType === 'channel' && !this.isChannelMember;
   }
 }

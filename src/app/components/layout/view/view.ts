@@ -1,4 +1,4 @@
-import { Component, Input, effect } from '@angular/core';
+import { Component, Input, effect, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 
 import { FirestoreService } from '../../../services/firestore';
@@ -12,6 +12,8 @@ import { UserService } from '../../../services/user.service';
 import { ChatContextService, ChatContextType } from '../../../services/chat-context.service';
 import { ChannelService } from '../../../services/channel.service';
 import { ConversationService } from '../../../services/conversation.service';
+import { NewMessageService } from '../../../services/new-message.service';
+import { ViewStateService } from '../../../services/view-state.service';
 
 type RecipientType = 'channel' | 'user' | null;
 
@@ -30,7 +32,8 @@ interface RecipientSuggestion {
   styleUrls: ['./view.scss'],
 })
 export class View {
-
+  public newMessage = inject(NewMessageService);
+  public viewState = inject(ViewStateService);
   @Input() currentUserUid: string | null = null;
   contextType: ChatContextType = 'channel';
   editingMessage: { id: string; text: string } | null = null;
@@ -150,4 +153,9 @@ export class View {
   onEditFinished() {
     this.editingMessage = null;
   }
+
+  onNewMessageToKeyup(event: KeyboardEvent) {
+  const input = event.target as HTMLInputElement;
+  this.newMessage.setQuery(input.value);
+}
 }

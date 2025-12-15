@@ -142,6 +142,10 @@ app-message-input,
   padding: 16px 24px;
 }
 
+.new-message-top {
+  padding: 28px 28px 12px 28px;
+}
+
 .recipient-input-wrapper {
   padding: 0 24px 16px 24px;
   position: relative;
@@ -241,4 +245,79 @@ app-message-input,
       }
     }
   }
+}
+
+.new-message-view {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  padding: 28px 28px 22px 28px;
+}
+
+.new-message-header {
+  margin-bottom: 18px;
+
+  h2 {
+    margin: 0;
+    font-size: 28px;
+    font-weight: 700;
+  }
+}
+
+.new-message-to-row {
+  position: relative;
+  // margin-bottom: 16px;
+}
+
+.new-message-to-input {
+  width: 100%;
+  height: 44px;
+  border: 1px solid #cfd2ff;
+  border-radius: 22px;
+  padding: 0 18px;
+  font-size: 16px;
+  outline: none;
+  background: #fff;
+
+  &:focus {
+    border-color: #535fff;
+  }
+}
+
+/* sorgt dafür, dass der Input unten bleibt (großer Leerbereich dazwischen) */
+.new-message-body-spacer {
+  flex: 1 1 auto;
+}
+
+.new-message-to-row {
+  position: relative;
+}
+
+.to-autocomplete {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 52px;
+  background: #fff;
+  border-radius: 16px;
+  box-shadow: 0 12px 40px rgba(0,0,0,.12);
+  padding: 8px;
+  z-index: 100;
+}
+
+.to-item {
+  padding: 10px 12px;
+  border-radius: 12px;
+  cursor: pointer;
+  display: flex;
+  gap: 8px;
+  align-items: center;
+
+  &:hover {
+    background: rgba(83, 95, 255, 0.10);
+  }
+}
+
+.to-hash, .to-at {
+  font-weight: 700;
 }
