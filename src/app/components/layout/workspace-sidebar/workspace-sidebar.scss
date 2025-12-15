@@ -50,11 +50,13 @@
     &:hover {
         color: #535AF1;
         font-weight: 700;
+
+        .show-menu-icon {
+            content: url(/icons/global/show_menu_hover.svg);
+        }
     }
 
-    .show-menu-icon:hover {
-        content: url(/icons/global/show_menu_hover.svg);
-    }
+
 }
 
 .left-menu-sidenav {
