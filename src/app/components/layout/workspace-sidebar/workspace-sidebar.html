@@ -29,13 +29,16 @@
                             </div>
                         </mat-expansion-panel-header>
 
-                        <div class="channel-list ml-16">
-                            @for (ch of channels(); track ch.id) {
-                            <div class="channel-item d-flex mb-16 cp" (click)="selectChannel(ch)">
-                                <img src="/icons/global/tag.svg" class="mr-8" alt="" />
-                                {{ ch.name }}
-                            </div>
-                            }
+            <div class="channel-list ml-16">
+              @for (ch of allChannels; track ch.id) {
+              <div
+                class="channel-item d-flex mb-16 cp"
+                (click)="selectChannel(ch)"
+              >
+                <img src="/icons/global/tag.svg" class="mr-8" alt="" />
+                {{ ch.name }}
+              </div>
+              }
 
                             <div class="channel-add cp" (click)="openAddChannelDialog()">
                                 <img src="/icons/global/add_circle.svg" class="mr-8" alt="" />
@@ -58,27 +61,34 @@
                             </div>
                         </mat-expansion-panel-header>
 
-                        @for (user of users(); track user.uid) {
-                        <div class="account-submenu-container cp" (click)="openDirectMessage(user)">
-                            <div class="account-avatar-name">
-                                <img [src]="getAvatarPath(user)" class="avatar mr-8" alt="" />
-                                <span>
-                                    {{ user.displayName || user.name || 'Unbekannter Nutzer' }}
-                                    @if (user.uid === currentUserUid) {
-                                    <span>&nbsp;(Du)</span>
-                                    }
-                                </span>
-                            </div>
-                            <div class="online-status-container">
-                                <img [src]="userService.getOnlineStatusIcon(user)" alt="" />
-                            </div>
-                        </div>
-                        }
-                    </mat-expansion-panel>
-                </mat-accordion>
+            @for (user of allUsers; track user.uid) {
+            <div
+              class="account-submenu-container cp"
+              (click)="openDirectMessage(user)"
+            >
+              <div class="account-avatar-name">
+                <img
+                  [src]="getAvatarPath(user)"
+                  class="avatar mr-8"
+                  alt=""
+                />
+                <span>
+                  {{ user.displayName || user.name || 'Unbekannter Nutzer' }}
+                  @if (user.uid === currentUserUid) {
+                    <span>&nbsp;(Du)</span>
+                  }
+                </span>
+              </div>
+              <div class="online-status-container">
+                <img [src]="userService.getOnlineStatusIcon(user)" alt="" />
+              </div>
             </div>
-        </mat-drawer>
-    </mat-drawer-container>
+            }
+          </mat-expansion-panel>
+        </mat-accordion>
+      </div>
+    </mat-drawer>
+  </mat-drawer-container>
 
     <div class="left-menu-button-icon-container cp fs-20" (click)="drawer.toggle()">
         <div class="left-menu-button">{{ drawer.opened ? 'Workspace-Menü schließen' : 'Workspace-Menü öffnen' }}

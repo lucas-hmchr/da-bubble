@@ -113,6 +113,9 @@ section {
   overflow-y: auto;
   padding: 16px 35px;
   scroll-behavior: smooth;
+  // new 14.12.:
+  position: relative;
+  z-index: 1;
 }
 
 .blackborder {
@@ -121,6 +124,12 @@ section {
 
 app-message-input {
   flex-shrink: 0;
+}
+
+app-message-input,
+#message-container {
+  position: relative;
+  z-index: 1; // bewusst klein halten
 }
 
 .new-message-view {

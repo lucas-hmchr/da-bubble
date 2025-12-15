@@ -1,5 +1,6 @@
-import { Component, OnInit, Input, effect } from '@angular/core';
+import { Component, Input, effect } from '@angular/core';
 import { CommonModule } from '@angular/common';
+
 import { FirestoreService } from '../../../services/firestore';
 import { MessageInput } from '../../shared/message-input/message-input';
 import { Message } from '../../shared/message/message';
@@ -7,8 +8,10 @@ import { Channel } from '../../../models/channel.interface';
 import { MessageData } from '../../../models/message.interface';
 import { getAvatarById } from '../../../../shared/data/avatars';
 import { User } from '../../../models/user.model';
-import { ChannelSelectionService, ViewMode } from '../../../services/channel-selection.service';
 import { UserService } from '../../../services/user.service';
+import { ChatContextService, ChatContextType } from '../../../services/chat-context.service';
+import { ChannelService } from '../../../services/channel.service';
+import { ConversationService } from '../../../services/conversation.service';
 
 type RecipientType = 'channel' | 'user' | null;
 
@@ -26,19 +29,11 @@ interface RecipientSuggestion {
   templateUrl: './view.html',
   styleUrls: ['./view.scss'],
 })
-export class View implements OnInit {
+export class View {
 
   @Input() currentUserUid: string | null = null;
-
-  channel?: Channel;
-  editingMessage?: { id: string; text: string };
-  channelMembers: User[] = [];
-  allChannels: Channel[] = [];
-  allUsers: User[] = [];
-
-  viewMode: ViewMode = 'channel';
-
-  selectedDmUser: User | null = null;
+  contextType: ChatContextType = 'channel';
+  editingMessage: { id: string; text: string } | null = null;
 
   recipientInputValue = '';
   recipientSuggestions: RecipientSuggestion[] = [];
@@ -46,80 +41,65 @@ export class View implements OnInit {
   selectedRecipient: RecipientSuggestion | null = null;
 
   constructor(
-    private firestoreService: FirestoreService,
-    private channelSelection: ChannelSelectionService,
+    private firestore: FirestoreService,
+    private channelService: ChannelService,
+    private conversationService: ConversationService,
+    private chatContext: ChatContextService,
     public userService: UserService,
   ) {
 
-    this.firestoreService.getCollection<User>('users').subscribe(users => {
-      this.allUsers = users;
-      this.updateChannelMembers();
-      this.updateSelectedDmUser();
-    });
-
     effect(() => {
-      const mode = this.channelSelection.mode();
-      const channelId = this.channelSelection.activeChannelId();
-      const dmUserId = this.channelSelection.activeDmUserId();
+      const type = this.chatContext.contextType();
+      const channelId = this.chatContext.channelId();
+      const convId = this.chatContext.convId();
 
-      this.viewMode = mode;
+      this.contextType = type;
 
-      if (mode === 'channel' && channelId) {
-        this.loadChannelById(channelId);
-        this.selectedDmUser = null;
-      }
-
-      if (mode === 'dm' && dmUserId) {
-        this.channel = undefined;
-        this.selectedRecipient = null;
-        this.recipientInputValue = '';
-        this.showRecipientSuggestions = false;
-        this.selectedDmUser =
-          this.allUsers.find(u => u.uid === dmUserId) ?? null;
-      }
-
-      if (mode === 'newMessage') {
-        this.channel = undefined;
-        this.selectedDmUser = null;
-        this.selectedRecipient = null;
-        this.recipientInputValue = '';
-        this.recipientSuggestions = [];
-        this.showRecipientSuggestions = false;
+      if (type === 'channel' && channelId) {
+        this.channelService.subscribeSelectedChannel(channelId);
+        this.conversationService.cleanup();
+        this.resetNewMessageState();
+      } else if (type === 'dm' && convId) {
+        this.conversationService.subscribeToConversation(convId);
+        this.resetNewMessageState();
+      } else if (type === 'new') {
+        this.conversationService.cleanup();
+        this.channelService.cleanUp();
+        this.resetNewMessageState();
       }
     });
   }
 
-  ngOnInit(): void {
-    this.firestoreService.getCollection<Channel>('channels')
-      .subscribe(chs => this.allChannels = chs);
+  get channel(): Channel | null {
+    return this.channelService.activeChannel();
   }
 
+  get channelMessages(): MessageData[] {
+    return this.channelService.activeChannelMessages();
+  }
 
-loadChannelById(channelId: string) {
-  this.firestoreService
-    .getDocument<Channel>(`channels/${channelId}`)
-    .subscribe(ch => {
-      if (!ch) {
-        this.channel = undefined;
-        return;
-      }
+  get channelMembers(): User[] {
+    return this.channelService.channelMembers();
+  }
 
-      this.channel = { ...ch, id: channelId } as Channel;
+  get allChannels(): Channel[] {
+    return this.channelService.channels();
+  }
 
-      this.viewMode = 'channel';
+  get allUsers(): User[] {
+    return this.firestore.userList();
+  }
 
-      this.updateChannelMembers();
-    });
-}
+  get dmMessages(): MessageData[] {
+    return this.conversationService.activeConversationMessages();
+  }
 
+  get dmPartner(): User | null {
+    return this.conversationService.activeConversationPartner();
+  }
 
-  private updateChannelMembers() {
-    if (!this.channel?.members || this.allUsers.length === 0) {
-      this.channelMembers = [];
-      return;
-    }
-    const memberIds = this.channel.members as string[];
-    this.channelMembers = this.allUsers.filter(u => u.uid && memberIds.includes(u.uid));
+  get dmConversationId(): string | null {
+    return this.conversationService.activeConversationId();
   }
 
   getAvatarSrc(user: User): string {
@@ -129,85 +109,11 @@ loadChannelById(channelId: string) {
     return '/images/avatars/avatar_default.svg';
   }
 
-
-  private updateSelectedDmUser() {
-    const dmUserId = this.channelSelection.activeDmUserId();
-    if (!dmUserId) {
-      this.selectedDmUser = null;
-      return;
-    }
-    this.selectedDmUser = this.allUsers.find(u => u.uid === dmUserId) ?? null;
-  }
-
-  get currentConversationId(): string | undefined {
-    if (!this.currentUserUid || !this.selectedDmUser?.uid) return undefined;
-    const ids = [this.currentUserUid, this.selectedDmUser.uid].sort();
-    return ids.join('_');
-  }
-
-
-  onRecipientInput(event: Event) {
-    const value = (event.target as HTMLInputElement).value;
-    this.recipientInputValue = value;
-    this.selectedRecipient = null;
-
-    const trimmed = value.trim();
-    if (!trimmed) {
-      this.recipientSuggestions = [];
-      this.showRecipientSuggestions = false;
-      return;
-    }
-
-    if (trimmed.startsWith('#')) {
-      const q = trimmed.slice(1).toLowerCase();
-      const matches = this.allChannels.filter(c =>
-        (c.name ?? '').toLowerCase().includes(q)
-      );
-      this.recipientSuggestions = matches.map(c => ({
-        type: 'channel' as const,
-        id: c.id as string,
-        label: `#${c.name}`,
-        detail: 'Channel',
-      }));
-      this.showRecipientSuggestions = this.recipientSuggestions.length > 0;
-      return;
-    }
-
-    if (trimmed.startsWith('@')) {
-      const q = trimmed.slice(1).toLowerCase();
-      const matches = this.allUsers.filter(u =>
-        (u.displayName ?? u.name ?? u.email ?? '')
-          .toLowerCase()
-          .includes(q)
-      );
-      this.recipientSuggestions = matches.map(u => ({
-        type: 'user' as const,
-        id: u.uid!,
-        label: u.displayName ?? u.name ?? u.email ?? 'Unbekannter Nutzer',
-        detail: 'Mitglied',
-      }));
-      this.showRecipientSuggestions = this.recipientSuggestions.length > 0;
-      return;
-    }
-
+  private resetNewMessageState() {
+    this.recipientInputValue = '';
     this.recipientSuggestions = [];
     this.showRecipientSuggestions = false;
-  }
-
-  onSelectRecipient(s: RecipientSuggestion) {
-    this.selectedRecipient = s;
-    this.recipientInputValue = s.label;
-    this.showRecipientSuggestions = false;
-  }
-
-
-  onEditRequested(msg: MessageData) {
-    if (!msg.id) return;
-    this.editingMessage = { id: msg.id as string, text: msg.text };
-  }
-
-  onEditFinished() {
-    this.editingMessage = undefined;
+    this.selectedRecipient = null;
   }
 
   onNewMessageSent(evt: {
@@ -216,7 +122,12 @@ loadChannelById(channelId: string) {
     conversationId?: string;
   }) {
     if (evt.contextType === 'channel' && evt.channelId) {
-      this.channelSelection.setActiveChannelId(evt.channelId);
+      this.chatContext.openChannel(evt.channelId);
+    }
+
+    if (evt.contextType === 'conversation' && evt.conversationId) {
+      // hier wird noch die conversation id statt der id des other Users übergeben - allgemeine anpassung der funktion? 
+      this.chatContext.openConversation(evt.conversationId);
     }
   }
 
@@ -224,8 +135,19 @@ loadChannelById(channelId: string) {
     if (!this.selectedRecipient || this.selectedRecipient.type !== 'channel') {
       return undefined;
     }
-
     return this.allChannels.find(c => c.id === this.selectedRecipient!.id);
   }
 
+  // onEditRequested(payload: { id: string; text: string }) {
+  //   this.editingMessage = payload;
+  // }
+
+  onEditRequested(msg: MessageData) {
+    if (!msg.id) return;
+    this.editingMessage = { id: msg.id, text: msg.text };
+  }
+
+  onEditFinished() {
+    this.editingMessage = null;
+  }
 }

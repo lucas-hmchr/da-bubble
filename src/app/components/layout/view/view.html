@@ -1,111 +1,113 @@
 <section>
 
-  <ng-container *ngIf="viewMode === 'channel' && channel as activeChannel; else notChannelView">
+  <!-- CHANNEL VIEW -->
+  @if (contextType === 'channel' && channel) {
 
-    <header class="dm-header">
-      <div class="channel-header-left">
-        <h2 class="fw-700 fs-24"># {{ activeChannel.name }}</h2>
-        <img src="/icons/global/keyboard_arrow_down.svg" alt="">
-      </div>
-
-      <div class="channel-members">
-        <div class="member-avatars">
-          <ng-container *ngFor="let u of channelMembers | slice: 0:3">
-            <img class="member-avatar" [src]="getAvatarSrc(u)" [alt]="u.displayName || u.name || 'User'" />
-          </ng-container>
-        </div>
-
-        <span>{{ channelMembers.length }}</span>
-
-        <img class="add-person" src="/icons/global/person_add1.svg" alt="">
-      </div>
-    </header>
-
-    <div id="chat-container">
-      <div class="messages-scroll">
-        <app-message [channel]="activeChannel" [currentUserUid]="currentUserUid"
-          (editRequested)="onEditRequested($event)"></app-message>
-      </div>
-
-      <app-message-input [channel]="activeChannel" [currentUserUid]="currentUserUid" [editingMessage]="editingMessage"
-        (editFinished)="onEditFinished()"></app-message-input>
+  <header class="dm-header">
+    <div class="channel-header-left">
+      <h2 class="fw-700 fs-24"># {{ channel.name }}</h2>
+      <img src="/icons/global/keyboard_arrow_down.svg" alt="">
     </div>
 
-  </ng-container>
-
-  <ng-template #notChannelView>
-
-    <ng-container *ngIf="viewMode === 'dm' && selectedDmUser; else newMessageView">
-
-      <header class="dm-header">
-        <div class="dm-header-left">
-          <div>
-            <img class="dm-header-avatar" [src]="getAvatarSrc(selectedDmUser!)"
-              [alt]="selectedDmUser!.displayName || selectedDmUser!.name || 'User'" />
-            <img class="online-icon" [src]="userService.getOnlineStatusIcon(selectedDmUser)" alt="">
-          </div>
-          <span class="dm-header-name fw-700 fs-24">
-            {{ selectedDmUser!.displayName || selectedDmUser!.name || 'Unbekannter Nutzer' }}
-          </span>
-        </div>
-      </header>
-
-      <div class="dm-body">
-        <div class="dm-intro">
-          <div>
-            <img class="dm-intro-avatar" [src]="getAvatarSrc(selectedDmUser!)"
-              [alt]="selectedDmUser!.displayName || selectedDmUser!.name || 'User'" />
-            <h2>{{ selectedDmUser!.displayName || selectedDmUser!.name || 'Unbekannter Nutzer' }}</h2>
-          </div>
-          <p>
-            Diese Unterhaltung findet nur zwischen
-            <span class="dm-mention">@{{ selectedDmUser!.displayName || selectedDmUser!.name }}</span>
-            und dir statt.
-          </p>
-        </div>
+    <div class="channel-members">
+      <div class="member-avatars">
+        @for (u of channelMembers | slice:0:3; track u.uid ?? $index) {
+        <img class="member-avatar" [src]="getAvatarSrc(u)" [alt]="u.displayName || u.name || 'User'" />
+        }
       </div>
 
-      <app-message-input [currentUserUid]="currentUserUid" [contextType]="'conversation'"
-        [conversationId]="currentConversationId"></app-message-input>
+      <span>{{ channelMembers.length }}</span>
 
-    </ng-container>
+      <img class="add-person" src="/icons/global/person_add1.svg" alt="">
+    </div>
+  </header>
 
-    <ng-template #newMessageView>
-      <section class="new-message-view">
+  <div id="chat-container">
+    <div class="messages-scroll">
+      <app-message [channel]="channel" [currentUserUid]="currentUserUid" (editRequested)="onEditRequested($event)">
+      </app-message>
+    </div>
 
-        <header class="new-message-header">
-          <h2>Neue Nachricht</h2>
-        </header>
+    <app-message-input [channel]="channel" [currentUserUid]="currentUserUid"
+      [editingMessage]="editingMessage ?? undefined" (editFinished)="onEditFinished()">
+    </app-message-input>
+  </div>
 
-        <div class="recipient-input-wrapper">
-          <input type="text" class="recipient-input" placeholder="An: #channel oder @jemand oder E-Mail Adresse"
-            [value]="recipientInputValue" (input)="onRecipientInput($event)" />
+  <!-- DIRECT MESSAGE VIEW -->
+  } @else if (contextType === 'dm' && dmPartner) {
 
-          <div class="recipient-suggestions" *ngIf="showRecipientSuggestions">
-            <div class="recipient-suggestion" *ngFor="let s of recipientSuggestions" (click)="onSelectRecipient(s)">
-              <span class="suggestion-prefix">
-                {{ s.type === 'channel' ? '#' : (s.type === 'user' ? '@' : '') }}
-              </span>
+  <header class="dm-header">
+    <div class="dm-header-left">
+      <div>
+        <img class="dm-header-avatar" [src]="getAvatarSrc(dmPartner)"
+          [alt]="dmPartner.displayName || dmPartner.name || 'User'" />
+        <img class="online-icon" [src]="userService.getOnlineStatusIcon(dmPartner)" alt="">
+      </div>
+      <span class="dm-header-name fw-700 fs-24">
+        {{ dmPartner.displayName || dmPartner.name || 'Unbekannter Nutzer' }}
+      </span>
+    </div>
+  </header>
 
-              <div class="suggestion-texts">
-                <span class="suggestion-label">{{ s.label }}</span>
-                <span class="suggestion-detail" *ngIf="s.detail">{{ s.detail }}</span>
-              </div>
-            </div>
-          </div>
-        </div>
+  @if (dmMessages.length === 0) {
 
-        <div class="new-message-body"></div>
+  <!-- EMPTY DM (Design bleibt wie aktuell) -->
+  <div class="dm-body">
+    <div class="dm-intro">
+      <div>
+        <img class="dm-intro-avatar" [src]="getAvatarSrc(dmPartner)"
+          [alt]="dmPartner.displayName || dmPartner.name || 'User'" />
+        <h2>{{ dmPartner.displayName || dmPartner.name || 'Unbekannter Nutzer' }}</h2>
+      </div>
+      <p>
+        Diese Unterhaltung findet nur zwischen
+        <span class="dm-mention">
+          @{{ dmPartner.displayName || dmPartner.name }}
+        </span>
+        und dir statt.
+      </p>
+    </div>
+  </div>
 
-        <app-message-input [currentUserUid]="currentUserUid"
-          [contextType]="selectedRecipient?.type === 'channel' ? 'channel' : 'conversation'"
-          [channel]="getSelectedRecipientChannel()" [conversationId]="selectedRecipient?.type === 'user'
-  ? selectedRecipient?.id
-  : undefined" (messageSent)="onNewMessageSent($event)"></app-message-input>
+  <app-message-input [currentUserUid]="currentUserUid" [contextType]="'conversation'"
+    [conversationId]="dmConversationId">
+  </app-message-input>
 
-      </section>
-    </ng-template>
+  } @else {
 
-  </ng-template>
+  <!-- DM WITH MESSAGES (wie Channel) -->
+  <div id="chat-container">
+    <div class="messages-scroll">
+<app-message
+  [contextType]="'conversation'"
+  [conversationId]="dmConversationId"
+  [currentUserUid]="currentUserUid"
+  (editRequested)="onEditRequested($event)">
+</app-message>
+    </div>
+
+    <app-message-input [currentUserUid]="currentUserUid" [contextType]="'conversation'"
+      [conversationId]="dmConversationId" [editingMessage]="editingMessage ?? undefined"
+      (editFinished)="onEditFinished()">
+    </app-message-input>
+  </div>
+
+  }
+
+  <!-- NEW MESSAGE VIEW (Platzhalter) -->
+  } @else {
+
+  <section class="new-message-view">
+    <header class="new-message-header">
+      <h2>Neue Nachricht</h2>
+    </header>
+
+    <p>
+      Der „Neue Nachricht“-Flow wird gerade umgebaut.
+      Wähle oben links einen Channel oder Nutzer, um einen Chat zu öffnen.
+    </p>
+  </section>
+
+  }
 
 </section>

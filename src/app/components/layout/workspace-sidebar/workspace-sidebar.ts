@@ -8,9 +8,12 @@ import { AddChannelDialog } from '../../add-channel-dialog/add-channel-dialog';
 import { Channel } from '../../../models/channel.interface';
 import { User } from '../../../models/user.model';
 import { FirestoreService } from '../../../services/firestore';
-import { getAvatarById } from '../../../../shared/data/avatars';
+import { getAvatarById, getAvatarSrc } from '../../../../shared/data/avatars';
 import { UserService } from '../../../services/user.service';
 import { ChannelSelectionService } from '../../../services/channel-selection.service';
+import { ChannelService } from '../../../services/channel.service';
+import { ChatContextService } from '../../../services/chat-context.service';
+import { ConversationService } from '../../../services/conversation.service';
 
 @Component({
   selector: 'app-workspace-sidebar',
@@ -22,11 +25,6 @@ import { ChannelSelectionService } from '../../../services/channel-selection.ser
 export class WorkspaceSidebar {
   @Input() currentUserUid: string | null = null;
 
-  public userService = inject(UserService);
-
-  channels = signal<Channel[]>([]);
-  users = signal<User[]>([]);
-
   readonly channelOpen = signal(false);
   readonly dmOpen = signal(false);
   isClosed = signal(false);
@@ -34,20 +32,18 @@ export class WorkspaceSidebar {
   constructor(
     private dialog: MatDialog,
     private firestore: FirestoreService,
-    private channelSelection: ChannelSelectionService
-  ) {
-    this.firestore.getCollection<Channel>('channels').subscribe((chs) => {
-      this.channels.set(chs);
+    private channelService: ChannelService,
+    private chatContext: ChatContextService,
+    public userService: UserService,
+    public conversationService: ConversationService,
+  ) { }
 
-      const first = chs[0];
-      if (first && !this.channelSelection.activeChannelId()) {
-        this.channelSelection.setActiveChannelId(first.id as string);
-      }
-    });
+  get allChannels(): Channel[] {
+    return this.channelService.channels();
+  }
 
-    this.firestore.getCollection<User>('users').subscribe((us) => {
-      this.users.set(us);
-    });
+  get allUsers(): User[] {
+    return this.firestore.userList();
   }
 
   openAddChannelDialog() {
@@ -60,19 +56,28 @@ export class WorkspaceSidebar {
   }
 
   selectChannel(ch: Channel) {
-    this.channelSelection.selectChannel(ch);
+    if (!ch.id) {
+      console.warn('Channel ohne id:', ch);
+      return;
+    }
+    this.chatContext.openChannel(ch.id);
   }
 
   openNewMessage() {
-    this.channelSelection.openNewMessage();
+    this.chatContext.openNewMessage();
   }
 
   openDirectMessage(user: User) {
     if (!user.uid) return;
-    this.channelSelection.openDirectMessage(user.uid);
+    this.chatContext.openConversation(user.uid);
+    this.conversationService.setConvPartner(user)
   }
 
   getAvatarPath(user: User) {
     return getAvatarById(user.avatarId).src;
+  }
+
+  isChannelActive(channel: Channel): boolean {
+    return this.chatContext.channelId() === channel.id;
   }
 }
