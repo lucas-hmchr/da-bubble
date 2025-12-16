@@ -114,16 +114,17 @@
       }
     </div>
 
-    <app-message-input [currentUserUid]="currentUserUid"
-      [contextType]="(contextType === 'channel' && channel) ? 'channel' : 'conversation'"
-      [channel]="(contextType === 'channel' && channel) ? channel : undefined"
-      [conversationId]="(contextType === 'dm' && dmPartner) ? dmConversationId : null"
-      [editingMessage]="editingMessage ?? undefined" (editFinished)="onEditFinished()" [placeholderText]="
-    (contextType === 'channel' && channel)
+    <app-message-input [currentUserUid]="currentUserUid" [forceEditable]="viewState.isNew()"
+      [contextType]="viewState.isChannel() ? 'channel' : 'conversation'"
+      [channel]="viewState.isChannel() ? channel ?? undefined : undefined"
+      [conversationId]="viewState.isDm() ? dmConversationId : null" [editingMessage]="editingMessage ?? undefined"
+      (editFinished)="onEditFinished()" [placeholderText]="
+    viewState.isChannel()
       ? ('Nachricht an ' + (channel?.name ?? ''))
-      : ((contextType === 'dm' && dmPartner) ? 'Antwort' : 'Starte eine neue Nachricht')
+      : (viewState.isDm() ? 'Antwort' : 'Starte eine neue Nachricht')
   ">
     </app-message-input>
+
 
 
   </div>

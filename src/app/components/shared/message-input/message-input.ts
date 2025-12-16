@@ -172,6 +172,17 @@ export class MessageInput implements OnInit {
 
   async onSend() {
     const text = this.getTrimmedText();
+    const isNewMessageFlow =
+      this.forceEditable &&
+      this.contextType === 'conversation' &&
+      !this.conversationId &&
+      !this.channel;
+
+    if (isNewMessageFlow) {
+      const ok = await this.newMessage.sendAndNavigate(text);
+      if (ok) this.afterSend();   // nur leeren wenn wirklich gesendet
+      return;
+    }
     if (!text) return;
 
     if (this.forceEditable && this.contextType === 'conversation' && !this.conversationId && !this.channel) {
