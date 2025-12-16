@@ -105,6 +105,11 @@ export class View {
     return this.conversationService.activeConversationId();
   }
 
+  get isChannelEmpty(): boolean {
+    return this.channelService.isActiveChannelEmpty();
+  }
+
+
   getAvatarSrc(user: User): string {
     if (user.avatarId) {
       return getAvatarById(user.avatarId).src;
@@ -155,7 +160,7 @@ export class View {
   }
 
   onNewMessageToKeyup(event: KeyboardEvent) {
-  const input = event.target as HTMLInputElement;
-  this.newMessage.setQuery(input.value);
-}
+    const input = event.target as HTMLInputElement;
+    this.newMessage.setQuery(input.value);
+  }
 }

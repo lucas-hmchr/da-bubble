@@ -18,14 +18,33 @@ section {
   min-height: 0;
 }
 
+#chat-container-new{
+  height: calc(100% - 96px);
+  padding-bottom: 10px;
+  display: flex;
+  justify-content: space-between;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
+}
+
+.dm-header-small {
+  height: 96px;
+}
+
+.dm-header-big {
+  height: 160px;
+}
 .dm-header {
   display: flex;
   justify-content: space-between;
-  height: 96px;
+  // height: 160px;
+  // height: fit-content;
   padding-inline: 35px;
   box-shadow: 0 5px 5px -2px rgba(100, 100, 100, 0.1);
   flex-shrink: 0;
   align-items: center;
+  margin-bottom: 5px;
 
   .dm-header-left {
     display: flex;
@@ -111,11 +130,16 @@ section {
   flex: 1;
   min-height: 0;
   overflow-y: auto;
+  // overflow-y: hidden;
   padding: 16px 35px;
   scroll-behavior: smooth;
   // new 14.12.:
   position: relative;
   z-index: 1;
+  // background-color: red;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
 }
 
 .blackborder {
@@ -124,6 +148,7 @@ section {
 
 app-message-input {
   flex-shrink: 0;
+  padding: 10px 20px;
 }
 
 app-message-input,
@@ -297,12 +322,13 @@ app-message-input,
   position: absolute;
   left: 0;
   right: 0;
-  top: 52px;
+  top: 80px;
   background: #fff;
   border-radius: 16px;
   box-shadow: 0 12px 40px rgba(0,0,0,.12);
   padding: 8px;
   z-index: 100;
+  height: 60vh;
 }
 
 .to-item {
@@ -320,4 +346,8 @@ app-message-input,
 
 .to-hash, .to-at {
   font-weight: 700;
+}
+
+.justify-content-end {
+  justify-content: end;
 }
