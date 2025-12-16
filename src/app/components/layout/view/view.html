@@ -19,7 +19,7 @@
         <img src="/icons/global/keyboard_arrow_down.svg" alt="" style="cursor: pointer;">
 
         }@else if (viewState.isDm() && dmPartner; as partner) { <!-- header links für direktnachricht -->
-        <div style="position: relative;">
+        <div style="position: relative;display: flex;">
           <img style="height: 50px;aspect-ratio: 1/1;border-radius: 50%;" [src]="getAvatarSrc(dmPartner)"
             [alt]="dmPartner.displayName || dmPartner.name || 'User'" />
           <img style="position: absolute;bottom: 5px;right: -5px;height: 17px;"
@@ -87,7 +87,7 @@
 
       } @else if (contextType === 'dm' && dmPartner) {
       @if (dmMessages.length === 0) {
-      <div class="dm-intro" style="background-color: yellow;padding: 0px 0px 24px 0px;">
+      <div class="dm-intro" style="padding: 0px 0px 24px 0px;">
         <div>
           <img class="dm-intro-avatar" [src]="getAvatarSrc(dmPartner)"
             [alt]="dmPartner.displayName || dmPartner.name || 'User'" />

@@ -2,23 +2,12 @@ section {
   font-family: 'Nunito';
   background-color: white;
   border-radius: 30px;
-  height: calc(100% - 16px);
   display: flex;
   flex-direction: column;
   height: 100%;
 }
 
-#chat-container {
-  height: calc(100% - 96px);
-  padding-bottom: 10px;
-  display: flex;
-  justify-content: space-between;
-  flex-direction: column;
-  flex: 1;
-  min-height: 0;
-}
-
-#chat-container-new{
+#chat-container-new {
   height: calc(100% - 96px);
   padding-bottom: 10px;
   display: flex;
@@ -35,49 +24,15 @@ section {
 .dm-header-big {
   height: 160px;
 }
+
 .dm-header {
   display: flex;
   justify-content: space-between;
-  // height: 160px;
-  // height: fit-content;
   padding-inline: 35px;
   box-shadow: 0 5px 5px -2px rgba(100, 100, 100, 0.1);
   flex-shrink: 0;
   align-items: center;
   margin-bottom: 5px;
-
-  .dm-header-left {
-    display: flex;
-    align-items: center;
-    gap: 16px;
-    height: 50px;
-
-    >div {
-      position: relative;
-      height: 100%;
-
-      .dm-header-avatar {
-        height: 100%;
-        aspect-ratio: 1/1;
-        border-radius: 50%;
-      }
-
-      .online-icon {
-        height: 14px;
-        aspect-ratio: 1/1;
-        position: absolute;
-        bottom: 0;
-        right: 0;
-      }
-    }
-  }
-
-  .channel-header-left {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 8px;
-  }
 
   .channel-members {
     display: flex;
@@ -93,7 +48,6 @@ section {
         border-radius: 50%;
         border: 2px solid #fff;
         object-fit: cover;
-        /* leicht überlappen */
         margin-left: -8px;
 
         &:first-child {
@@ -110,7 +64,6 @@ section {
       cursor: pointer;
     }
   }
-
 }
 
 .add-person {
@@ -130,168 +83,20 @@ section {
   flex: 1;
   min-height: 0;
   overflow-y: auto;
-  // overflow-y: hidden;
   padding: 16px 35px;
   scroll-behavior: smooth;
-  // new 14.12.:
   position: relative;
   z-index: 1;
-  // background-color: red;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
 }
 
-.blackborder {
-  border: 1px solid black;
-}
-
 app-message-input {
   flex-shrink: 0;
   padding: 10px 20px;
-}
-
-app-message-input,
-#message-container {
   position: relative;
-  z-index: 1; // bewusst klein halten
-}
-
-.new-message-view {
-  display: flex;
-  flex-direction: column;
-  height: 100%;
-}
-
-.new-message-header {
-  padding: 16px 24px;
-}
-
-.new-message-top {
-  padding: 28px 28px 12px 28px;
-}
-
-.recipient-input-wrapper {
-  padding: 0 24px 16px 24px;
-  position: relative;
-}
-
-.recipient-input {
-  width: 100%;
-  border-radius: 999px;
-  border: 1px solid var(--clr-purple-light);
-  padding: 10px 16px;
-  font-size: 16px;
-}
-
-.recipient-suggestions {
-  position: absolute;
-  top: 44px;
-  left: 24px;
-  right: 24px;
-  background: #fff;
-  border-radius: 12px;
-  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.12);
-  max-height: 260px;
-  overflow-y: auto;
-  z-index: 10;
-}
-
-.recipient-suggestion {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  padding: 8px 12px;
-  cursor: pointer;
-
-  &:hover {
-    background: var(--bg-clr);
-  }
-}
-
-.suggestion-prefix {
-  font-weight: 700;
-}
-
-.suggestion-texts {
-  display: flex;
-  flex-direction: column;
-}
-
-.suggestion-label {
-  font-size: 15px;
-}
-
-.suggestion-detail {
-  font-size: 13px;
-  color: #777;
-}
-
-.new-message-body {
-  flex: 1;
-}
-
-.dm-body {
-  flex: 1;
-  padding: 0px 35px 24px 35px;
-
-  .dm-intro {
-    height: 100%;
-    width: 100%;
-    display: flex;
-    flex-direction: column;
-    justify-content: end;
-
-    >div {
-      display: flex;
-      align-items: end;
-      gap: 32px;
-      margin-bottom: 24px;
-
-      .dm-intro-avatar {
-        border-radius: 50%;
-        width: 100px;
-        aspect-ratio: 1/1;
-      }
-
-      >h2 {
-        padding-bottom: 12px;
-        font-size: 24px;
-        font-weight: 700;
-      }
-    }
-
-    >p {
-      font-size: 20px;
-      color: var(--clr-gray);
-
-      .dm-mention {
-        color: var(--clr-purple-3);
-      }
-    }
-  }
-}
-
-.new-message-view {
-  display: flex;
-  flex-direction: column;
-  height: 100%;
-  padding: 28px 28px 22px 28px;
-}
-
-.new-message-header {
-  margin-bottom: 18px;
-
-  h2 {
-    margin: 0;
-    font-size: 28px;
-    font-weight: 700;
-  }
-}
-
-.new-message-to-row {
-  position: relative;
-  // margin-bottom: 16px;
+  z-index: 1;
 }
 
 .new-message-to-input {
@@ -309,15 +114,6 @@ app-message-input,
   }
 }
 
-/* sorgt dafür, dass der Input unten bleibt (großer Leerbereich dazwischen) */
-.new-message-body-spacer {
-  flex: 1 1 auto;
-}
-
-.new-message-to-row {
-  position: relative;
-}
-
 .to-autocomplete {
   position: absolute;
   left: 0;
@@ -325,7 +121,7 @@ app-message-input,
   top: 80px;
   background: #fff;
   border-radius: 16px;
-  box-shadow: 0 12px 40px rgba(0,0,0,.12);
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.12);
   padding: 8px;
   z-index: 100;
   height: 60vh;
@@ -344,7 +140,8 @@ app-message-input,
   }
 }
 
-.to-hash, .to-at {
+.to-hash,
+.to-at {
   font-weight: 700;
 }
 
