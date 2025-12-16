@@ -34,24 +34,28 @@
           <input class="new-message-to-input" type="text" [value]="newMessage.query()"
             (keyup)="onNewMessageToKeyup($event)" placeholder="An: #channel, oder @jemand oder E-Mail Adresse" />
           @if (newMessage.show() && newMessage.mode() === 'channel') {
-          <div class="to-autocomplete" style="background-color: gray;">
-            @for (ch of newMessage.filteredChannels(); track ch.id ?? $index) {
-            <div class="to-item" (click)="newMessage.selectChannel(ch)">
-              <span class="to-hash">#</span>
-              <span>{{ ch.name }}</span>
+          <div class="to-autocomplete">
+            <div class="to-autocomplete-inner">
+              @for (ch of newMessage.filteredChannels(); track ch.id ?? $index) {
+              <div class="to-item" (click)="newMessage.selectChannel(ch)">
+                <span class="to-hash">#</span>
+                <span>{{ ch.name }}</span>
+              </div>
+              }
             </div>
-            }
           </div>
           }
 
           @if (newMessage.show() && newMessage.mode() === 'user') {
-          <div class="to-autocomplete" style="background-color: lightblue;">
-            @for (u of newMessage.filteredUsers(); track u.uid ?? $index) {
-            <div class="to-item" (click)="newMessage.selectUser(u)">
-              <span class="to-at">@</span>
-              <span>{{ u.displayName || u.name || 'Unbekannter Nutzer' }}</span>
+          <div class="to-autocomplete">
+            <div class="to-autocomplete-inner">
+              @for (u of newMessage.filteredUsers(); track u.uid ?? $index) {
+              <div class="to-item" (click)="newMessage.selectUser(u)">
+                <span class="to-at">@</span>
+                <span>{{ u.displayName || u.name || 'Unbekannter Nutzer' }}</span>
+              </div>
+              }
             </div>
-            }
           </div>
           }
         </div>
@@ -110,10 +114,17 @@
       }
     </div>
 
-    <app-message-input [currentUserUid]="currentUserUid" [contextType]="'conversation'"
-      [conversationId]="dmConversationId" [editingMessage]="editingMessage ?? undefined"
-      (editFinished)="onEditFinished()" [placeholderText]="(contextType === 'channel' && channel)? ('Nachricht an ' + (channel?.name ?? '')): ((contextType === 'dm' && dmPartner) ? 'Antwort' : 'Starte eine neue Nachricht')">
+    <app-message-input [currentUserUid]="currentUserUid"
+      [contextType]="(contextType === 'channel' && channel) ? 'channel' : 'conversation'"
+      [channel]="(contextType === 'channel' && channel) ? channel : undefined"
+      [conversationId]="(contextType === 'dm' && dmPartner) ? dmConversationId : null"
+      [editingMessage]="editingMessage ?? undefined" (editFinished)="onEditFinished()" [placeholderText]="
+    (contextType === 'channel' && channel)
+      ? ('Nachricht an ' + (channel?.name ?? ''))
+      : ((contextType === 'dm' && dmPartner) ? 'Antwort' : 'Starte eine neue Nachricht')
+  ">
     </app-message-input>
+
 
   </div>
 

@@ -15,6 +15,7 @@ import { User } from '../../../models/user.model';
 import { AvatarId, getAvatarById } from '../../../../shared/data/avatars';
 import { MessageInputService } from '../../../services/message-intput.service';
 import { UserService } from '../../../services/user.service';
+import { NewMessageService } from '../../../services/new-message.service';
 // import { getAvatarSrc } from '../../../../shared/data/avatars';
 
 @Component({
@@ -54,6 +55,7 @@ export class MessageInput implements OnInit {
 
   isEditing = false;
   private _editingMessage?: { id: string; text: string };
+  private newMessage = inject(NewMessageService);
 
   @ViewChild('messageInput') messageInput!: ElementRef<HTMLTextAreaElement>;
   @ViewChild('container') container!: ElementRef<HTMLDivElement>;
@@ -171,6 +173,12 @@ export class MessageInput implements OnInit {
   async onSend() {
     const text = this.getTrimmedText();
     if (!text) return;
+
+    if (this.forceEditable && this.contextType === 'conversation' && !this.conversationId && !this.channel) {
+      await this.newMessage.sendAndNavigate(text);
+      this.afterSend();
+      return;
+    }
 
     if (!this.currentUserUid) {
       console.warn('Kein aktueller Benutzer (UID).');

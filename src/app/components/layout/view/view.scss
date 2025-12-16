@@ -94,7 +94,6 @@ section {
 
 app-message-input {
   flex-shrink: 0;
-  // padding: 10px 20px;
   padding: 20px 35px;
   position: relative;
   z-index: 1;
@@ -119,26 +118,41 @@ app-message-input {
   position: absolute;
   left: 0;
   right: 0;
-  top: 80px;
-  background: #fff;
+  top: calc(100% + 8px);
+  z-index: 9999;
+
+  background: transparent;
   border-radius: 16px;
-  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.12);
-  padding: 8px;
-  z-index: 100;
-  height: 60vh;
+  box-shadow: 0 12px 40px rgba(0,0,0,.12);
 }
 
-.to-item {
-  padding: 10px 12px;
-  border-radius: 12px;
-  cursor: pointer;
-  display: flex;
-  gap: 8px;
-  align-items: center;
+.to-autocomplete-inner {
+  background: #fff;
+  border-radius: 16px;
 
-  &:hover {
-    background: rgba(83, 95, 255, 0.10);
-  }
+  max-height: min(320px, calc(100vh - 220px));
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding: 6px 0;
+}
+
+
+.to-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+
+  padding: 10px 14px;
+  cursor: pointer;
+  border-radius: 12px;
+
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.to-item:hover {
+  background: rgba(83, 95, 255, 0.10);
 }
 
 .to-hash,
@@ -151,29 +165,30 @@ app-message-input {
 }
 
 .dm-intro {
-  // padding: 0px 0px 24px 0px;
-  
   >div {
     display: flex;
     align-items: end;
     gap: 32px;
     margin-bottom: 24px;
+
     >h2 {
       font-size: 24px;
       padding-bottom: 12px;
     }
   }
-  >p{
+
+  >p {
     font-family: 'Nunito';
     font-size: 20px;
     color: var(--clr-gray);
+
     >span {
       color: var(--clr-purple-3);
     }
   }
 }
 
-.dm-intro-avatar{
+.dm-intro-avatar {
   border-radius: 50%;
   width: 100px;
   aspect-ratio: 1/1;
