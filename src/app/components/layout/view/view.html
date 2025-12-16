@@ -87,7 +87,7 @@
 
       } @else if (contextType === 'dm' && dmPartner) {
       @if (dmMessages.length === 0) {
-      <div class="dm-intro" style="padding: 0px 0px 24px 0px;">
+      <div class="dm-intro">
         <div>
           <img class="dm-intro-avatar" [src]="getAvatarSrc(dmPartner)"
             [alt]="dmPartner.displayName || dmPartner.name || 'User'" />

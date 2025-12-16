@@ -148,3 +148,27 @@ app-message-input {
 .justify-content-end {
   justify-content: end;
 }
+
+.dm-intro {
+  padding: 0px 0px 24px 0px;
+  >div {
+    display: flex;
+    align-items: end;
+    gap: 32px;
+    margin-bottom: 24px;
+  }
+  >p{
+    font-family: 'Nunito';
+    font-size: 20px;
+    color: var(--clr-gray);
+    >span {
+      color: var(--clr-purple-3);
+    }
+  }
+}
+
+.dm-intro-avatar{
+  border-radius: 50%;
+  width: 100px;
+  aspect-ratio: 1/1;
+}
