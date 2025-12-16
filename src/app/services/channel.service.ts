@@ -1,4 +1,4 @@
-import { Injectable, signal } from "@angular/core";
+import { Injectable, signal,computed  } from "@angular/core";
 import { Channel } from "../models/channel.interface";
 import { MessageData } from "../models/message.interface";
 import { FirestoreService } from "./firestore";
@@ -17,7 +17,8 @@ export class ChannelService {
     activeChannel = signal<Channel | null>(null);
     channelMembers = signal<User[]>([]);
     activeChannelMessages = signal<MessageData[]>([]);
-
+    readonly isActiveChannelEmpty = computed(() => this.activeChannelMessages().length === 0);
+    
     constructor(private firestore: FirestoreService) {
         this.firestore.subscribeUsers();
         this.allChannelsSub = this.getAllChannels().subscribe(chs => {

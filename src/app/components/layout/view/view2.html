@@ -1,0 +1,153 @@
+<section>
+
+  <!-- CHANNEL VIEW -->
+  @if (contextType === 'channel' && channel) {
+    
+  <header class="dm-header">
+    <div class="channel-header-left">
+      <h2 class="fw-700 fs-24"># {{ channel.name }}</h2>
+      <img src="/icons/global/keyboard_arrow_down.svg" alt="">
+    </div>
+
+    <div class="channel-members">
+      <div class="member-avatars">
+        @for (u of channelMembers | slice:0:3; track u.uid ?? $index) {
+        <img class="member-avatar" [src]="getAvatarSrc(u)" [alt]="u.displayName || u.name || 'User'" />
+        }
+      </div>
+
+      <span>{{ channelMembers.length }}</span>
+      <img class="add-person" src="/icons/global/person_add1.svg" alt="">
+    </div>
+  </header>
+
+  <div id="chat-container">
+    <div class="messages-scroll">
+      <app-message [channel]="channel" [currentUserUid]="currentUserUid" (editRequested)="onEditRequested($event)">
+      </app-message>
+    </div>
+
+    <app-message-input [channel]="channel" [currentUserUid]="currentUserUid"
+      [editingMessage]="editingMessage ?? undefined" (editFinished)="onEditFinished()">
+    </app-message-input>
+  </div>
+
+  <!-- DIRECT MESSAGE VIEW -->
+  } @else if (contextType === 'dm' && dmPartner) {
+
+  <header class="dm-header">
+    <div class="dm-header-left">
+      <div>
+        <img class="dm-header-avatar" [src]="getAvatarSrc(dmPartner)"
+          [alt]="dmPartner.displayName || dmPartner.name || 'User'" />
+        <img class="online-icon" [src]="userService.getOnlineStatusIcon(dmPartner)" alt="">
+      </div>
+
+      <span class="dm-header-name fw-700 fs-24">
+        {{ dmPartner.displayName || dmPartner.name || 'Unbekannter Nutzer' }}
+      </span>
+    </div>
+  </header>
+
+  @if (dmMessages.length === 0) {
+
+  <!-- EMPTY DM (Design bleibt wie aktuell) -->
+  <div class="dm-body">
+    <div class="dm-intro">
+      <div>
+        <img class="dm-intro-avatar" [src]="getAvatarSrc(dmPartner)"
+          [alt]="dmPartner.displayName || dmPartner.name || 'User'" />
+        <h2>{{ dmPartner.displayName || dmPartner.name || 'Unbekannter Nutzer' }}</h2>
+      </div>
+
+      <p>
+        Diese Unterhaltung findet nur zwischen
+        <span class="dm-mention">
+          @{{ dmPartner.displayName || dmPartner.name }}
+        </span>
+        und dir statt.
+      </p>
+    </div>
+  </div>
+
+  <app-message-input [currentUserUid]="currentUserUid" [contextType]="'conversation'"
+    [conversationId]="dmConversationId">
+  </app-message-input>
+
+  } @else {
+
+  <!-- DM WITH MESSAGES (wie Channel) -->
+  <div id="chat-container">
+    <div class="messages-scroll">
+      <app-message [contextType]="'conversation'" [conversationId]="dmConversationId" [currentUserUid]="currentUserUid"
+        (editRequested)="onEditRequested($event)">
+      </app-message>
+    </div>
+
+    <app-message-input [currentUserUid]="currentUserUid" [contextType]="'conversation'"
+      [conversationId]="dmConversationId" [editingMessage]="editingMessage ?? undefined"
+      (editFinished)="onEditFinished()">
+    </app-message-input>
+  </div>
+
+  }
+
+  <!-- NEW MESSAGE VIEW -->
+  } @else {
+
+  <section class="new-message-view">
+
+    <div class="new-message-top">
+      <header class="new-message-header">
+        <h2>Neue Nachricht</h2>
+      </header>
+
+      <div class="new-message-to-row">
+        <input
+          class="new-message-to-input"
+          type="text"
+          [value]="newMessage.query()"
+          (keyup)="onNewMessageToKeyup($event)"
+          placeholder="An: #channel, oder @jemand oder E-Mail Adresse"
+        />
+
+        @if (newMessage.show() && newMessage.mode() === 'channel') {
+          <div class="to-autocomplete">
+            @for (ch of newMessage.filteredChannels(); track ch.id ?? $index) {
+              <div class="to-item" (click)="newMessage.selectChannel(ch)">
+                <span class="to-hash">#</span>
+                <span>{{ ch.name }}</span>
+              </div>
+            }
+          </div>
+        }
+
+        @if (newMessage.show() && newMessage.mode() === 'user') {
+          <div class="to-autocomplete">
+            @for (u of newMessage.filteredUsers(); track u.uid ?? $index) {
+              <div class="to-item" (click)="newMessage.selectUser(u)">
+                <span class="to-at">@</span>
+                <span>{{ u.displayName || u.name || 'Unbekannter Nutzer' }}</span>
+              </div>
+            }
+          </div>
+        }
+      </div>
+    </div>
+
+    <!-- gleicher Container wie Channel/DM -->
+    <div id="chat-container">
+      <div class="messages-scroll"></div>
+
+      <app-message-input
+        [currentUserUid]="currentUserUid"
+        [forceEditable]="true"
+        [placeholderText]="'Starte eine neue Nachricht'">
+      </app-message-input>
+    </div>
+
+  </section>
+
+}
+
+</section>

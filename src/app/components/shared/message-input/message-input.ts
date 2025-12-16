@@ -15,6 +15,7 @@ import { User } from '../../../models/user.model';
 import { AvatarId, getAvatarById } from '../../../../shared/data/avatars';
 import { MessageInputService } from '../../../services/message-intput.service';
 import { UserService } from '../../../services/user.service';
+import { NewMessageService } from '../../../services/new-message.service';
 // import { getAvatarSrc } from '../../../../shared/data/avatars';
 
 @Component({
@@ -30,6 +31,8 @@ export class MessageInput implements OnInit {
   @Input() currentUserUid: string | null = null;
   @Input() contextType: 'channel' | 'conversation' = 'channel';
   @Input() conversationId?: string | null;
+  @Input() forceEditable = false;
+  @Input() placeholderText?: string;
 
   @Input() set editingMessage(value: { id: string; text: string } | undefined) {
     this._editingMessage = value;
@@ -52,6 +55,7 @@ export class MessageInput implements OnInit {
 
   isEditing = false;
   private _editingMessage?: { id: string; text: string };
+  private newMessage = inject(NewMessageService);
 
   @ViewChild('messageInput') messageInput!: ElementRef<HTMLTextAreaElement>;
   @ViewChild('container') container!: ElementRef<HTMLDivElement>;
@@ -153,7 +157,11 @@ export class MessageInput implements OnInit {
   onEnter(event: KeyboardEvent | Event) {
     if ((event as KeyboardEvent).shiftKey) return;
 
-    if (this.contextType === 'channel' && !this.isChannelMember) {
+    // if (this.contextType === 'channel' && !this.isChannelMember) {
+    //   event.preventDefault();
+    //   return;
+    // }
+    if (this.isReadOnly) {
       event.preventDefault();
       return;
     }
@@ -164,7 +172,24 @@ export class MessageInput implements OnInit {
 
   async onSend() {
     const text = this.getTrimmedText();
+    const isNewMessageFlow =
+      this.forceEditable &&
+      this.contextType === 'conversation' &&
+      !this.conversationId &&
+      !this.channel;
+
+    if (isNewMessageFlow) {
+      const ok = await this.newMessage.sendAndNavigate(text);
+      if (ok) this.afterSend();   // nur leeren wenn wirklich gesendet
+      return;
+    }
     if (!text) return;
+
+    if (this.forceEditable && this.contextType === 'conversation' && !this.conversationId && !this.channel) {
+      await this.newMessage.sendAndNavigate(text);
+      this.afterSend();
+      return;
+    }
 
     if (!this.currentUserUid) {
       console.warn('Kein aktueller Benutzer (UID).');
@@ -202,48 +227,48 @@ export class MessageInput implements OnInit {
   }
 
 
-private async handleChannelSend(text: string, senderId: string): Promise<string> {
-  if (!this.channel?.id) {
-    console.warn('Kein Channel gesetzt.');
-    return '';
+  private async handleChannelSend(text: string, senderId: string): Promise<string> {
+    if (!this.channel?.id) {
+      console.warn('Kein Channel gesetzt.');
+      return '';
+    }
+
+    const channelId = this.channel.id as string;
+
+    if (this.isEditing && this.editingMessage?.id) {
+      await this.messageService.updateChannelMessage(
+        channelId,
+        this.editingMessage.id,
+        text
+      );
+    } else {
+      await this.messageService.sendChannelMessage(channelId, text, senderId);
+    }
+
+    return channelId;
   }
 
-  const channelId = this.channel.id as string;
 
-  if (this.isEditing && this.editingMessage?.id) {
-    await this.messageService.updateChannelMessage(
-      channelId,
-      this.editingMessage.id,
-      text
-    );
-  } else {
-    await this.messageService.sendChannelMessage(channelId, text, senderId);
+  private async handleConversationSend(text: string, senderId: string): Promise<string> {
+    if (!this.conversationId) {
+      console.warn('Keine Conversation-ID gesetzt.');
+      return '';
+    }
+
+    const convId = this.conversationId;
+
+    if (this.isEditing && this.editingMessage?.id) {
+      await this.messageService.updateConversationMessage(
+        convId,
+        this.editingMessage.id,
+        text
+      );
+    } else {
+      await this.messageService.sendConversationMessage(convId, text, senderId);
+    }
+
+    return convId;
   }
-
-  return channelId;
-}
-
-
-private async handleConversationSend(text: string, senderId: string): Promise<string> {
-  if (!this.conversationId) {
-    console.warn('Keine Conversation-ID gesetzt.');
-    return '';
-  }
-
-  const convId = this.conversationId;
-
-  if (this.isEditing && this.editingMessage?.id) {
-    await this.messageService.updateConversationMessage(
-      convId,
-      this.editingMessage.id,
-      text
-    );
-  } else {
-    await this.messageService.sendConversationMessage(convId, text, senderId);
-  }
-
-  return convId;
-}
 
 
   private afterSend() {
@@ -342,14 +367,31 @@ private async handleConversationSend(text: string, senderId: string): Promise<st
   }
 
 
+  // get isChannelMember(): boolean {
+  //   if (this.contextType !== 'channel') return true;
+  //   if (!this.channel || !this.currentUserUid) return false;
+  //   const members = (this.channel.members ?? []) as string[];
+  //   return members.includes(this.currentUserUid);
+  // }
   get isChannelMember(): boolean {
     if (this.contextType !== 'channel') return true;
+
+    // Public Default-Channel
+    if (this.channel?.id === 'general') return true;
     if (!this.channel || !this.currentUserUid) return false;
+
     const members = (this.channel.members ?? []) as string[];
     return members.includes(this.currentUserUid);
   }
 
+
+  // get isReadOnly(): boolean {
+  //   return this.contextType === 'channel' && !this.isChannelMember;
+  // }
+
   get isReadOnly(): boolean {
+    // NEW MESSAGE VIEW / freier Modus: niemals read-only
+    if (this.forceEditable) return false;
     return this.contextType === 'channel' && !this.isChannelMember;
   }
 }

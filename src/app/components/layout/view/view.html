@@ -1,15 +1,72 @@
 <section>
 
-  <!-- CHANNEL VIEW -->
-  @if (contextType === 'channel' && channel) {
+  <header class="dm-header" [class.dm-header-small]="
+    (viewState.isChannel() && !!channel) ||
+    (viewState.isDm() && !!dmPartner)
+  " [class.dm-header-big]="
+    !(
+      (viewState.isChannel() && !!channel) ||
+      (viewState.isDm() && !!dmPartner)
+    )
+  ">
 
-  <header class="dm-header">
-    <div class="channel-header-left">
-      <h2 class="fw-700 fs-24"># {{ channel.name }}</h2>
-      <img src="/icons/global/keyboard_arrow_down.svg" alt="">
+    <div style="width: 100%;"> <!-- header LINKS -->
+      <div id="header-left" style="display: flex; align-items: center;gap: 8px; width: 100%;">
+
+        @if (viewState.isChannel() && channel; as ch) { <!-- header links für channel -->
+        <img src="/icons/global/tag.svg" alt="">
+        <h2>{{ channel.name }}</h2>
+        <img src="/icons/global/keyboard_arrow_down.svg" alt="" style="cursor: pointer;">
+
+        }@else if (viewState.isDm() && dmPartner; as partner) { <!-- header links für direktnachricht -->
+        <div style="position: relative;display: flex;">
+          <img style="height: 50px;aspect-ratio: 1/1;border-radius: 50%;" [src]="getAvatarSrc(dmPartner)"
+            [alt]="dmPartner.displayName || dmPartner.name || 'User'" />
+          <img style="position: absolute;bottom: 5px;right: -5px;height: 17px;"
+            [src]="userService.getOnlineStatusIcon(dmPartner)" alt="">
+          <!-- <img class="online-icon" [src]="userService.getOnlineStatusIcon(dmPartner)" alt=""> -->
+        </div>
+        <h2>{{ dmPartner.displayName || dmPartner.name || 'Unbekannter Nutzer' }}</h2>
+
+        }@else { <!-- header links für neue nachricht -->
+        <div style="display: flex;flex-direction: column; gap: 16px; align-items: start;width: 100%;position: relative">
+          <h2>Neue Nachricht</h2>
+          <input class="new-message-to-input" type="text" [value]="newMessage.query()"
+            (keyup)="onNewMessageToKeyup($event)" placeholder="An: #channel, oder @jemand oder E-Mail Adresse" />
+          @if (newMessage.show() && newMessage.mode() === 'channel') {
+          <div class="to-autocomplete">
+            <div class="to-autocomplete-inner">
+              @for (ch of newMessage.filteredChannels(); track ch.id ?? $index) {
+              <div class="to-item" (click)="newMessage.selectChannel(ch)">
+                <span class="to-hash">#</span>
+                <span>{{ ch.name }}</span>
+              </div>
+              }
+            </div>
+          </div>
+          }
+
+          @if (newMessage.show() && newMessage.mode() === 'user') {
+          <div class="to-autocomplete">
+            <div class="to-autocomplete-inner">
+              @for (u of newMessage.filteredUsers(); track u.uid ?? $index) {
+              <div class="to-item" (click)="newMessage.selectUser(u)">
+                <span class="to-at">@</span>
+                <span>{{ u.displayName || u.name || 'Unbekannter Nutzer' }}</span>
+              </div>
+              }
+            </div>
+          </div>
+          }
+        </div>
+        }
+
+
+      </div>
     </div>
 
-    <div class="channel-members">
+    @if (viewState.isChannel() && channel; as ch) {
+    <div class="channel-members"> <!-- header RECHTS -->
       <div class="member-avatars">
         @for (u of channelMembers | slice:0:3; track u.uid ?? $index) {
         <img class="member-avatar" [src]="getAvatarSrc(u)" [alt]="u.displayName || u.name || 'User'" />
@@ -17,97 +74,61 @@
       </div>
 
       <span>{{ channelMembers.length }}</span>
-
       <img class="add-person" src="/icons/global/person_add1.svg" alt="">
-    </div>
+    </div> }
   </header>
 
-  <div id="chat-container">
-    <div class="messages-scroll">
+  <div id="chat-container-new">
+    <div class="messages-scroll" [ngClass]="{
+    'justify-content-end':
+      (viewState.isChannel() && (channelMessages?.length ?? 0) === 0) ||
+      (viewState.isDm() && (dmMessages?.length ?? 0) === 0)
+  }">
+      @if (contextType === 'channel' && channel) {
+
       <app-message [channel]="channel" [currentUserUid]="currentUserUid" (editRequested)="onEditRequested($event)">
       </app-message>
+
+      } @else if (contextType === 'dm' && dmPartner) {
+      @if (dmMessages.length === 0) {
+      <div class="dm-intro">
+        <div>
+          <img class="dm-intro-avatar" [src]="getAvatarSrc(dmPartner)"
+            [alt]="dmPartner.displayName || dmPartner.name || 'User'" />
+          <h2>{{ dmPartner.displayName || dmPartner.name || 'Unbekannter Nutzer' }}</h2>
+        </div>
+
+        <p>
+          Diese Unterhaltung findet nur zwischen
+          <span class="dm-mention">
+            @{{ dmPartner.displayName || dmPartner.name }}
+          </span>
+          und dir statt.
+        </p>
+      </div>} @else{
+      <app-message [contextType]="'conversation'" [conversationId]="dmConversationId" [currentUserUid]="currentUserUid"
+        (editRequested)="onEditRequested($event)">
+      </app-message>
+      }
+      } @else {
+      }
     </div>
 
-    <app-message-input [channel]="channel" [currentUserUid]="currentUserUid"
-      [editingMessage]="editingMessage ?? undefined" (editFinished)="onEditFinished()">
+    <app-message-input [currentUserUid]="currentUserUid" [forceEditable]="viewState.isNew()"
+      [contextType]="viewState.isChannel() ? 'channel' : 'conversation'"
+      [channel]="viewState.isChannel() ? channel ?? undefined : undefined"
+      [conversationId]="viewState.isDm() ? dmConversationId : null" [editingMessage]="editingMessage ?? undefined"
+      (editFinished)="onEditFinished()" [placeholderText]="
+    viewState.isChannel()
+      ? ('Nachricht an ' + (channel?.name ?? ''))
+      : (viewState.isDm() ? 'Antwort' : 'Starte eine neue Nachricht')
+  ">
     </app-message-input>
+
+
+
   </div>
 
-  <!-- DIRECT MESSAGE VIEW -->
-  } @else if (contextType === 'dm' && dmPartner) {
 
-  <header class="dm-header">
-    <div class="dm-header-left">
-      <div>
-        <img class="dm-header-avatar" [src]="getAvatarSrc(dmPartner)"
-          [alt]="dmPartner.displayName || dmPartner.name || 'User'" />
-        <img class="online-icon" [src]="userService.getOnlineStatusIcon(dmPartner)" alt="">
-      </div>
-      <span class="dm-header-name fw-700 fs-24">
-        {{ dmPartner.displayName || dmPartner.name || 'Unbekannter Nutzer' }}
-      </span>
-    </div>
-  </header>
-
-  @if (dmMessages.length === 0) {
-
-  <!-- EMPTY DM (Design bleibt wie aktuell) -->
-  <div class="dm-body">
-    <div class="dm-intro">
-      <div>
-        <img class="dm-intro-avatar" [src]="getAvatarSrc(dmPartner)"
-          [alt]="dmPartner.displayName || dmPartner.name || 'User'" />
-        <h2>{{ dmPartner.displayName || dmPartner.name || 'Unbekannter Nutzer' }}</h2>
-      </div>
-      <p>
-        Diese Unterhaltung findet nur zwischen
-        <span class="dm-mention">
-          @{{ dmPartner.displayName || dmPartner.name }}
-        </span>
-        und dir statt.
-      </p>
-    </div>
-  </div>
-
-  <app-message-input [currentUserUid]="currentUserUid" [contextType]="'conversation'"
-    [conversationId]="dmConversationId">
-  </app-message-input>
-
-  } @else {
-
-  <!-- DM WITH MESSAGES (wie Channel) -->
-  <div id="chat-container">
-    <div class="messages-scroll">
-<app-message
-  [contextType]="'conversation'"
-  [conversationId]="dmConversationId"
-  [currentUserUid]="currentUserUid"
-  (editRequested)="onEditRequested($event)">
-</app-message>
-    </div>
-
-    <app-message-input [currentUserUid]="currentUserUid" [contextType]="'conversation'"
-      [conversationId]="dmConversationId" [editingMessage]="editingMessage ?? undefined"
-      (editFinished)="onEditFinished()">
-    </app-message-input>
-  </div>
-
-  }
-
-  <!-- NEW MESSAGE VIEW (Platzhalter) -->
-  } @else {
-
-  <section class="new-message-view">
-    <header class="new-message-header">
-      <h2>Neue Nachricht</h2>
-    </header>
-
-    <p>
-      Der „Neue Nachricht“-Flow wird gerade umgebaut.
-      Wähle oben links einen Channel oder Nutzer, um einen Chat zu öffnen.
-    </p>
-  </section>
-
-  }
 
 </section>
