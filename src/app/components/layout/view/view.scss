@@ -94,7 +94,8 @@ section {
 
 app-message-input {
   flex-shrink: 0;
-  padding: 10px 20px;
+  // padding: 10px 20px;
+  padding: 20px 35px;
   position: relative;
   z-index: 1;
 }
@@ -150,12 +151,17 @@ app-message-input {
 }
 
 .dm-intro {
-  padding: 0px 0px 24px 0px;
+  // padding: 0px 0px 24px 0px;
+  
   >div {
     display: flex;
     align-items: end;
     gap: 32px;
     margin-bottom: 24px;
+    >h2 {
+      font-size: 24px;
+      padding-bottom: 12px;
+    }
   }
   >p{
     font-family: 'Nunito';
