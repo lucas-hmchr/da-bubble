@@ -145,6 +145,7 @@ export class NewMessageService {
             return false;
         }
 
+        // ✅ CHANNEL – funktioniert bereits
         if (t.type === 'channel') {
             await this.mi.sendChannelMessage(t.id, text, senderId);
             this.chatContext.openChannel(t.id);
@@ -152,16 +153,22 @@ export class NewMessageService {
             return true;
         }
 
-        // DM: ConversationId erzeugen/holen, senden, dann direkt zur DM wechseln
-        const convId = await this.conversations.getOrCreateConversationId(senderId, t.id);
+        // ✅ DM – KORREKT
+        const otherUserId = t.id;
+
+        // Conversation sicherstellen (für DB)
+        const convId = await this.conversations.getOrCreateConversationId(senderId, otherUserId);
+
         await this.mi.sendConversationMessage(convId, text, senderId);
 
-        // statt openConversation(userId): direkt zur DM-Route, weil convId bereits bekannt ist
-        await this.router.navigate(['/dm', convId]);
+        // ✅ statt openConversation(otherUserId):
+        await this.chatContext.openConversationByConvId(convId);
 
         this.resetAll();
         return true;
     }
+
+
 
 
 }

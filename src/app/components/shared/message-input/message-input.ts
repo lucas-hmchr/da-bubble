@@ -170,42 +170,42 @@ export class MessageInput implements OnInit {
     this.onSend();
   }
 
-  async onSend() {
-    const text = this.getTrimmedText();
-    const isNewMessageFlow =
-      this.forceEditable &&
-      this.contextType === 'conversation' &&
-      !this.conversationId &&
-      !this.channel;
+async onSend() {
+  const text = this.getTrimmedText();
+  if (!text) return;
 
-    if (isNewMessageFlow) {
-      const ok = await this.newMessage.sendAndNavigate(text);
-      if (ok) this.afterSend();   // nur leeren wenn wirklich gesendet
-      return;
-    }
-    if (!text) return;
+  // NEW MESSAGE FLOW:
+  // forceEditable = true, wir sind im conversation-mode (weil app-message-input nur 1x gerendert wird),
+  // aber ohne conversationId und ohne channel -> Ziel kommt aus NewMessageService (Header-Input)
+  const isNewMessageFlow =
+    this.forceEditable &&
+    this.contextType === 'conversation' &&
+    !this.conversationId &&
+    !this.channel;
 
-    if (this.forceEditable && this.contextType === 'conversation' && !this.conversationId && !this.channel) {
-      await this.newMessage.sendAndNavigate(text);
-      this.afterSend();
-      return;
-    }
-
-    if (!this.currentUserUid) {
-      console.warn('Kein aktueller Benutzer (UID).');
-      return;
-    }
-
-    try {
-      const ctx = await this.sendByContext(text, this.currentUserUid);
-
-      this.afterSend();
-
-      this.messageSent.emit(ctx);
-    } catch (error) {
-      console.error('Fehler beim Senden der Nachricht:', error);
-    }
+  if (isNewMessageFlow) {
+    const ok = await this.newMessage.sendAndNavigate(text);
+    if (ok) this.afterSend(); // nur leeren wenn wirklich gesendet wurde
+    return;
   }
+
+  // NORMALER FLOW (Channel oder bestehende Conversation)
+  if (!this.currentUserUid) {
+    console.warn('Kein aktueller Benutzer (UID).');
+    return;
+  }
+
+  try {
+    const ctx = await this.sendByContext(text, this.currentUserUid);
+
+    this.afterSend();
+
+    this.messageSent.emit(ctx);
+  } catch (error) {
+    console.error('Fehler beim Senden der Nachricht:', error);
+  }
+}
+
 
 
   private getTrimmedText(): string {
