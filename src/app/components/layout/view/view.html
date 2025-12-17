@@ -16,18 +16,23 @@
 
         <!-- DM HEADER -->
         @else if (viewState.isDm()) {
-        @if (dmPartner) {
-        <div style="position: relative; display: flex;">
-          <img style="height: 50px; aspect-ratio: 1/1; border-radius: 50%;" [src]="getAvatarSrc(dmPartner)"
-            [alt]="dmPartner.displayName || dmPartner.name || 'User'" />
-          <img style="position: absolute; bottom: 5px; right: -5px; height: 17px;"
-            [src]="userService.getOnlineStatusIcon(dmPartner)" alt="" />
-        </div>
-        <h2>{{ dmPartner.displayName || dmPartner.name || 'Unbekannter Nutzer' }}</h2>
-        } @else {
-        <!-- Falls dmPartner noch lädt -->
-        <h2>Direktnachricht</h2>
-        }
+          @if (dmPartner) {
+            <div style="position: relative; display: flex;">
+              <img
+                style="height: 50px; aspect-ratio: 1/1; border-radius: 50%;"
+                [src]="getAvatarSrc(dmPartner)"
+                [alt]="dmPartner.displayName || dmPartner.name || 'User'"
+              />
+              <img
+                style="position: absolute; bottom: 5px; right: -5px; height: 17px;"
+                [src]="userService.getOnlineStatusIcon(dmPartner)"
+                alt=""
+              />
+            </div>
+            <h2>{{ dmPartner.displayName || dmPartner.name || 'Unbekannter Nutzer' }}</h2>
+          } @else {
+            <h2>Direktnachricht</h2>
+          }
         }
 
         <!-- NEW MESSAGE HEADER -->
@@ -112,54 +117,62 @@
     }
   </header>
 
-  <!-- BODY -->
   <div id="chat-container-new">
 
     <div class="messages-scroll" [ngClass]="{
         'justify-content-end':
           (viewState.isChannel() && (channelMessages?.length ?? 0) === 0) ||
-          (viewState.isDm() && (dmMessages?.length ?? 0) === 0)
-      }">
-      <!-- CHANNEL MESSAGES -->
+          (viewState.isDm() && dmLoaded() && (dmMessages?.length ?? 0) === 0)
+      }"
+    >
+
       @if (viewState.isChannel() && channel) {
       <app-message [channel]="channel" [currentUserUid]="currentUserUid" (editRequested)="onEditRequested($event)">
       </app-message>
       }
 
-      <!-- DM -->
       @else if (viewState.isDm()) {
 
-      @if ((dmMessages?.length ?? 0) === 0) {
-      @if (dmPartner) {
-      <div class="dm-intro">
-        <div>
-          <img class="dm-intro-avatar" [src]="getAvatarSrc(dmPartner)"
-            [alt]="dmPartner.displayName || dmPartner.name || 'User'" />
-          <h2>{{ dmPartner.displayName || dmPartner.name || 'Unbekannter Nutzer' }}</h2>
-        </div>
+        @if (!dmLoaded()) {
+        }
 
-        <p>
-          Diese Unterhaltung findet nur zwischen
-          <span class="dm-mention">
-            @{{ dmPartner.displayName || dmPartner.name }}
-          </span>
-          und dir statt.
-        </p>
-      </div>
-      }
-      } @else {
-      <app-message [contextType]="'conversation'" [conversationId]="dmConversationId" [currentUserUid]="currentUserUid"
-        (editRequested)="onEditRequested($event)">
-      </app-message>
-      }
+        @else if ((dmMessages?.length ?? 0) === 0) {
+          @if (dmPartner) {
+            <div class="dm-intro">
+              <div>
+                <img
+                  class="dm-intro-avatar"
+                  [src]="getAvatarSrc(dmPartner)"
+                  [alt]="dmPartner.displayName || dmPartner.name || 'User'"
+                />
+                <h2>{{ dmPartner.displayName || dmPartner.name || 'Unbekannter Nutzer' }}</h2>
+              </div>
+
+              <p>
+                Diese Unterhaltung findet nur zwischen
+                <span class="dm-mention">
+                  @{{ dmPartner.displayName || dmPartner.name }}
+                </span>
+                und dir statt.
+              </p>
+            </div>
+          }
+        }
+
+        @else {
+          <app-message
+            [contextType]="'conversation'"
+            [conversationId]="dmConversationId"
+            [currentUserUid]="currentUserUid"
+            (editRequested)="onEditRequested($event)">
+          </app-message>
+        }
       }
 
-      <!-- NEW MESSAGE: bewusst leer -->
       @else {
       }
     </div>
 
-    <!-- SINGLE MESSAGE INPUT -->
     <app-message-input [currentUserUid]="currentUserUid" [forceEditable]="viewState.isNew()"
       [contextType]="viewState.isChannel() ? 'channel' : 'conversation'"
       [channel]="viewState.isChannel() ? (channel ?? undefined) : undefined"

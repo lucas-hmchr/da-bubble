@@ -110,7 +110,10 @@ export class View {
     return this.channelService.isActiveChannelEmpty();
   }
 
-
+  dmLoaded(): boolean {
+    return this.conversationService.dmLoaded();
+  }
+  
   getAvatarSrc(user: User): string {
     if (user.avatarId) {
       return getAvatarById(user.avatarId).src;

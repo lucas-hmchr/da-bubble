@@ -1,4 +1,4 @@
-import { Injectable, inject, signal } from '@angular/core';
+import { Injectable, inject, signal, computed } from '@angular/core';
 import {
     DocumentReference,
     Firestore,
@@ -27,21 +27,60 @@ export class ConversationService {
 
     private convSub?: Subscription;
     private messagesSub?: Subscription;
+    private dmLoadedTimer: any = null;
 
     activeConversationId = signal<string | null>(null);
     activeConversationPartner = signal<User | null>(null);
     activeConversationMessages = signal<MessageData[]>([]);
+    dmLoaded = signal<boolean>(false);
 
-    constructor(private firestore: FirestoreService,  private authService: AuthService) { }
+    constructor(private firestore: FirestoreService, private authService: AuthService) { }
 
     subscribeToConversation(convId: string) {
         this.cleanup();
+
+        this.dmLoaded.set(false);
         this.activeConversationId.set(convId);
-        this.messagesSub = this.getConversationMessages(convId)
-            .subscribe(msgs => {
-                this.activeConversationMessages.set(msgs);
-            });
+
+        let hasLoadedOnce = false;
+
+        this.messagesSub = this.getConversationMessages(convId).subscribe((msgs) => {
+            this.activeConversationMessages.set(msgs);
+
+            const count = msgs?.length ?? 0;
+
+            // ✅ Sobald Messages vorhanden sind: Timer stoppen + sofort "loaded"
+            if (count > 0) {
+                if (this.dmLoadedTimer) {
+                    clearTimeout(this.dmLoadedTimer);
+                    this.dmLoadedTimer = null;
+                }
+                if (!this.dmLoaded()) {
+                    this.dmLoaded.set(true);
+                }
+                hasLoadedOnce = true;
+                return;
+            }
+
+            // Ab hier: count === 0
+
+            // Wenn wir bereits "loaded" sind, bleibt es loaded (wirklich leerer Chat)
+            if (hasLoadedOnce) {
+                if (!this.dmLoaded()) this.dmLoaded.set(true);
+                return;
+            }
+
+            // Erste(n) leere(n) Snapshots: Timer (nur einmal) starten
+            if (!this.dmLoadedTimer) {
+                this.dmLoadedTimer = setTimeout(() => {
+                    this.dmLoaded.set(true);
+                    hasLoadedOnce = true;
+                    this.dmLoadedTimer = null;
+                }, 300); // etwas großzügiger als 150ms
+            }
+        });
     }
+
 
     setConvPartner(user: User) {
         this.activeConversationPartner.set(user)
@@ -50,7 +89,19 @@ export class ConversationService {
     cleanup() {
         this.convSub?.unsubscribe();
         this.messagesSub?.unsubscribe();
+
+        this.convSub = undefined;
+        this.messagesSub = undefined;
+
+        if (this.dmLoadedTimer) {
+            clearTimeout(this.dmLoadedTimer);
+            this.dmLoadedTimer = null;
+        }
+
+        this.dmLoaded.set(false);
     }
+
+
 
     buildConversationId(userA: string, userB: string): string {
         return [userA, userB].sort().join('_');
@@ -94,4 +145,6 @@ export class ConversationService {
             lastMessageAt: date,
         });
     }
+
+    // readonly dmLoaded = computed(() => this._dmLoaded());
 }
