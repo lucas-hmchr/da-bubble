@@ -34,7 +34,6 @@
             </div>
             <h2>{{ dmPartner.displayName || dmPartner.name || 'Unbekannter Nutzer' }}</h2>
           } @else {
-            <!-- Falls dmPartner noch lädt -->
             <h2>Direktnachricht</h2>
           }
         }
@@ -110,9 +109,10 @@
       [ngClass]="{
         'justify-content-end':
           (viewState.isChannel() && (channelMessages?.length ?? 0) === 0) ||
-          (viewState.isDm() && (dmMessages?.length ?? 0) === 0)
+          (viewState.isDm() && dmLoaded() && (dmMessages?.length ?? 0) === 0)
       }"
     >
+
       <!-- CHANNEL MESSAGES -->
       @if (viewState.isChannel() && channel) {
         <app-message
@@ -125,7 +125,12 @@
       <!-- DM -->
       @else if (viewState.isDm()) {
 
-        @if ((dmMessages?.length ?? 0) === 0) {
+        <!-- ⏳ Noch nicht geladen → nichts anzeigen -->
+        @if (!dmLoaded()) {
+        }
+
+        <!-- 📭 Geladen, aber leer → Intro -->
+        @else if ((dmMessages?.length ?? 0) === 0) {
           @if (dmPartner) {
             <div class="dm-intro">
               <div>
@@ -146,7 +151,10 @@
               </p>
             </div>
           }
-        } @else {
+        }
+
+        <!-- 💬 Geladen + Nachrichten vorhanden -->
+        @else {
           <app-message
             [contextType]="'conversation'"
             [conversationId]="dmConversationId"
