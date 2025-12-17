@@ -1,20 +1,16 @@
 <section>
 
-  <!-- HEADER -->
   <header class="dm-header" [class.dm-header-small]="viewState.isChannel() || viewState.isDm()"
     [class.dm-header-big]="viewState.isNew()">
-    <!-- HEADER LINKS -->
     <div style="width: 100%;">
       <div id="header-left" style="display: flex; align-items: center; gap: 8px; width: 100%;">
 
-        <!-- CHANNEL HEADER -->
         @if (viewState.isChannel() && channel; as ch) {
         <img src="/icons/global/tag.svg" alt="">
         <h2>{{ ch.name }}</h2>
         <img src="/icons/global/keyboard_arrow_down.svg" alt="" style="cursor: pointer;">
         }
 
-        <!-- DM HEADER -->
         @else if (viewState.isDm()) {
           @if (dmPartner) {
             <div style="position: relative; display: flex;">
@@ -35,7 +31,6 @@
           }
         }
 
-        <!-- NEW MESSAGE HEADER -->
         @else {
         <div
           style="display: flex; flex-direction: column; gap: 16px; align-items: start; width: 100%; position: relative;">
@@ -75,7 +70,6 @@
       </div>
     </div>
 
-    <!-- HEADER RECHTS (nur Channel) -->
     @if (viewState.isChannel() && channel) {
     <div class="channel-members">
       <div class="member-avatars" (click)="toggleChannelMemberList()">
