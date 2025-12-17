@@ -1,4 +1,4 @@
-import { Component, Input, effect, inject } from '@angular/core';
+import { Component, Input, effect, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 
 import { FirestoreService } from '../../../services/firestore';
@@ -42,6 +42,7 @@ export class View {
   recipientSuggestions: RecipientSuggestion[] = [];
   showRecipientSuggestions = false;
   selectedRecipient: RecipientSuggestion | null = null;
+  showChannelMemberList = signal<Boolean>(false);
 
   constructor(
     private firestore: FirestoreService,
@@ -162,5 +163,9 @@ export class View {
   onNewMessageToKeyup(event: KeyboardEvent) {
     const input = event.target as HTMLInputElement;
     this.newMessage.setQuery(input.value);
+  }
+
+  toggleChannelMemberList() {
+    this.showChannelMemberList.set(!this.showChannelMemberList());
   }
 }
