@@ -43,6 +43,19 @@ section {
 
     .member-avatars {
       display: flex;
+      padding: 3px 8px;
+      border-radius: 50px;
+      transition: 0.1s ease-in-out;
+
+      >span {
+        display: flex;
+        align-items: center;
+        padding-left: 4px;
+      }
+
+      &:hover {
+        background-color: var(--bg-clr);
+      }
 
       .member-avatar {
         width: 32px;
@@ -253,7 +266,7 @@ app-message-input {
   width: 100%;
   cursor: pointer;
 
-  &:hover{
+  &:hover {
     background-color: var(--bg-clr);
   }
 
@@ -262,6 +275,7 @@ app-message-input {
     display: flex;
     align-items: center;
     justify-content: center;
+
     >.user-icon {
       aspect-ratio: 1/1;
       border-radius: 50%;

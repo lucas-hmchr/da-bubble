@@ -77,9 +77,9 @@
         @for (u of channelMembers | slice:0:3; track u.uid ?? $index) {
         <img class="member-avatar" [src]="getAvatarSrc(u)" [alt]="u.displayName || u.name || 'User'" />
         }
+        <span class="fw-600">{{ channelMembers.length }}</span>
       </div>
 
-      <span>{{ channelMembers.length }}</span>
       <img class="add-person" src="/icons/global/person_add1.svg" alt="">
       @if (showChannelMemberList()) {
       <div class="member-list-popup">
