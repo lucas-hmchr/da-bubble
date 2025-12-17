@@ -14,6 +14,8 @@ import { ChannelService } from '../../../services/channel.service';
 import { ConversationService } from '../../../services/conversation.service';
 import { NewMessageService } from '../../../services/new-message.service';
 import { ViewStateService } from '../../../services/view-state.service';
+import { ProfilePopup } from "../../shared/profile-popup/profile-popup";
+import { ProfilePopupService } from '../../../services/profile-popup.service';
 
 type RecipientType = 'channel' | 'user' | null;
 
@@ -27,7 +29,7 @@ interface RecipientSuggestion {
 @Component({
   selector: 'app-view',
   standalone: true,
-  imports: [CommonModule, MessageInput, Message],
+  imports: [CommonModule, MessageInput, Message, ProfilePopup],
   templateUrl: './view.html',
   styleUrls: ['./view.scss'],
 })
@@ -50,12 +52,14 @@ export class View {
     private conversationService: ConversationService,
     private chatContext: ChatContextService,
     public userService: UserService,
+    private profilePopupService: ProfilePopupService,
   ) {
 
     effect(() => {
       const type = this.chatContext.contextType();
       const channelId = this.chatContext.channelId();
       const convId = this.chatContext.convId();
+      this.showChannelMemberList.set(false);
 
       this.contextType = type;
 
@@ -167,5 +171,9 @@ export class View {
 
   toggleChannelMemberList() {
     this.showChannelMemberList.set(!this.showChannelMemberList());
+  }
+
+  openProfile(uid: string) {
+    this.profilePopupService.open(uid);
   }
 }

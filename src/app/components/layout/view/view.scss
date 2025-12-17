@@ -5,6 +5,7 @@ section {
   display: flex;
   flex-direction: column;
   height: 100%;
+  position: relative;
 }
 
 #chat-container-new {
@@ -284,8 +285,9 @@ app-message-input {
 
     >.status-icon {
       position: absolute;
-      bottom: 5px;
+      bottom: 0px;
       right: 0px;
+      width: 12px;
     }
   }
 

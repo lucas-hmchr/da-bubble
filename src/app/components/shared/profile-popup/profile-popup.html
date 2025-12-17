@@ -1,0 +1,33 @@
+@if (isOpen()) {
+<div class="overlay" (click)="close()">
+    <div class="popup" (click)="$event.stopPropagation()">
+        <div class="popup-content">
+            <img src="/icons/global/close.svg" class="close-icon">
+            <span class="fw-700 fs-24">Profil</span>
+            <img [src]="popup.getAvatarSrc()" class="avatar">
+            <div>
+                <span class="fw-700" style="font-size: 32px;">{{ popup.user()?.displayName }}</span>
+                <div class="online-status">
+                    <img [src]="userService.getOnlineStatusIcon(popup.user()!)">
+                    @if (userService.isOnline(popup.user()!)) {
+                        <span class="online fs-20">Aktiv</span>
+                    } @else {
+                        <span class="fs-20">Abwesend</span>
+                    }
+                </div>
+            </div>
+            <div class="mail-wrapper">
+                <div class="mail-container">
+                    <img src="/icons/login/mail_active.svg" >
+                    <span class="fw-700 fs-20">E-Mail-Adresse</span>
+                </div>
+                <span class="fs-18 email">{{ popup.user()?.email }}</span>
+            </div>
+            <div class="contact-btn" (click)="popup.navigateToChat()">
+                <img src="/icons/global/message.svg" alt="">
+                <span class="fs-18 fw-700">Nachricht</span>
+            </div>
+        </div>
+    </div>
+</div>
+}

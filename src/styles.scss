@@ -37,6 +37,9 @@ body {
   --clr-rosa: #ED1E79;
   --clr-white: #FFFFFF;
   --box-shadow: 0px 6px 10px 0px #00000033;
+  --overlay-bg: #00000033;
+  --border-radius: 30px;
+  --clr-blue: #1381FF;
 
 }
 
@@ -87,7 +90,7 @@ body {
 }
 
 .fs-20 {
-  font-size: 20px;
+  font-size: 20px!important;
 }
 
 .fs-24 {

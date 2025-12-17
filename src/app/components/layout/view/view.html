@@ -88,7 +88,7 @@
           <span class="fw-700 fs-24">Mitglieder</span>
           <div class="member-list">
             @for (m of channelMembers; track $index) {
-            <div class="member">
+            <div class="member" (click)="openProfile(m.id!)">
               <div>
                 <img [src]="getAvatarSrc(m)" class="user-icon">
                 <img [src]="userService.getOnlineStatusIcon(m)" class="status-icon">
@@ -172,5 +172,4 @@
     </app-message-input>
 
   </div>
-
 </section>

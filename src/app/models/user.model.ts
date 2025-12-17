@@ -8,7 +8,7 @@ export type NewUser = {
 };
 
 export interface User {
-  id?: number;
+  id?: string;
   avatarId: AvatarId;
   createdAt?: any;
   displayName?: string;
