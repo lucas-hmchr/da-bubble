@@ -1,23 +1,16 @@
 <section>
 
-  <!-- HEADER -->
-  <header
-    class="dm-header"
-    [class.dm-header-small]="viewState.isChannel() || viewState.isDm()"
-    [class.dm-header-big]="viewState.isNew()"
-  >
-    <!-- HEADER LINKS -->
+  <header class="dm-header" [class.dm-header-small]="viewState.isChannel() || viewState.isDm()"
+    [class.dm-header-big]="viewState.isNew()">
     <div style="width: 100%;">
       <div id="header-left" style="display: flex; align-items: center; gap: 8px; width: 100%;">
 
-        <!-- CHANNEL HEADER -->
         @if (viewState.isChannel() && channel; as ch) {
-          <img src="/icons/global/tag.svg" alt="">
-          <h2>{{ ch.name }}</h2>
-          <img src="/icons/global/keyboard_arrow_down.svg" alt="" style="cursor: pointer;">
+        <img src="/assets/icons/global/tag.svg" alt="">
+        <h2>{{ ch.name }}</h2>
+        <img src="/assets/icons/global/keyboard_arrow_down.svg" alt="" style="cursor: pointer;">
         }
 
-        <!-- DM HEADER -->
         @else if (viewState.isDm()) {
           @if (dmPartner) {
             <div style="position: relative; display: flex;">
@@ -38,98 +31,105 @@
           }
         }
 
-        <!-- NEW MESSAGE HEADER -->
         @else {
-          <div style="display: flex; flex-direction: column; gap: 16px; align-items: start; width: 100%; position: relative;">
-            <h2>Neue Nachricht</h2>
+        <div
+          style="display: flex; flex-direction: column; gap: 16px; align-items: start; width: 100%; position: relative;">
+          <h2>Neue Nachricht</h2>
 
-            <input
-              class="new-message-to-input"
-              type="text"
-              [value]="newMessage.query()"
-              (keyup)="onNewMessageToKeyup($event)"
-              placeholder="An: #channel, oder @jemand oder E-Mail Adresse"
-            />
+          <input class="new-message-to-input" type="text" [value]="newMessage.query()"
+            (keyup)="onNewMessageToKeyup($event)" placeholder="An: #channel, oder @jemand oder E-Mail Adresse" />
 
-            @if (newMessage.show() && newMessage.mode() === 'channel') {
-              <div class="to-autocomplete">
-                <div class="to-autocomplete-inner">
-                  @for (ch of newMessage.filteredChannels(); track ch.id ?? $index) {
-                    <div class="to-item" (click)="newMessage.selectChannel(ch)">
-                      <span class="to-hash">#</span>
-                      <span>{{ ch.name }}</span>
-                    </div>
-                  }
-                </div>
+          @if (newMessage.show() && newMessage.mode() === 'channel') {
+          <div class="to-autocomplete">
+            <div class="to-autocomplete-inner">
+              @for (ch of newMessage.filteredChannels(); track ch.id ?? $index) {
+              <div class="to-item" (click)="newMessage.selectChannel(ch)">
+                <span class="to-hash">#</span>
+                <span>{{ ch.name }}</span>
               </div>
-            }
-
-            @if (newMessage.show() && newMessage.mode() === 'user') {
-              <div class="to-autocomplete">
-                <div class="to-autocomplete-inner">
-                  @for (u of newMessage.filteredUsers(); track u.uid ?? $index) {
-                    <div class="to-item" (click)="newMessage.selectUser(u)">
-                      <span class="to-at">@</span>
-                      <span>{{ u.displayName || u.name || 'Unbekannter Nutzer' }}</span>
-                    </div>
-                  }
-                </div>
-              </div>
-            }
+              }
+            </div>
           </div>
+          }
+
+          @if (newMessage.show() && newMessage.mode() === 'user') {
+          <div class="to-autocomplete">
+            <div class="to-autocomplete-inner">
+              @for (u of newMessage.filteredUsers(); track u.uid ?? $index) {
+              <div class="to-item" (click)="newMessage.selectUser(u)">
+                <span class="to-at">@</span>
+                <span>{{ u.displayName || u.name || 'Unbekannter Nutzer' }}</span>
+              </div>
+              }
+            </div>
+          </div>
+          }
+        </div>
         }
 
       </div>
     </div>
 
-    <!-- HEADER RECHTS (nur Channel) -->
     @if (viewState.isChannel() && channel) {
-      <div class="channel-members">
-        <div class="member-avatars">
-          @for (u of channelMembers | slice:0:3; track u.uid ?? $index) {
-            <img
-              class="member-avatar"
-              [src]="getAvatarSrc(u)"
-              [alt]="u.displayName || u.name || 'User'"
-            />
-          }
-        </div>
-
-        <span>{{ channelMembers.length }}</span>
-        <img class="add-person" src="/icons/global/person_add1.svg" alt="">
+    <div class="channel-members">
+      <div class="member-avatars" (click)="toggleChannelMemberList()">
+        @for (u of channelMembers | slice:0:3; track u.uid ?? $index) {
+        <img class="member-avatar" [src]="getAvatarSrc(u)" [alt]="u.displayName || u.name || 'User'" />
+        }
+        <span class="fw-600">{{ channelMembers.length }}</span>
       </div>
+
+      <img class="add-person" src="/assets/icons/global/person_add1.svg" alt="">
+      @if (showChannelMemberList()) {
+      <div class="member-list-popup">
+        <div class="member-list-content">
+          <img src="/assets/icons/global/close.svg" class="close-icon" (click)="toggleChannelMemberList()">
+          <span class="fw-700 fs-24">Mitglieder</span>
+          <div class="member-list">
+            @for (m of channelMembers; track $index) {
+            <div class="member" (click)="openProfile(m.id!)">
+              <div>
+                <img [src]="getAvatarSrc(m)" class="user-icon">
+                <img [src]="userService.getOnlineStatusIcon(m)" class="status-icon">
+              </div>
+              <span class="fs-18">{{ m.displayName }}</span>
+            </div>
+            }
+
+          </div>
+          <div class="member">
+            <div>
+              <img src="/assets/icons/global/person_add1.svg">
+            </div>
+            <span>Mitglieder hinzufügen</span>
+          </div>
+        </div>
+      </div>
+      }
+
+    </div>
     }
   </header>
 
-  <!-- BODY -->
   <div id="chat-container-new">
 
-    <div
-      class="messages-scroll"
-      [ngClass]="{
+    <div class="messages-scroll" [ngClass]="{
         'justify-content-end':
           (viewState.isChannel() && (channelMessages?.length ?? 0) === 0) ||
           (viewState.isDm() && dmLoaded() && (dmMessages?.length ?? 0) === 0)
       }"
     >
 
-      <!-- CHANNEL MESSAGES -->
       @if (viewState.isChannel() && channel) {
-        <app-message
-          [channel]="channel"
-          [currentUserUid]="currentUserUid"
-          (editRequested)="onEditRequested($event)">
-        </app-message>
+      <app-message [channel]="channel" [currentUserUid]="currentUserUid" (editRequested)="onEditRequested($event)">
+      </app-message>
       }
 
-      <!-- DM -->
       @else if (viewState.isDm()) {
 
-        <!-- ⏳ Noch nicht geladen → nichts anzeigen -->
         @if (!dmLoaded()) {
         }
 
-        <!-- 📭 Geladen, aber leer → Intro -->
         @else if ((dmMessages?.length ?? 0) === 0) {
           @if (dmPartner) {
             <div class="dm-intro">
@@ -153,7 +153,6 @@
           }
         }
 
-        <!-- 💬 Geladen + Nachrichten vorhanden -->
         @else {
           <app-message
             [contextType]="'conversation'"
@@ -164,31 +163,20 @@
         }
       }
 
-      <!-- NEW MESSAGE: bewusst leer -->
       @else {
       }
     </div>
 
-    <!-- SINGLE MESSAGE INPUT -->
-    <app-message-input
-      [currentUserUid]="currentUserUid"
-      [forceEditable]="viewState.isNew()"
-
+    <app-message-input [currentUserUid]="currentUserUid" [forceEditable]="viewState.isNew()"
       [contextType]="viewState.isChannel() ? 'channel' : 'conversation'"
       [channel]="viewState.isChannel() ? (channel ?? undefined) : undefined"
-      [conversationId]="viewState.isDm() ? dmConversationId : null"
-
-      [editingMessage]="editingMessage ?? undefined"
-      (editFinished)="onEditFinished()"
-
-      [placeholderText]="
+      [conversationId]="viewState.isDm() ? dmConversationId : null" [editingMessage]="editingMessage ?? undefined"
+      (editFinished)="onEditFinished()" [placeholderText]="
         viewState.isChannel()
           ? ('Nachricht an ' + (channel?.name ?? ''))
           : (viewState.isDm() ? 'Antwort' : 'Starte eine neue Nachricht')
-      "
-    >
+      ">
     </app-message-input>
 
   </div>
-
 </section>

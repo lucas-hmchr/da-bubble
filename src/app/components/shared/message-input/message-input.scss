@@ -145,20 +145,20 @@ textarea:disabled {
 }
 
 .icon-smile {
-    content: url('/icons/global/smile1.svg');
+    content: url('/assets/icons/global/smile1.svg');
 
     &:hover {
-        content: url('/icons/global/smile3.svg');
+        content: url('/assets/icons/global/smile3.svg');
         background-color: var(--bg-clr);
         border-radius: 100%;
     }
 }
 
 .icon-at {
-    content: url('/icons/global/at1.svg');
+    content: url('/assets/icons/global/at1.svg');
 
     &:hover {
-        content: url('/icons/global/at3.svg');
+        content: url('/assets/icons/global/at3.svg');
         background-color: var(--bg-clr);
         border-radius: 100%;
     }
@@ -168,10 +168,10 @@ textarea:disabled {
     cursor: pointer;
     height: 30px;
     width: 30px;
-    content: url('/icons/global/send1.svg');
+    content: url('/assets/icons/global/send1.svg');
 
     &:hover {
-        content: url('/icons/global/send2.svg');
+        content: url('/assets/icons/global/send2.svg');
     }
 }
 

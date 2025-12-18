@@ -3,14 +3,12 @@
 @use './styles/variables.scss' as *;
 
 html {
-  @include mat.theme((
-    color: (
-      primary: mat.$azure-palette,
-      tertiary: mat.$blue-palette,
-    ),
-    typography: Roboto,
-    density: 0,
-  ));
+  @include mat.theme((color: (primary: mat.$azure-palette,
+        tertiary: mat.$blue-palette,
+      ),
+      typography: Roboto,
+      density: 0,
+    ));
 }
 
 body {
@@ -38,6 +36,11 @@ body {
   --clr-gray: #686868;
   --clr-rosa: #ED1E79;
   --clr-white: #FFFFFF;
+  --box-shadow: 0px 6px 10px 0px #00000033;
+  --overlay-bg: #00000033;
+  --border-radius: 30px;
+  --clr-blue: #1381FF;
+
 }
 
 * {
@@ -82,15 +85,23 @@ body {
   }
 }
 
+.fs-18 {
+  font-size: 18px!important;
+}
+
 .fs-20 {
-  font-size: 20px;
+  font-size: 20px!important;
 }
 
 .fs-24 {
-  font-size: 24px;
+  font-size: 24px !important;
 }
 
-.fw-700{
+.fw-600 {
+  font-weight: 600;
+}
+
+.fw-700 {
   font-weight: 700;
 }
 

@@ -1,19 +1,19 @@
 <section class="header">
     <div class="top-bar">
         <div class="topbar">
-            <img src="/icons/global/logo-header.svg" alt="logo">
+            <img src="/assets/icons/global/logo-header.svg" alt="logo">
         </div>
         <div class="search-bar">
             <input type="text" id="name" name="name" placeholder="Devspace durchsuchen" class="search-inputs">
-            <img src="/icons/global/search.svg" alt="search" class="search-icon-right">
+            <img src="/assets/icons/global/search.svg" alt="search" class="search-icon-right">
         </div>
         <div class="profil" (click)="toggleDropdownMenu($event)">
             <h1>Frederik Beck</h1>
             <div class="profil-image">
-                <img src="icons/global/Avatar.svg" alt="avatar-profil">
-                <img src="icons/global/Online.svg" alt="avatar-online-icon" class="online-icon">
+                <img src="/assets/icons/global/Avatar.svg" alt="avatar-profil">
+                <img src="/assets/icons/global/Online.svg" alt="avatar-online-icon" class="online-icon">
             </div>
-            <img src="icons/global/keyboard_arrow_down.svg" (click)="toggleDropdownMenu($event)" alt="arrow-drop-down">
+            <img src="/assets/icons/global/keyboard_arrow_down.svg" (click)="toggleDropdownMenu($event)" alt="arrow-drop-down">
 
             <div class="dropdown-menu" [class.show]="isDropdownMenuOpen">
                 <div class="menu-name" (click)="openProfilModal()">Profil</div>
@@ -24,13 +24,13 @@
                 <div class="modal-header">
                     <h2>Profil</h2>
                     <div class="close-icon-wrapper" (click)="closeProfilModal()">
-                        <img src="icons/global/close.svg" alt="close" class="close-icon">
+                        <img src="/assets/icons/global/close.svg" alt="close" class="close-icon">
                     </div>
                 </div>
 
                 <div class="modal-content">
                     <div class="avatar-large">
-                        <img src="icons/global/Avatar.svg" alt="avatar-profil">
+                        <img src="/assets/icons/global/Avatar.svg" alt="avatar-profil">
                     </div>
 
                     <div class="profil-info">
@@ -46,7 +46,7 @@
                     </div>
 
                     <div class="email-section">
-                        <img src="icons/login/mail_active.svg" alt="email" class="email-icon">
+                        <img src="/assets/icons/login/mail_active.svg" alt="email" class="email-icon">
                         <div class="email-info">
                             <p class="email-label">E-Mail-Adresse</p>
                             <p class="email-address">fred.beck@email.com</p>
@@ -59,18 +59,18 @@
                 <div class="modal-header">
                     <h2>Dein Profil bearbeiten</h2>
                     <div class="close-icon-wrapper" (click)="closeProfilEditModal()">
-                        <img src="icons/global/close.svg" alt="close" class="close-icon">
+                        <img src="/assets/icons/global/close.svg" alt="close" class="close-icon">
                     </div>
                 </div>
 
                 <div class="modal-content">
                     <div class="avatar-large">
-                        <img src="icons/global/Avatar.svg" alt="avatar-profil">
+                        <img src="/assets/icons/global/Avatar.svg" alt="avatar-profil">
                     </div>
 
                     <div class="form-section">
                         <div class="circle-profil-name">
-                            <img class="" src="icons/global/account_circle.svg" alt="">
+                            <img class="" src="/assets/icons/global/account_circle.svg" alt="">
                             <label>Vollständiger Name</label>
                         </div>
                         <input type="text" value="Frederik Beck" class="input-field">

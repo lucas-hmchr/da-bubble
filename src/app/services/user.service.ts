@@ -1,6 +1,8 @@
 import { Timestamp } from '@angular/fire/firestore';
 import { User } from '../models/user.model';
 import { Injectable, signal } from '@angular/core';
+import { Observable } from 'rxjs';
+import { FirestoreService } from './firestore';
 
 @Injectable({
     providedIn: 'root',
@@ -10,14 +12,14 @@ export class UserService {
 
     private now = signal(Date.now());
 
-    constructor() {
+    constructor(private firestoreService: FirestoreService) {
         setInterval(() => {
             this.now.set(Date.now());
         }, 30_000);
     }
 
     private isUserOnline(user: User, thresholdMs = 3 * 60 * 1000): boolean {
-        if (!user.lastActiveAt) return false;
+        if (!user?.lastActiveAt) return false;
         const lastActive =
             user.lastActiveAt instanceof Timestamp
                 ? user.lastActiveAt.toMillis()
@@ -32,11 +34,16 @@ export class UserService {
 
     public getOnlineStatusIcon(user: User) {
         if (this.isOnline(user)) {
-            return `/icons/global/Online.svg`;
+            return `/assets/icons/global/Online.svg`;
         } else {
-            return `/icons/global/Offline.svg`;
+            return `/assets/icons/global/Offline.svg`;
         }
     }
+
+    public getUserByUid(uid: string): Observable<User | undefined> {
+        return this.firestoreService.getDocument<User>(`users/${uid}`);
+    }
+
 }
 
 
