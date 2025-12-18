@@ -10,7 +10,6 @@ import { User } from '../../../models/user.model';
 import { FirestoreService } from '../../../services/firestore';
 import { getAvatarById, getAvatarSrc } from '../../../../shared/data/avatars';
 import { UserService } from '../../../services/user.service';
-import { ChannelSelectionService } from '../../../services/channel-selection.service';
 import { ChannelService } from '../../../services/channel.service';
 import { ChatContextService } from '../../../services/chat-context.service';
 import { ConversationService } from '../../../services/conversation.service';
@@ -70,7 +69,6 @@ export class WorkspaceSidebar {
   openDirectMessage(user: User) {
     if (!user.uid) return;
     this.chatContext.openConversation(user.uid);
-    this.conversationService.setConvPartner(user)
   }
 
   getAvatarPath(user: User) {

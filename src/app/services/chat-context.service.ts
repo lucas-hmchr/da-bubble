@@ -4,6 +4,7 @@ import { filter } from 'rxjs';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { ConversationService } from './conversation.service';
 import { AuthService } from '../auth/auth.service';
+import { user } from '@angular/fire/auth';
 
 export type ChatContextType = 'channel' | 'dm' | 'new';
 
@@ -84,7 +85,6 @@ export class ChatContextService {
       activeUser.uid,
       userId
     );
-
     // wichtig: State setzen + navigieren
     this._state.set({ type: 'dm', channelId: null, convId });
     await this.router.navigate(['/dm', convId]);

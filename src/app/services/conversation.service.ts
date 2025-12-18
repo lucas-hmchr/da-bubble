@@ -7,11 +7,12 @@ import {
     serverTimestamp,
     setDoc,
 } from '@angular/fire/firestore';
-import { Observable, Subscription } from 'rxjs';
+import { firstValueFrom, Observable, Subscription } from 'rxjs';
 import { FirestoreService } from "./firestore";
 import { MessageData } from '../models/message.interface';
 import { User } from './../models/user.model';
 import { AuthService } from '../auth/auth.service';
+import { UserService } from './user.service';
 
 export interface Conversation {
     id?: string;
@@ -34,7 +35,7 @@ export class ConversationService {
     activeConversationMessages = signal<MessageData[]>([]);
     dmLoaded = signal<boolean>(false);
 
-    constructor(private firestore: FirestoreService, private authService: AuthService) { }
+    constructor(private firestore: FirestoreService, private authService: AuthService, private userService: UserService) { }
 
     subscribeToConversation(convId: string) {
         this.cleanup();
@@ -43,7 +44,7 @@ export class ConversationService {
         this.activeConversationId.set(convId);
 
         let hasLoadedOnce = false;
-
+        this.setConvPartner(convId)
         this.messagesSub = this.getConversationMessages(convId).subscribe((msgs) => {
             this.activeConversationMessages.set(msgs);
 
@@ -81,9 +82,20 @@ export class ConversationService {
         });
     }
 
+    private getPartnerIdFromRoute(routeParam: string): string {
+        const uid = this.authService.activeUser()?.uid;
+        const parts = routeParam.split('_');
+        if (parts.length === 2) {
+            const [a, b] = parts;
+            return a === uid ? b : a;
+        }
+        return routeParam;
+    }
 
-    setConvPartner(user: User) {
-        this.activeConversationPartner.set(user)
+    async setConvPartner(convId: string) {
+        const partnerId = this.getPartnerIdFromRoute(convId);
+        const user = await firstValueFrom(this.userService.getUserByUid(partnerId));
+        if (user) this.activeConversationPartner.set(user);
     }
 
     cleanup() {
@@ -100,8 +112,6 @@ export class ConversationService {
 
         this.dmLoaded.set(false);
     }
-
-
 
     buildConversationId(userA: string, userB: string): string {
         return [userA, userB].sort().join('_');

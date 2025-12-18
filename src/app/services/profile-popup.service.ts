@@ -5,6 +5,7 @@ import { User } from '../models/user.model';
 import { getAvatarById } from '../../shared/data/avatars';
 import { Router } from '@angular/router';
 import { ChatContextService } from './chat-context.service';
+import { ConversationService } from './conversation.service';
 
 @Injectable({ providedIn: 'root' })
 export class ProfilePopupService {
@@ -14,7 +15,7 @@ export class ProfilePopupService {
     loading = signal(false);
     router = inject(Router);
 
-    constructor(public userService: UserService, private chatCtx: ChatContextService) { }
+    constructor(public userService: UserService, private chatCtx: ChatContextService, private coversationService: ConversationService) { }
 
     async open(uid: string) {
         this.uid.set(uid);
@@ -48,6 +49,7 @@ export class ProfilePopupService {
         const uid = u?.uid;
         if (!uid) return;
         this.chatCtx.openConversation(uid);
+        // this.coversationService.setConvPartner(this.user()!)
         this.close();
     }
 
