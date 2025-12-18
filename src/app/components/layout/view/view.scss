@@ -83,13 +83,13 @@ section {
 }
 
 .add-person {
-  content: url('/icons/global/person_add1.svg');
+  content: url('/assets/icons/global/person_add1.svg');
   background-color: var(--bg-clr);
   border-radius: 100%;
   padding: 7px;
 
   &:hover {
-    content: url('/icons/global/person_add2.svg');
+    content: url('/assets/icons/global/person_add2.svg');
     background-color: var(--bg-clr);
     border-radius: 100%;
   }

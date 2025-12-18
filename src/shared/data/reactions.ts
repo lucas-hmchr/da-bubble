@@ -16,8 +16,8 @@ export interface ReactionDef {
 }
 
 export const reactionDefs: readonly ReactionDef[] = [
-  { id: 'check',    icon: '/icons/global/check1.svg',    isEmoji: false },
-  { id: 'thumbsup', icon: '/icons/global/thumbsup1.svg', isEmoji: false },
+  { id: 'check',    icon: '/assets/icons/global/check1.svg',    isEmoji: false },
+  { id: 'thumbsup', icon: '/assets/icons/global/thumbsup1.svg', isEmoji: false },
 
   // Emoji-Reactions für die Palette
   { id: 'rocket', icon: '🚀', isEmoji: true },

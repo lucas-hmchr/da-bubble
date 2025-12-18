@@ -3,16 +3,16 @@
         <mat-drawer #drawer class="left-menu-sidenav" mode="side" opened="true">
             <div class="channels-button-container">
                 <div class="workspace-logo-text-container">
-                    <img src="/icons/global/workspace_logo.svg" alt="" />
+                    <img src="/assets/icons/global/workspace_logo.svg" alt="" />
                     <span class="devspace-txt">Devspace</span>
                 </div>
 
-                <img class="edit-square-icon cp" src="/icons/global/edit_square_default.svg" alt=""
+                <img class="edit-square-icon cp" src="/assets/icons/global/edit_square_default.svg" alt=""
                     (click)="openNewMessage()" />
             </div>
 
             <div class="channel-message-add-container">
-                <img class="add-icon cp" src="/icons/global/add_default.svg" (click)="openAddChannelDialog()" alt="" />
+                <img class="add-icon cp" src="/assets/icons/global/add_default.svg" (click)="openAddChannelDialog()" alt="" />
 
                 <mat-accordion class="mat-accordion-container">
                     <mat-expansion-panel hideToggle="true" class="channel-panel" (opened)="channelOpen.set(true)"
@@ -23,7 +23,7 @@
                                     arrow_drop_down
                                 </mat-icon>
                                 <div class="three-circle-channels-container">
-                                    <img src="/icons/global/workspaces_three_circles_default.svg" alt="" />
+                                    <img src="/assets/icons/global/workspaces_three_circles_default.svg" alt="" />
                                     <span class="fs-20">Channels</span>
                                 </div>
                             </div>
@@ -35,13 +35,13 @@
                 class="channel-item d-flex mb-16 cp"
                 (click)="selectChannel(ch)"
               >
-                <img src="/icons/global/tag.svg" class="mr-8" alt="" />
+                <img src="/assets/icons/global/tag.svg" class="mr-8" alt="" />
                 {{ ch.name }}
               </div>
               }
 
                             <div class="channel-add cp" (click)="openAddChannelDialog()">
-                                <img src="/icons/global/add_circle.svg" class="mr-8" alt="" />
+                                <img src="/assets/icons/global/add_circle.svg" class="mr-8" alt="" />
                                 Channel hinzufügen
                             </div>
                         </div>
@@ -55,7 +55,7 @@
                                     arrow_drop_down
                                 </mat-icon>
                                 <div class="account-directMessage-container">
-                                    <img src="/icons/global/account_circle.svg" class="mr-8" alt="" />
+                                    <img src="/assets/icons/global/account_circle.svg" class="mr-8" alt="" />
                                     <span class="fs-20">Direktnachrichten</span>
                                 </div>
                             </div>

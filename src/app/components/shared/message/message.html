@@ -15,18 +15,18 @@
       <!-- WICHTIG: mouseleave bleibt, aber das Options-Menü setzt einen "hover lock" -->
       <div class="message-content" [ngClass]="{ fdrr: isOwnMessage(msg) }" (mouseleave)="onMessageMouseLeave(msg)">
         <div class="message-actions">
-          <img src="/icons/global/check1.svg" alt="" class="action-btn check-btn"
+          <img src="/assets/icons/global/check1.svg" alt="" class="action-btn check-btn"
             (click)="toggleReaction(msg, 'check')" />
-          <img src="/icons/global/thumbsup1.svg" alt="" class="action-btn thumbsup-btn"
+          <img src="/assets/icons/global/thumbsup1.svg" alt="" class="action-btn thumbsup-btn"
             (click)="toggleReaction(msg, 'thumbsup')" />
 
-          <img src="/icons/global/reaction1.svg" alt="" class="action-btn reaction-btn"
+          <img src="/assets/icons/global/reaction1.svg" alt="" class="action-btn reaction-btn"
             (click)="onToggleReactionPicker(msg)" />
 
-          <img *ngIf="contextType === 'channel'" src="/icons/global/answer1.svg" alt="" class="action-btn answer-btn" />
+          <img *ngIf="contextType === 'channel'" src="/assets/icons/global/answer1.svg" alt="" class="action-btn answer-btn" />
 
           <!-- 3-Punkte nur bei eigener Message -->
-          <img *ngIf="isOwnMessage(msg)" src="/icons/global/option1.svg" alt="" class="action-btn option-btn"
+          <img *ngIf="isOwnMessage(msg)" src="/assets/icons/global/option1.svg" alt="" class="action-btn option-btn"
             (click)="toggleOptionsMenu(msg, i, msgs.length, $event)" />
 
 
