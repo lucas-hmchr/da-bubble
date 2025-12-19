@@ -23,6 +23,13 @@
         display: none;
     }
 
+    &.focused {
+        .search-inputs {
+            border: 2px solid #444DF2;
+            box-shadow: 0 0 0 3px rgba(68, 77, 242, 0.1);
+        }
+    }
+
     .search-inputs {
         height: 70px;
         width: 989px;
@@ -31,6 +38,25 @@
         border: none;
         outline: none;
         font-size: 33px;
+    }
+
+    .search-icon-clear {
+        position: absolute;
+        right: 80px;
+        top: 50%;
+        transform: translateY(-50%);
+        width: 28px;
+        height: 28px;
+        cursor: pointer;
+        opacity: 0.5;
+        transition: opacity 0.2s ease;
+        padding: 4px;
+        border-radius: 50%;
+
+        &:hover {
+            opacity: 1;
+            background-color: rgba(0, 0, 0, 0.05);
+        }
     }
 
     .search-icon-right {

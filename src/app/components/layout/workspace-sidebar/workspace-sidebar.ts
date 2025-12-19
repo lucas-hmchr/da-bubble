@@ -1,32 +1,43 @@
-import { Component, Input, inject, signal } from '@angular/core';
+import { Component, Input, inject, signal, OnInit, OnDestroy } from '@angular/core';
 import { MatSidenavModule } from '@angular/material/sidenav';
 import { MatButtonModule } from '@angular/material/button';
 import { MatExpansionModule } from '@angular/material/expansion';
 import { MatIconModule } from '@angular/material/icon';
 import { MatDialog } from '@angular/material/dialog';
+import { CommonModule } from '@angular/common';
 import { AddChannelDialog } from '../../add-channel-dialog/add-channel-dialog';
 import { Channel } from '../../../models/channel.interface';
 import { User } from '../../../models/user.model';
 import { FirestoreService } from '../../../services/firestore';
-import { getAvatarById, getAvatarSrc } from '../../../../shared/data/avatars';
+import { getAvatarById } from '../../../../shared/data/avatars';
 import { UserService } from '../../../services/user.service';
 import { ChannelService } from '../../../services/channel.service';
 import { ChatContextService } from '../../../services/chat-context.service';
 import { ConversationService } from '../../../services/conversation.service';
+import { SearchService } from '../../../services/search.topbar.service';
+import { Subject } from 'rxjs';
+import { takeUntil, debounceTime } from 'rxjs/operators';
 
 @Component({
   selector: 'app-workspace-sidebar',
   standalone: true,
-  imports: [MatSidenavModule, MatButtonModule, MatExpansionModule, MatIconModule],
+  imports: [CommonModule, MatSidenavModule, MatButtonModule, MatExpansionModule, MatIconModule],
   templateUrl: './workspace-sidebar.html',
   styleUrl: './workspace-sidebar.scss',
 })
-export class WorkspaceSidebar {
+export class WorkspaceSidebar implements OnInit, OnDestroy {
   @Input() currentUserUid: string | null = null;
 
   readonly channelOpen = signal(false);
   readonly dmOpen = signal(false);
   isClosed = signal(false);
+
+  isSearching = signal(false);
+  searchQuery = signal('');
+  filteredChannels = signal<Channel[]>([]);
+  filteredUsers = signal<User[]>([]);
+
+  private destroy$ = new Subject<void>();
 
   constructor(
     private dialog: MatDialog,
@@ -35,14 +46,63 @@ export class WorkspaceSidebar {
     private chatContext: ChatContextService,
     public userService: UserService,
     public conversationService: ConversationService,
-  ) { }
+    private searchService: SearchService
+  ) {}
+
+  ngOnInit() {
+    this.resetSearch();
+
+    this.searchService.searchQuery$
+      .pipe(takeUntil(this.destroy$), debounceTime(300))
+      .subscribe((query) => {
+        this.searchQuery.set(query);
+
+        if (query.trim()) {
+          this.isSearching.set(true);
+          this.performSearch(query);
+        } else {
+          this.isSearching.set(false);
+          this.resetSearch();
+        }
+      });
+  }
 
   get allChannels(): Channel[] {
-    return this.channelService.channels();
+    return this.isSearching() ? this.filteredChannels() : this.channelService.channels();
   }
 
   get allUsers(): User[] {
-    return this.firestore.userList();
+    return this.isSearching() ? this.filteredUsers() : this.firestore.userList();
+  }
+
+  performSearch(query: string) {
+    const searchTerm = query.toLowerCase().trim();
+
+    const channels = this.channelService
+      .channels()
+      .filter(
+        (channel) =>
+          channel.name?.toLowerCase().includes(searchTerm) ||
+          channel.description?.toLowerCase().includes(searchTerm)
+      );
+    this.filteredChannels.set(channels);
+
+    const users = this.firestore
+      .userList()
+      .filter(
+        (user) =>
+          user.uid !== this.currentUserUid &&
+          (user.displayName?.toLowerCase().includes(searchTerm) ||
+            user.name?.toLowerCase().includes(searchTerm) ||
+            user.email?.toLowerCase().includes(searchTerm))
+      );
+    this.filteredUsers.set(users);
+  }
+
+  resetSearch() {
+    this.filteredChannels.set(this.channelService.channels());
+    this.filteredUsers.set(this.firestore.userList());
+    this.searchQuery.set('');
   }
 
   openAddChannelDialog() {
@@ -60,6 +120,7 @@ export class WorkspaceSidebar {
       return;
     }
     this.chatContext.openChannel(ch.id);
+    this.clearSearchIfActive();
   }
 
   openNewMessage() {
@@ -69,6 +130,13 @@ export class WorkspaceSidebar {
   openDirectMessage(user: User) {
     if (!user.uid) return;
     this.chatContext.openConversation(user.uid);
+    this.clearSearchIfActive();
+  }
+
+  clearSearchIfActive() {
+    if (this.isSearching()) {
+      this.searchService.clearSearch();
+    }
   }
 
   getAvatarPath(user: User) {
@@ -77,5 +145,10 @@ export class WorkspaceSidebar {
 
   isChannelActive(channel: Channel): boolean {
     return this.chatContext.channelId() === channel.id;
+  }
+
+  ngOnDestroy() {
+    this.destroy$.next();
+    this.destroy$.complete();
   }
 }

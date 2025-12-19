@@ -4,7 +4,10 @@
             <img src="/assets/icons/global/logo-header.svg" alt="logo">
         </div>
         <div class="search-bar">
-            <input type="text" id="name" name="name" placeholder="Devspace durchsuchen" class="search-inputs">
+            <input type="text" id="name" name="name" placeholder="Devspace durchsuchen" class="search-inputs"
+                [(ngModel)]="searchQuery" (input)="onSearchInput()" (focus)="onSearchFocus()" (blur)="onSearchBlur()">
+            <img *ngIf="searchQuery.length > 0" src="/assets/icons/global/close.svg" alt="clear"
+                class="search-icon-clear" (click)="clearSearch()">
             <img src="/assets/icons/global/search.svg" alt="search" class="search-icon-right">
         </div>
         <div class="profil" (click)="toggleDropdownMenu($event)">
@@ -13,7 +16,8 @@
                 <img src="/assets/icons/global/Avatar.svg" alt="avatar-profil">
                 <img src="/assets/icons/global/Online.svg" alt="avatar-online-icon" class="online-icon">
             </div>
-            <img src="/assets/icons/global/keyboard_arrow_down.svg" (click)="toggleDropdownMenu($event)" alt="arrow-drop-down">
+            <img src="/assets/icons/global/keyboard_arrow_down.svg" (click)="toggleDropdownMenu($event)"
+                alt="arrow-drop-down">
 
             <div class="dropdown-menu" [class.show]="isDropdownMenuOpen">
                 <div class="menu-name" (click)="openProfilModal()">Profil</div>
