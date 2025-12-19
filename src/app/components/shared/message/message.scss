@@ -1,38 +1,54 @@
 /* =========================================================
-   Container / Basics
+   CONTAINER / LAYOUT
 ========================================================= */
 
 .message-container {
   width: 100%;
 }
 
-p {
-  font-size: 18px;
+.message-wrapper {
+  position: relative;
+  overflow: visible;
 }
 
-a {
-  text-decoration: none;
-  color: #535AF1;
-  font-size: 18px;
-}
-
-
-/* =========================================================
-   Empty Channel
-========================================================= */
-
-.empty-channel-info {
+.message-content {
+  position: relative;
   display: flex;
-  flex-direction: column;
   gap: 16px;
+  padding: 10px 24px;
+  overflow: visible;
+//   z-index: 1;
+
+  &:hover {
+    cursor: pointer;
+    background-color: var(--bg-clr);
+
+    .other-person {
+      background-color: var(--clr-white);
+    }
+  }
+
+  > div {
+    > div {
+      display: flex;
+      gap: 16px;
+      align-items: center;
+    }
+  }
 }
 
+/* Eigene Nachrichten umdrehen */
+.fdrr {
+  flex-direction: row-reverse;
+}
 
 /* =========================================================
-   Date Separator
+   DATE SEPARATOR (muss UNTER Popups liegen)
 ========================================================= */
 
 .date-separator {
+  position: relative;
+  z-index: 0; /* Wichtig: unter Action-Bar / Popup */
   display: flex;
   align-items: center;
   width: 100%;
@@ -47,23 +63,19 @@ a {
 }
 
 .date-separator span {
+  position: relative;
+  z-index: 0;
   padding: 6px 14px;
   border: 1px solid #d0d0e0;
   border-radius: 20px;
-  background: white;
+  background: #fff;
   font-family: sans-serif;
   font-size: 14px;
 }
 
-
 /* =========================================================
-   Layout / Message Row
+   AVATAR / TEXT
 ========================================================= */
-
-.message-wrapper,
-.message-content {
-  overflow: visible;
-}
 
 .profile-pic {
   height: 70px;
@@ -71,59 +83,34 @@ a {
   border-radius: 100%;
 }
 
+p {
+  font-size: 18px;
+}
+
+a {
+  text-decoration: none;
+  color: #535AF1;
+  font-size: 18px;
+}
+
 .send-name {
   font-weight: bold;
   font-size: 18px;
 }
 
-.send-info,
-.last-reply-time {
+.send-info {
   font-size: 14px;
   color: #686868;
 }
 
-.message-content {
-  display: flex;
-  gap: 16px;
-  padding: 10px 24px;
-  position: relative; /* Anchor für Actionbar, Picker, Menü */
-  z-index: auto;      /* wichtig: kein permanenter Stacking-Context */
-
-  > div {
-    > div {
-      display: flex;
-      gap: 16px;
-      align-items: center;
-    }
-  }
-
-  &:hover {
-    cursor: pointer;
-    background-color: var(--bg-clr);
-
-    .other-person {
-      background-color: var(--clr-white);
-    }
-  }
+.text {
+  margin: 10px 0;
 }
 
-/* Eigene Nachrichten umdrehen */
-.fdrr {
-  flex-direction: row-reverse;
-}
-
-
-/* =========================================================
-   Bubbles
-========================================================= */
-
+/* Sprechblasen */
 .bubble {
   padding: 15px;
   border-radius: 30px;
-}
-
-.text {
-  margin: 10px 0;
 }
 
 .other-person {
@@ -138,20 +125,21 @@ a {
   border-top-right-radius: 0;
 }
 
+/* Empty channel info */
+.empty-channel-info {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
 
 /* =========================================================
-   Action Bar (Hover Icons)
+   ACTION BAR (Hover-Leiste über der Message)
 ========================================================= */
 
-/* Default: fremde Nachricht (links) -> Action-Bar rechts */
 .message-actions {
   position: absolute;
-  top: 0px;
-  z-index: 50;
-
-  right: 24px;
-  left: auto;
-
+  top: 0;
+  z-index: 30; /* über Content & Separator */
   width: max-content;
   display: inline-flex;
   align-items: center;
@@ -165,21 +153,25 @@ a {
   opacity: 0;
   pointer-events: none;
   transition: opacity 0.15s ease, transform 0.15s ease;
+
+  right: 24px;
+  left: auto;
 }
 
-/* Eigene Nachricht -> Action-Bar links */
+/* Eigene Nachricht: Action-Bar links */
 .message-content.fdrr .message-actions {
   left: 24px;
   right: auto;
 }
 
-/* Actionbar sichtbar beim Hover */
+/* Hover: Action-Bar sichtbar */
 .message-content:hover .message-actions {
   opacity: 1;
   pointer-events: auto;
   transform: translateY(calc(-100% + 25px));
 }
 
+/* Buttons */
 .action-btn {
   border: none;
   background: transparent;
@@ -187,9 +179,12 @@ a {
   font-size: 16px;
   line-height: 1;
   padding: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
 }
 
-/* Hover-Swaps für IMG Buttons (die ersten 4 sind <img>, der option ist <button><img>) */
+/* Hover-Swaps für img-Buttons (funktioniert für <img> und <button><img>) */
 .check-btn:hover {
   content: url('/assets/icons/global/check2.svg');
 }
@@ -206,14 +201,82 @@ a {
   content: url('/assets/icons/global/answer2.svg');
 }
 
-/* Option-Button: du hast jetzt <button class="option-btn"><img ...></button> */
-.option-btn img:hover {
+/* Option-Button: dein HTML ist jetzt <button class="option-btn"><img ...></button>
+   -> deshalb img gezielt tauschen */
+.option-btn img {
+  display: block;
+}
+
+.option-btn:hover img {
   content: url('/assets/icons/global/option2.svg');
 }
 
+/* =========================================================
+   OPTIONS MENU (Bearbeiten / Löschen)
+========================================================= */
+
+.message-options-menu {
+  position: absolute;
+  top: 46px;
+  right: 0;
+  width: 250px;
+  background: #fff;
+  border-radius: 22px;
+  padding: 10px;
+  box-shadow: 0 18px 50px rgba(0, 0, 0, 0.18);
+
+  display: flex;
+  flex-direction: column;
+
+  z-index: 9999; /* WICHTIG: über Separator & Nachbar-Message */
+  pointer-events: auto;
+}
+
+/* nach oben öffnen */
+.message-options-menu.open-up {
+  top: auto;
+  bottom: 46px;
+}
+
+/* Hover-“Bridge”: verhindert, dass beim Überfahren der Lücke das menu schließt */
+.message-options-menu::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 12px;
+  top: -12px;
+}
+
+.message-options-menu.open-up::before {
+  top: auto;
+  bottom: -12px;
+}
+
+/* Items */
+.message-options-menu .menu-item {
+  width: 100%;
+  border: 0;
+  background: transparent;
+
+  padding: 18px 16px;
+  border-radius: 18px;
+  font-size: 16px;
+  font-weight: 600;
+  text-align: center;
+  cursor: pointer;
+
+  color: #1f1f1f;
+  transition: background-color 120ms ease, color 120ms ease;
+}
+
+.message-options-menu .menu-item:hover {
+  background: rgba(83, 95, 255, 0.12);
+  color: #535FFF;
+}
 
 /* =========================================================
-   Reaction Picker (Emoji-Leiste)
+   REACTION PICKER (Emoji-Auswahl unter Action-Bar)
 ========================================================= */
 
 .reaction-picker {
@@ -227,7 +290,7 @@ a {
   background: #ffffff;
   border-radius: 999px;
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.12);
-  z-index: 15;
+  z-index: 40; /* über Content */
 }
 
 .message-content.fdrr .reaction-picker {
@@ -247,9 +310,8 @@ a {
   }
 }
 
-
 /* =========================================================
-   Reaction Summary (Chips + Tooltip)
+   REACTIONS SUMMARY (Chips unter Bubble)
 ========================================================= */
 
 .reactions-summary {
@@ -273,15 +335,15 @@ a {
   &:hover {
     background-color: var(--bg-clr);
   }
-}
 
-.reaction-chip.mine {
-  border-color: var(--clr-purple-2);
-  background-color: rgba(121, 126, 243, 0.12);
-}
+  &.mine {
+    border-color: var(--clr-purple-2);
+    background-color: rgba(121, 126, 243, 0.12);
+  }
 
-.reaction-chip.own-message {
-  border-color: var(--clr-purple-1);
+  &.own-message {
+    border-color: var(--clr-purple-1);
+  }
 }
 
 .reaction-icon {
@@ -310,7 +372,7 @@ a {
   font-size: 14px;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
   white-space: nowrap;
-  z-index: 20;
+  z-index: 9999;
   opacity: 0;
   pointer-events: none;
   transition: opacity 0.12s ease-in-out;
@@ -321,137 +383,41 @@ a {
   gap: 4px;
   min-width: 160px;
   text-align: center;
+
+  .tooltip-icon {
+    margin-bottom: 2px;
+
+    img,
+    span {
+      width: 24px;
+      height: 24px;
+      font-size: 24px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+    }
+  }
+
+  .tooltip-name {
+    font-weight: 700;
+  }
+
+  .tooltip-text {
+    font-size: 13px;
+    opacity: 0.9;
+  }
 }
 
 .reaction-chip:hover .reaction-tooltip {
   opacity: 1;
 }
 
-.reaction-tooltip .tooltip-icon {
-  margin-bottom: 2px;
-
-  img,
-  span {
-    width: 24px;
-    height: 24px;
-    font-size: 24px;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-  }
-}
-
-.reaction-tooltip .tooltip-name {
-  font-weight: 700;
-}
-
-.reaction-tooltip .tooltip-text {
-  font-size: 13px;
-  opacity: 0.9;
-}
-
-
-/* =========================================================
-   Options Menu (Bearbeiten / Löschen)
-========================================================= */
-
-.message-options-menu {
-  position: absolute;
-  top: 46px;
-  right: 0px;
-  width: 250px;
-
-  background: #fff;
-  border-radius: 22px;
-  padding: 10px;
-  box-shadow: 0 18px 50px rgba(0, 0, 0, 0.18);
-  z-index: 3000;
-  pointer-events: auto;
-
-  display: flex;
-  flex-direction: column;
-}
-
-.message-options-menu.open-up {
-  top: auto;
-  bottom: 46px;
-}
-
-/* Hover-Brücke (damit Mausweg ins Menü nicht sofort mouseleave triggert) */
-.message-options-menu::before {
-  content: "";
-  position: absolute;
-  left: 0;
-  right: 0;
-  height: 12px;
-  top: -12px;
-  background: transparent;
-  pointer-events: auto;
-}
-
-.message-options-menu.open-up::before {
-  top: auto;
-  bottom: -12px;
-}
-
-.message-options-menu .menu-item {
-  width: 100%;
-  border: 0;
-  background: transparent;
-
-  padding: 18px 16px;
-  border-radius: 18px;
-  font-size: 16px;
-  font-weight: 600;
-  text-align: center;
-
-  cursor: pointer;
-  color: #1f1f1f;
-  transition: background-color 120ms ease, color 120ms ease;
-}
-
-.message-options-menu .menu-item:hover {
-  background: rgba(83, 95, 255, 0.12);
-  color: #535FFF;
-}
-
-
-/* =========================================================
-   Popup-Stabilität: Hover-Shield + Stacking Fix
-========================================================= */
-
-/* Wenn Menü offen: gesamte Message nach vorne holen (sonst Header kann überlagern) */
-.message-content.menu-open {
-  z-index: 2000;
-}
-
-/* Wenn Menü offen: Actionbar bleibt sichtbar & klickbar */
-.message-content.menu-open .message-actions {
-  opacity: 1;
-  pointer-events: auto;
-  transform: translateY(calc(-100% + 25px));
-}
-
-/* Unsichtbare Fläche unter der Actionbar, damit der Cursor zum Menü kann,
-   ohne dass die nächste Message "Hover" übernimmt */
-.message-content.menu-open .message-actions::after {
-  content: "";
-  position: absolute;
-  left: 0;
-  right: 0;
-  top: 100%;
-  height: 70px;
-  background: transparent;
-  pointer-events: auto;
-}
-
-/* Wrapper leicht darunter, offene Message bleibt ganz oben */
 .message-wrapper {
   position: relative;
-  z-index: 1;
+  z-index: 0;       /* Default: alle gleich */
+  overflow: visible;
 }
 
-.message-content.menu-open {
-  position: relative;
-  z-index: 2000;
+.message-wrapper.menu-open {
+  z-index: 50;      /* Diese Message kommt über die Nachbarn */
 }
