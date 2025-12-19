@@ -5,8 +5,11 @@
       <p>Sei der Erste, der eine Nachricht in diesem Channel schreibt!</p>
     </div>
 
-    <section *ngFor="let msg of msgs; let i = index" class="message-wrapper"
-      [class.menu-open]="optionsMenuForMessageId === msg.id">
+    <section
+      *ngFor="let msg of msgs; let i = index"
+      class="message-wrapper"
+      [class.menu-open]="optionsMenuForMessageId === msg.id"
+    >
       <div class="date-separator" *ngIf="i === 0 || !isSameDay(msg.createdAt, msgs[i - 1]?.createdAt)">
         <span>
           {{ toDate(msg.createdAt) | date: 'EEEE, d. MMMM' }}
@@ -27,21 +30,25 @@
             class="action-btn answer-btn" />
 
           <!-- 3-Punkte nur bei eigener Message -->
-          <button *ngIf="isOwnMessage(msg)" class="action-btn option-btn"
-            (click)="msg.id && toggleOptionsMenu($event, msg.id)" type="button">
-            <img src="/assets/icons/global/option1.svg" alt="">
+          <button *ngIf="isOwnMessage(msg)" class="action-btn option-btn" (click)="msg.id && toggleOptionsMenu($event, msg.id)">
+            <img src="/icons/global/option1.svg" alt="">
           </button>
 
           @if (optionsMenuForMessageId === msg.id) {
-          <div class="message-options-menu" [class.open-up]="optionsMenuOpenUp" (mouseenter)="onOptionsMenuMouseEnter()"
-            (mouseleave)="onOptionsMenuMouseLeave()" (click)="$event.stopPropagation()">
-            <button class="menu-item" type="button" (click)="startInlineEdit(msg); closeOptionsMenu()">
-              Nachricht bearbeiten
-            </button>
-            <button class="menu-item" type="button" (click)="onDeleteMessage(msg); closeOptionsMenu()">
-              Nachricht löschen
-            </button>
-          </div>
+            <div
+              class="message-options-menu"
+              [class.open-up]="optionsMenuOpenUp"
+              (mouseenter)="onOptionsMenuMouseEnter()"
+              (mouseleave)="onOptionsMenuMouseLeave()"
+              (click)="$event.stopPropagation()"
+            >
+              <button class="menu-item" type="button" (click)="startInlineEdit(msg); closeOptionsMenu()">
+                Nachricht bearbeiten
+              </button>
+              <button class="menu-item" type="button" (click)="onDeleteMessage(msg); closeOptionsMenu()">
+                Nachricht löschen
+              </button>
+            </div>
           }
         </div>
 
@@ -63,21 +70,29 @@
             </span>
           </div>
 
+          <!-- INLINE EDIT -->
           <ng-container *ngIf="editingMessageId === msg.id; else normalBubble">
-            <div class="inline-edit fdc" (click)="$event.stopPropagation()">
-              <textarea class="inline-edit-textarea" [attr.data-edit-id]="msg.id" [(ngModel)]="editText"
-                (keydown)="onInlineEditKeydown($event, msg)"></textarea>
+            <div class="inline-edit">
+              <textarea
+                class="inline-edit-textarea"
+                [attr.data-edit-id]="msg.id"
+                [(ngModel)]="editText"
+                (keydown)="onInlineEditKeydown($event, msg)"
+              ></textarea>
 
               <div class="inline-edit-actions">
                 <button type="button" class="inline-edit-cancel" (click)="cancelInlineEdit()">Abbrechen</button>
-                <button type="button" class="inline-edit-save" [disabled]="!canSaveInlineEdit"
-                  (click)="saveInlineEdit(msg)">
+                <button
+                  type="button"
+                  class="inline-edit-save"
+                  [disabled]="!canSaveInlineEdit"
+                  (click)="saveInlineEdit(msg)"
+                >
                   Speichern
                 </button>
               </div>
             </div>
           </ng-container>
-
 
           <ng-template #normalBubble>
             <p class="text bubble" [ngClass]="isOwnMessage(msg) ? 'me-person' : 'other-person'">
