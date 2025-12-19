@@ -68,8 +68,9 @@ export class Message implements OnChanges {
   reactionPickerForMessageId: string | null = null;
   emojiReactions: ReactionDef[] = EMOJI_REACTIONS as ReactionDef[];
   optionsMenuForMessageId: string | null = null;
-  openOptionsUp = false;
+  optionsMenuOpenUp = false;
   isOptionsMenuHovered = false;
+
 
   constructor(
     private firestoreService: FirestoreService,
@@ -266,18 +267,52 @@ export class Message implements OnChanges {
     this.reactionPickerForMessageId = null;
   }
 
-  toggleOptionsMenu(msg: MessageData, index: number, total: number, ev?: MouseEvent) {
-    ev?.stopPropagation();
-    if (!msg?.id) return;
+  // toggleOptionsMenu(msg: MessageData, index: number, total: number, ev?: MouseEvent) {
+  //   ev?.stopPropagation();
+  //   if (!msg?.id) return;
 
-    const isSame = this.optionsMenuForMessageId === msg.id;
-    this.optionsMenuForMessageId = isSame ? null : msg.id;
+  //   const isSame = this.optionsMenuForMessageId === msg.id;
+  //   this.optionsMenuForMessageId = isSame ? null : msg.id;
 
-    // nur wenn wir wirklich öffnen:
-    if (!isSame) {
-      const isLastMessage = index === total - 1;
-      this.openOptionsUp = isLastMessage;
+  //   // nur wenn wir wirklich öffnen:
+  //   if (!isSame) {
+  //     const isLastMessage = index === total - 1;
+  //     this.openOptionsUp = isLastMessage;
+  //   }
+  // }
+
+  toggleOptionsMenu(ev: MouseEvent, msgId: string) {
+    ev.stopPropagation();
+
+    // wenn gleiches Menü offen -> schließen
+    if (this.optionsMenuForMessageId === msgId) {
+      this.closeOptionsMenu();
+      return;
     }
+
+    this.optionsMenuForMessageId = msgId;
+
+    // Richtung dynamisch bestimmen (nicht nur "letzte Message")
+    queueMicrotask(() => {
+      const btn = ev.currentTarget as HTMLElement | null;
+      if (!btn) return;
+
+      // Container ist die Scroll-Fläche (wichtig wg. Header-Kollision)
+      const scroll = btn.closest('.messages-scroll') as HTMLElement | null;
+      const menu = scroll?.querySelector('.message-options-menu') as HTMLElement | null;
+
+      const menuHeight = menu?.getBoundingClientRect().height ?? 160;
+      const margin = 12;
+
+      const btnRect = btn.getBoundingClientRect();
+      const scrollRect = (scroll ?? document.documentElement).getBoundingClientRect();
+
+      const spaceBelow = scrollRect.bottom - btnRect.bottom;
+      const spaceAbove = btnRect.top - scrollRect.top;
+
+      // nur nach oben, wenn unten zu wenig Platz UND oben genug Platz ist
+      this.optionsMenuOpenUp = spaceBelow < (menuHeight + margin) && spaceAbove > (menuHeight + margin);
+    });
   }
 
   closeOverlays() {
@@ -365,4 +400,20 @@ export class Message implements OnChanges {
     const others = uids.length - 1;
     return `${this.getUserDisplayName(uids[0])} und ${others} weitere`;
   }
+
+  onOptionsMenuMouseEnter() {
+    this.isOptionsMenuHovered = true;
+  }
+
+  onOptionsMenuMouseLeave() {
+    this.isOptionsMenuHovered = false;
+    this.closeOptionsMenu();
+  }
+
+  closeOptionsMenu() {
+    this.optionsMenuForMessageId = null;
+    this.optionsMenuOpenUp = false;
+    this.isOptionsMenuHovered = false;
+  }
 }
+

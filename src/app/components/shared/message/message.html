@@ -5,7 +5,9 @@
       <p>Sei der Erste, der eine Nachricht in diesem Channel schreibt!</p>
     </div>
 
-    <section *ngFor="let msg of msgs; let i = index" class="message-wrapper">
+    <section *ngFor="let msg of msgs; let i = index" class="message-wrapper"
+      [class.menu-open]="optionsMenuForMessageId === msg.id">
+
       <div class="date-separator" *ngIf="i === 0 || !isSameDay(msg.createdAt, msgs[i - 1]?.createdAt)">
         <span>
           {{ toDate(msg.createdAt) | date: 'EEEE, d. MMMM' }}
@@ -13,7 +15,8 @@
       </div>
 
       <!-- WICHTIG: mouseleave bleibt, aber das Options-Menü setzt einen "hover lock" -->
-      <div class="message-content" [ngClass]="{ fdrr: isOwnMessage(msg) }" (mouseleave)="onMessageMouseLeave(msg)">
+      <div class="message-content" [class.menu-open]="!!msg.id && optionsMenuForMessageId === msg.id"
+        [ngClass]="{ fdrr: isOwnMessage(msg) }" (mouseleave)="onMessageMouseLeave(msg)">
         <div class="message-actions">
           <img src="/assets/icons/global/check1.svg" alt="" class="action-btn check-btn"
             (click)="toggleReaction(msg, 'check')" />
@@ -23,22 +26,24 @@
           <img src="/assets/icons/global/reaction1.svg" alt="" class="action-btn reaction-btn"
             (click)="onToggleReactionPicker(msg)" />
 
-          <img *ngIf="contextType === 'channel'" src="/assets/icons/global/answer1.svg" alt="" class="action-btn answer-btn" />
+          <img *ngIf="contextType === 'channel'" src="/assets/icons/global/answer1.svg" alt=""
+            class="action-btn answer-btn" />
 
           <!-- 3-Punkte nur bei eigener Message -->
-          <img *ngIf="isOwnMessage(msg)" src="/assets/icons/global/option1.svg" alt="" class="action-btn option-btn"
-            (click)="toggleOptionsMenu(msg, i, msgs.length, $event)" />
+          <button *ngIf="isOwnMessage(msg)" type="button" class="action-btn option-btn"
+            (click)="msg.id && toggleOptionsMenu($event, msg.id)">
+            <img src="/assets/icons/global/option1.svg" alt="Optionen" />
+          </button>
 
-
-          <!-- Options-Menü (Hover lock, damit darunter nichts reagiert) -->
-          <div class="message-options-menu" [class.open-up]="openOptionsUp"
-            *ngIf="isOwnMessage(msg) && optionsMenuForMessageId === msg.id" (mouseenter)="isOptionsMenuHovered = true"
-            (mouseleave)="isOptionsMenuHovered = false; closeOverlays()" (click)="$event.stopPropagation()">
-            <button class="menu-item" type="button" (click)="onEditMessage(msg); closeOverlays()">
+          <!-- Options-Menü: nur wenn msg.id existiert UND dieses Menü offen ist -->
+          <div class="message-options-menu" *ngIf="isOwnMessage(msg) && !!msg.id && optionsMenuForMessageId === msg.id"
+            [class.open-up]="optionsMenuOpenUp" (mouseenter)="onOptionsMenuMouseEnter()"
+            (mouseleave)="onOptionsMenuMouseLeave()" (click)="$event.stopPropagation()">
+            <button class="menu-item" type="button" (click)="onEditMessage(msg); closeOptionsMenu()">
               Nachricht bearbeiten
             </button>
 
-            <button class="menu-item" type="button" (click)="onDeleteMessage(msg); closeOverlays()">
+            <button class="menu-item" type="button" (click)="onDeleteMessage(msg); closeOptionsMenu()">
               Nachricht löschen
             </button>
           </div>
@@ -70,7 +75,7 @@
             <button class="reaction-chip" *ngFor="let rid of getReactionIds(msg)" [ngClass]="{
                 'mine': hasCurrentUserReaction(msg, rid),
                 'own-message': isOwnMessage(msg)
-              }" (click)="toggleReaction(msg, rid)" (mouseenter)="onHoverReaction(msg.id!, rid)"
+              }" (click)="toggleReaction(msg, rid)" (mouseenter)="msg.id && onHoverReaction(msg.id, rid)"
               (mouseleave)="onLeaveReaction()">
               <ng-container *ngIf="getReactionDefById(rid) as def">
                 <img *ngIf="!def.isEmoji" [src]="def.icon" alt="" class="reaction-icon" />

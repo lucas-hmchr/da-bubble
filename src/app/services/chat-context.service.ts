@@ -14,6 +14,8 @@ interface ChatContextState {
   convId: string | null;
 }
 
+const NEW_MESSAGE_CHANNEL_ID = 'general';
+
 const INITIAL_STATE: ChatContextState = {
   type: 'new',
   channelId: null,
@@ -23,54 +25,78 @@ const INITIAL_STATE: ChatContextState = {
 @Injectable({ providedIn: 'root' })
 export class ChatContextService {
   private router = inject(Router);
-  private conversationService = inject(ConversationService);
-  private authService = inject(AuthService);
-
   private _state = signal<ChatContextState>(INITIAL_STATE);
 
-  // Public, read-only API
   readonly contextType = computed(() => this._state().type);
   readonly channelId = computed(() => this._state().channelId);
   readonly convId = computed(() => this._state().convId);
 
-  constructor() {
-    // Initial sync (wichtig für "URL im neuen Tab einfügen")
-    this.syncFromUrl(this.router.url);
+  constructor(
+    private conversationService: ConversationService,
+    private authService: AuthService
+  ) {
+    this.updateFromUrl(this.router.url);
 
-    // Sync bei Navigation (wichtig für router.navigate)
     this.router.events
       .pipe(
         filter((e): e is NavigationEnd => e instanceof NavigationEnd),
         takeUntilDestroyed()
       )
-      .subscribe(() => this.syncFromUrl(this.router.url));
+      .subscribe((e) => this.updateFromUrl(e.urlAfterRedirects));
   }
 
-  private syncFromUrl(url: string) {
+  private updateFromUrl(url: string): void {
+    this._state.set(this.parseChatRoute(url));
+  }
+
+  private parseChatRoute(url: string): ChatContextState {
     const clean = url.split('?')[0].split('#')[0];
-    const parts = clean.split('/').filter(Boolean); // z.B. ["dm", "abc"] oder ["c","devteam"]
+    const [prefix, id] = clean.split('/').filter(Boolean);
 
-    if (parts[0] === 'dm' && parts[1]) {
-      this._state.set({ type: 'dm', channelId: null, convId: parts[1] });
-      return;
-    }
-
-    if (parts[0] === 'c' && parts[1]) {
-      // bei euch gilt: /c/general == newMessage
-      if (parts[1] === 'general') {
-        this._state.set({ type: 'new', channelId: null, convId: null });
-      } else {
-        this._state.set({ type: 'channel', channelId: parts[1], convId: null });
+    switch (prefix) {
+      case 'c': {
+        // weil /c/general -> "neue Nachricht"
+        if (id === NEW_MESSAGE_CHANNEL_ID) return this.newState();
+        return this.channelState(id);
       }
-      return;
-    }
 
-    // Fallback: new
-    this._state.set({ type: 'new', channelId: null, convId: null });
+      case 'dm':
+        return this.convState(id);
+
+      // Optional: falls irgendwo noch /new existiert
+      // case 'new':
+      //   return this.newState();
+
+      default:
+        return INITIAL_STATE;
+    }
+  }
+
+  private channelState(id?: string): ChatContextState {
+    return {
+      type: 'channel',
+      channelId: id ?? null,
+      convId: null,
+    };
+  }
+
+  private convState(id?: string): ChatContextState {
+    return {
+      type: 'dm',
+      channelId: null,
+      convId: id ?? null,
+    };
+  }
+
+  private newState(): ChatContextState {
+    return {
+      type: 'new',
+      channelId: null,
+      convId: null,
+    };
   }
 
   openChannel(channelId: string) {
-    this._state.set({ type: 'channel', channelId, convId: null });
     this.router.navigate(['/c', channelId]);
   }
 
@@ -91,14 +117,11 @@ export class ChatContextService {
   }
 
   async openConversationByConvId(convId: string) {
-    // wichtig: State setzen + navigieren
-    this._state.set({ type: 'dm', channelId: null, convId });
     await this.router.navigate(['/dm', convId]);
   }
 
   openNewMessage() {
-    // bei euch ist "new" = /c/general
-    this._state.set({ type: 'new', channelId: null, convId: null });
-    this.router.navigate(['/c', 'general']);
+    // "neue nachricht" = /c/general
+    this.router.navigate(['/c', NEW_MESSAGE_CHANNEL_ID]);
   }
 }
