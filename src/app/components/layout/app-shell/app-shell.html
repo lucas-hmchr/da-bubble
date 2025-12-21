@@ -1,4 +1,4 @@
-<app-topbar></app-topbar>
+<!-- <app-topbar></app-topbar>
 
 <section>
   <app-workspace-sidebar
@@ -10,4 +10,29 @@
   ></app-view>
 
   <app-thread-menu></app-thread-menu>
+</section> -->
+
+
+<app-topbar></app-topbar>
+
+<section class="shell">
+
+  @if (!isMobile() || activeMobileView() === 'sidebar') {
+  <app-workspace-sidebar [isMobile]="isMobile()" [currentUserUid]="currentUserUid" (newMessage)="openNewMessage()"></app-workspace-sidebar>
+  }
+
+  @if (!isMobile() || activeMobileView() === 'chat') {
+  <app-view [currentUserUid]="currentUserUid"></app-view>
+  }
+
+  @if (!isMobile() || activeMobileView() === 'thread') {
+  <app-thread-menu></app-thread-menu>
+  }
+
 </section>
+
+@if (isMobile() && !isNewMessageMode()) {
+      <button class="resp-fab" matFab (click)="openNewMessage()">
+          <img src="/assets/icons/global/edit_square_white.svg" alt="">
+      </button>
+}
