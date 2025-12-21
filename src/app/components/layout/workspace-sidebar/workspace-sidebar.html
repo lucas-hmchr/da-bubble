@@ -1,6 +1,7 @@
 <div class="left-menu-container" [class.closed]="isClosed()">
   <mat-drawer-container class="mat-drawer-container" autosize>
     <mat-drawer #drawer class="left-menu-sidenav" mode="side" opened="true">
+      @if (!isMobile) {
       <div class="channels-button-container">
         <div class="workspace-logo-text-container">
           <img src="/assets/icons/global/workspace_logo.svg" alt="" />
@@ -10,6 +11,12 @@
         <img class="edit-square-icon cp" src="/assets/icons/global/edit_square_default.svg" alt=""
           (click)="openNewMessage()" />
       </div>
+      }@else {
+      <div class="channels-button-container">
+        <input class="resp-input-workspace" placeholder="Gehe zu..." type="search" name="" id="">
+      </div>
+      }
+
 
       <div *ngIf="!isSearching()" class="channel-message-add-container">
         <img class="add-icon cp" src="/assets/icons/global/add_default.svg" (click)="openAddChannelDialog()" alt="" />
@@ -74,6 +81,7 @@
               </div>
             </div>
             }
+
           </mat-expansion-panel>
         </mat-accordion>
       </div>

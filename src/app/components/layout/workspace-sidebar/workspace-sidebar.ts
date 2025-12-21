@@ -1,9 +1,10 @@
-import { Component, Input, inject, signal, OnInit, OnDestroy } from '@angular/core';
+import { Component, Input, inject, signal, OnInit, OnDestroy, Output, EventEmitter } from '@angular/core';
 import { MatSidenavModule } from '@angular/material/sidenav';
 import { MatButtonModule } from '@angular/material/button';
 import { MatExpansionModule } from '@angular/material/expansion';
 import { MatIconModule } from '@angular/material/icon';
 import { MatDialog } from '@angular/material/dialog';
+import { MatFormFieldModule } from '@angular/material/form-field';
 import { CommonModule } from '@angular/common';
 import { AddChannelDialog } from '../../add-channel-dialog/add-channel-dialog';
 import { Channel } from '../../../models/channel.interface';
@@ -27,6 +28,8 @@ import { takeUntil, debounceTime } from 'rxjs/operators';
 })
 export class WorkspaceSidebar implements OnInit, OnDestroy {
   @Input() currentUserUid: string | null = null;
+  @Input() isMobile = false;
+@Output() newMessage = new EventEmitter<void>();
 
   readonly channelOpen = signal(false);
   readonly dmOpen = signal(false);
@@ -47,7 +50,7 @@ export class WorkspaceSidebar implements OnInit, OnDestroy {
     public userService: UserService,
     public conversationService: ConversationService,
     private searchService: SearchService
-  ) {}
+  ) { }
 
   ngOnInit() {
     this.resetSearch();
