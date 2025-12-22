@@ -6,6 +6,7 @@ import { ThreadMenu } from '../thread-menu/thread-menu';
 import { AuthService } from '../../../auth/auth.service';
 import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
+import { ChatContextService } from '../../../services/chat-context.service';
 
 export type MobileView = 'sidebar' | 'chat' | 'thread';
 
@@ -25,7 +26,7 @@ export class AppShell {
   private authService = inject(AuthService);
   isMobile = signal(window.innerWidth < 1024);
 
-  constructor() {
+  constructor(private chatContext: ChatContextService,) {
     effect(() => {
       const active = this.authService.activeUser();
       console.log('activeUser in AppShell:', active);
@@ -37,19 +38,21 @@ export class AppShell {
   }
 
   openNewMessage() {
-    // Mobile: erst auf Chat wechseln
+    this.isNewMessageMode.set(true);
+    this.chatContext.openNewMessage();
+
     if (this.isMobile()) {
       this.activeMobileView.set('chat');
     }
-
-    // hier sagen wir später dem View:
-    // "zeige neue Nachricht"
-    this.isNewMessageMode.set(true);
-
   }
 
-  closeNewMessage() {
-    this.isNewMessageMode.set(false);
+closeNewMessage() {
+  this.isNewMessageMode.set(false);
+
+  if (this.isMobile()) {
+    this.activeMobileView.set('sidebar');
   }
+}
+
 
 }
