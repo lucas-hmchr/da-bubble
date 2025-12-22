@@ -185,4 +185,9 @@ export class View {
   toggleAddChannelMemberPopup() {
     this.showAddChannelMemberPopup.set(!this.showAddChannelMemberPopup())
   }
+
+  openAddingPopupFromMemberList() {
+    this.showChannelMemberList.set(false);
+    this.showAddChannelMemberPopup.set(true);
+  }
 }
