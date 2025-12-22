@@ -16,6 +16,7 @@ import { NewMessageService } from '../../../services/new-message.service';
 import { ViewStateService } from '../../../services/view-state.service';
 import { ProfilePopup } from "../../shared/profile-popup/profile-popup";
 import { ProfilePopupService } from '../../../services/profile-popup.service';
+import { AddMemberPopup } from "./add-member-popup/add-member-popup";
 
 type RecipientType = 'channel' | 'user' | null;
 
@@ -29,7 +30,7 @@ interface RecipientSuggestion {
 @Component({
   selector: 'app-view',
   standalone: true,
-  imports: [CommonModule, MessageInput, Message, ProfilePopup],
+  imports: [CommonModule, MessageInput, Message, ProfilePopup, AddMemberPopup],
   templateUrl: './view.html',
   styleUrls: ['./view.scss'],
 })
@@ -45,6 +46,7 @@ export class View {
   showRecipientSuggestions = false;
   selectedRecipient: RecipientSuggestion | null = null;
   showChannelMemberList = signal<Boolean>(false);
+  showAddChannelMemberPopup = signal<Boolean>(false);
 
   constructor(
     private firestore: FirestoreService,
@@ -178,5 +180,9 @@ export class View {
 
   openProfile(uid: string) {
     this.profilePopupService.open(uid);
+  }
+
+  toggleAddChannelMemberPopup() {
+    this.showAddChannelMemberPopup.set(!this.showAddChannelMemberPopup())
   }
 }

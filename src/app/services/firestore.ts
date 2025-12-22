@@ -12,6 +12,7 @@ import {
   where,
   orderBy,
   serverTimestamp,
+  getDocs,
 } from '@angular/fire/firestore';
 import { Observable, BehaviorSubject, Subscription } from 'rxjs';
 import { User } from '../models/user.model';
