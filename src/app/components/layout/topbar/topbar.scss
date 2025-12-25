@@ -22,10 +22,15 @@
     }
 }
 
-.logo-title-container{
+.logo-title-container {
     display: flex;
     align-items: center;
     column-gap: 10px;
+
+    span {
+        font-size: 24px;
+        font-weight: bold;
+    }
 }
 
 .search-bar {

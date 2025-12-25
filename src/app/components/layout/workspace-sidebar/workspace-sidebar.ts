@@ -18,6 +18,7 @@ import { ConversationService } from '../../../services/conversation.service';
 import { SearchService } from '../../../services/search.topbar.service';
 import { Subject } from 'rxjs';
 import { takeUntil, debounceTime } from 'rxjs/operators';
+import { NewMessageService } from '../../../services/new-message.service';
 
 @Component({
   selector: 'app-workspace-sidebar',
@@ -29,8 +30,9 @@ import { takeUntil, debounceTime } from 'rxjs/operators';
 export class WorkspaceSidebar implements OnInit, OnDestroy {
   @Input() currentUserUid: string | null = null;
   @Input() isMobile = false;
-@Output() newMessage = new EventEmitter<void>();
+  @Output() newMessage = new EventEmitter<void>();
 
+  newMessage$ = inject(NewMessageService);
   readonly channelOpen = signal(false);
   readonly dmOpen = signal(false);
   isClosed = signal(false);
@@ -68,6 +70,11 @@ export class WorkspaceSidebar implements OnInit, OnDestroy {
           this.resetSearch();
         }
       });
+  }
+
+    onNewMessageToKeyup(event: KeyboardEvent) {
+    const input = event.target as HTMLInputElement;
+    this.newMessage$.setQuery(input.value);
   }
 
   get allChannels(): Channel[] {
