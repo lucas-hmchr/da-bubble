@@ -41,4 +41,5 @@ export class AddChannelDialog {
       this.dialogRef.close(); // Fenster schließen
     });
   }
+  
 }
