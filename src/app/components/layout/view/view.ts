@@ -144,7 +144,6 @@ export class View {
     }
 
     if (evt.contextType === 'conversation' && evt.conversationId) {
-      // hier wird noch die conversation id statt der id des other Users übergeben - allgemeine anpassung der funktion? 
       this.chatContext.openConversation(evt.conversationId);
     }
   }
@@ -155,10 +154,6 @@ export class View {
     }
     return this.allChannels.find(c => c.id === this.selectedRecipient!.id);
   }
-
-  // onEditRequested(payload: { id: string; text: string }) {
-  //   this.editingMessage = payload;
-  // }
 
   onEditRequested(msg: MessageData) {
     if (!msg.id) return;
