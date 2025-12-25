@@ -13,9 +13,39 @@
       </div>
       }@else {
       <div class="channels-button-container">
-        <input class="resp-input-workspace" placeholder="Gehe zu..." type="search" name="" id="">
+        <input class="resp-input-workspace" [value]="newMessage$.query()" (keyup)="onNewMessageToKeyup($event)"
+          placeholder="Gehe zu..." type="search" name="" id="">
+      </div>
+
+      @if (newMessage$.show()) {
+
+      <!-- USER SUCHEN (@) -->
+      @if (newMessage$.mode() === 'user') {
+      <div class="search-results">
+        @for (user of newMessage$.filteredUsers(); track user.uid) {
+        <div class="search-item" (click)="newMessage$.selectUser(user)">
+          <img [src]="getAvatarPath(user)" />
+          <span>{{ user.displayName ?? user.name }}</span>
+        </div>
+        }
       </div>
       }
+
+      <!-- CHANNEL SUCHEN (#) -->
+      @if (newMessage$.mode() === 'channel') {
+      <div class="search-results">
+        @for (channel of newMessage$.filteredChannels(); track channel.id) {
+        <div class="search-item" (click)="newMessage$.selectChannel(channel)">
+          <span># {{ channel.name }}</span>
+        </div>
+        }
+      </div>
+      }
+
+      }
+      }
+
+
 
 
       <div *ngIf="!isSearching()" class="channel-message-add-container">
