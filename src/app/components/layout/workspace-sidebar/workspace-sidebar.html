@@ -1,6 +1,8 @@
 <div class="left-menu-container" [class.closed]="isClosed()">
   <mat-drawer-container class="mat-drawer-container" autosize>
     <mat-drawer #drawer class="left-menu-sidenav" mode="side" opened="true">
+
+      <!-- HEADER -->
       @if (!isMobile) {
       <div class="channels-button-container">
         <div class="workspace-logo-text-container">
@@ -11,94 +13,82 @@
         <img class="edit-square-icon cp" src="/assets/icons/global/edit_square_default.svg" alt=""
           (click)="openNewMessage()" />
       </div>
-      }@else {
+      } @else {
       <div class="channels-button-container">
-        <input class="resp-input-workspace" [value]="newMessage$.query()" (keyup)="onNewMessageToKeyup($event)"
-          placeholder="Gehe zu..." type="search" name="" id="">
-      </div>
-
-      @if (newMessage$.show()) {
-
-      <!-- USER SUCHEN (@) -->
-      @if (newMessage$.mode() === 'user') {
-      <div class="search-results">
-        @for (user of newMessage$.filteredUsers(); track user.uid) {
-        <div class="search-item" (click)="newMessage$.selectUser(user)">
-          <img [src]="getAvatarPath(user)" />
-          <span>{{ user.displayName ?? user.name }}</span>
-        </div>
-        }
+        <input class="resp-input-workspace" type="search" placeholder="Gehe zu..." [value]="newMessage$.query()"
+          (keyup)="onNewMessageToKeyup($event)" />
       </div>
       }
 
-      <!-- CHANNEL SUCHEN (#) -->
-      @if (newMessage$.mode() === 'channel') {
-      <div class="search-results">
-        @for (channel of newMessage$.filteredChannels(); track channel.id) {
-        <div class="search-item" (click)="newMessage$.selectChannel(channel)">
-          <span># {{ channel.name }}</span>
-        </div>
-        }
-      </div>
-      }
-
-      }
-      }
-
-
-
-
+      <!-- NORMAL VIEW -->
       <div *ngIf="!isSearching()" class="channel-message-add-container">
-        <img class="add-icon cp" src="/assets/icons/global/add_default.svg" (click)="openAddChannelDialog()" alt="" />
+
+        <img class="add-icon cp" src="/assets/icons/global/add_default.svg" (click)="openAddChannelDialog()" />
 
         <mat-accordion class="mat-accordion-container">
-          <mat-expansion-panel hideToggle="true" class="channel-panel" (opened)="channelOpen.set(true)"
+
+          <!-- CHANNELS -->
+          @if (!isUserFilterActive()) {
+
+          <mat-expansion-panel hideToggle="true" class="channel-panel" [expanded]="channelOpen()" (opened)="channelOpen.set(true)"
             (closed)="channelOpen.set(false)">
+            @if (isNormalView()) {
+
             <mat-expansion-panel-header class="arrow-channel-add-container">
               <div class="header-left">
                 <mat-icon class="arrow-icon" [class.open]="channelOpen()">
                   arrow_drop_down
                 </mat-icon>
+
                 <div class="three-circle-channels-container">
-                  <img src="/assets/icons/global/workspaces_three_circles_default.svg" alt="" />
+                  <img src="/assets/icons/global/workspaces_three_circles_default.svg" />
                   <span class="fs-20">Channels</span>
                 </div>
               </div>
             </mat-expansion-panel-header>
+            }
 
             <div class="channel-list ml-16">
-              @for (ch of allChannels; track ch.id) {
+              @for (ch of visibleChannels(); track ch.id) {
               <div class="channel-item d-flex mb-16 cp" (click)="selectChannel(ch)">
-                <img src="/assets/icons/global/tag.svg" class="mr-8" alt="" />
+                <img src="/assets/icons/global/tag.svg" class="mr-8" />
                 {{ ch.name }}
               </div>
               }
 
               <div class="channel-add cp" (click)="openAddChannelDialog()">
-                <img src="/assets/icons/global/add_circle.svg" class="mr-8" alt="" />
+                <img src="/assets/icons/global/add_circle.svg" class="mr-8" />
                 Channel hinzufügen
               </div>
             </div>
           </mat-expansion-panel>
+          }
 
-          <mat-expansion-panel hideToggle="true" class="channel-panel" (opened)="dmOpen.set(true)"
+          <!-- DIRECT MESSAGES -->
+          @if (!isChannelFilterActive()) {
+          <mat-expansion-panel hideToggle="true" class="channel-panel" [expanded]="dmOpen()" (opened)="dmOpen.set(true)"
             (closed)="dmOpen.set(false)">
+
+            @if (isNormalView()) {
+
             <mat-expansion-panel-header class="arrow-dMessage-container">
               <div class="header-left">
                 <mat-icon class="arrow-icon" [class.open]="dmOpen()">
                   arrow_drop_down
                 </mat-icon>
+
                 <div class="account-directMessage-container">
-                  <img src="/assets/icons/global/account_circle.svg" class="mr-8" alt="" />
+                  <img src="/assets/icons/global/account_circle.svg" class="mr-8" />
                   <span class="fs-20">Direktnachrichten</span>
                 </div>
               </div>
             </mat-expansion-panel-header>
+            }
 
-            @for (user of allUsers; track user.uid) {
+            @for (user of visibleUsers(); track user.uid) {
             <div class="account-submenu-container cp" (click)="openDirectMessage(user)">
               <div class="account-avatar-name">
-                <img [src]="getAvatarPath(user)" class="avatar mr-8" alt="" />
+                <img [src]="getAvatarPath(user)" class="avatar mr-8" />
                 <span>
                   {{ user.displayName || user.name || 'Unbekannter Nutzer' }}
                   @if (user.uid === currentUserUid) {
@@ -106,38 +96,45 @@
                   }
                 </span>
               </div>
+
               <div class="online-status-container">
-                <img [src]="userService.getOnlineStatusIcon(user)" alt="" />
+                <img [src]="userService.getOnlineStatusIcon(user)" />
               </div>
             </div>
             }
-
           </mat-expansion-panel>
+          }
+
         </mat-accordion>
       </div>
 
+      <!-- SEARCH RESULTS (TOPBAR SEARCH) -->
       <div *ngIf="isSearching()" class="search-results-container">
+
         <div class="search-header">
           <h3>Suchergebnisse für "{{ searchQuery() }}"</h3>
-          <span class="result-count">({{ filteredChannels().length + filteredUsers().length }} Ergebnisse)</span>
+          <span class="result-count">
+            ({{ visibleChannels().length + visibleUsers().length }} Ergebnisse)
+          </span>
         </div>
 
-        <div *ngIf="filteredChannels().length === 0 && filteredUsers().length === 0" class="no-results">
-          <img src="/assets/icons/global/search.svg" alt="no results" class="no-results-icon">
+        <div *ngIf="!visibleChannels().length && !visibleUsers().length" class="no-results">
+          <img src="/assets/icons/global/search.svg" class="no-results-icon" />
           <p class="no-results-title">Keine Ergebnisse gefunden</p>
           <p class="no-results-text">Versuche es mit anderen Suchbegriffen</p>
         </div>
 
-        <div *ngIf="filteredChannels().length > 0 || filteredUsers().length > 0" class="results-list">
-          <div *ngIf="filteredChannels().length > 0" class="results-section">
+        <div class="results-list">
+
+          <div *ngIf="visibleChannels().length" class="results-section">
             <h4 class="results-section-title">
-              <img src="/assets/icons/global/workspaces_three_circles_default.svg" alt="" class="section-icon">
-              Channels ({{ filteredChannels().length }})
+              <img src="/assets/icons/global/workspaces_three_circles_default.svg" class="section-icon" />
+              Channels ({{ visibleChannels().length }})
             </h4>
 
-            @for (channel of filteredChannels(); track channel.id) {
+            @for (channel of visibleChannels(); track channel.id) {
             <div class="result-item channel-result cp" (click)="selectChannel(channel)">
-              <img src="/assets/icons/global/tag.svg" class="result-icon" alt="" />
+              <img src="/assets/icons/global/tag.svg" class="result-icon" />
               <div class="result-info">
                 <span class="result-name">{{ channel.name }}</span>
                 <span *ngIf="channel.description" class="result-description">
@@ -148,50 +145,37 @@
             }
           </div>
 
-          <div *ngIf="filteredUsers().length > 0" class="results-section">
+          <div *ngIf="visibleUsers().length" class="results-section">
             <h4 class="results-section-title">
-              <img src="/assets/icons/global/account_circle.svg" alt="" class="section-icon">
-              Direktnachrichten ({{ filteredUsers().length }})
+              <img src="/assets/icons/global/account_circle.svg" class="section-icon" />
+              Direktnachrichten ({{ visibleUsers().length }})
             </h4>
 
-            @for (user of filteredUsers(); track user.uid) {
+            @for (user of visibleUsers(); track user.uid) {
             <div class="result-item dm-result cp" (click)="openDirectMessage(user)">
               <div class="dm-avatar-container">
-                <img [src]="getAvatarPath(user)" class="result-avatar" alt="" />
+                <img [src]="getAvatarPath(user)" class="result-avatar" />
                 <div *ngIf="user.isOnline" class="online-status-dot"></div>
               </div>
               <div class="result-info">
                 <span class="result-name">
-                  {{ user.displayName || user.name || 'Unbekannter Nutzer' }}
+                  {{ user.displayName || user.name }}
                 </span>
               </div>
             </div>
             }
           </div>
+
         </div>
       </div>
+
     </mat-drawer>
   </mat-drawer-container>
 
   <div class="left-menu-button-icon-container cp fs-20" (click)="drawer.toggle()">
-    <div class="left-menu-button">{{ drawer.opened ? 'Workspace-Menü schließen' : 'Workspace-Menü öffnen' }}
-      @if (drawer.opened) {
-      <!-- schließen-icon -->
-      <svg class="menu-icon" width="32" height="32" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <rect x="8" y="8" width="16" height="16" rx="1" stroke="currentColor" stroke-width="2" />
-        <path d="M13.7144 9V25" stroke="currentColor" stroke-width="2" />
-        <path d="M19.4283 18.2856L17.4961 16.3535C17.3009 16.1582 17.3009 15.8416 17.4961 15.6464L19.4283 13.7142"
-          stroke="currentColor" stroke-width="2" stroke-linecap="round" />
-      </svg>
-      } @else {
-      <!-- öffnen-icon -->
-      <svg class="menu-icon" width="32" height="32" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <rect x="8" y="8" width="16" height="16" rx="1" stroke="currentColor" stroke-width="2" />
-        <path d="M13.7144 9V25" stroke="currentColor" stroke-width="2" />
-        <path d="M17.143 18.2856L19.0752 16.3535C19.2704 16.1582 19.2704 15.8416 19.0752 15.6464L17.143 13.7142"
-          stroke="currentColor" stroke-width="2" stroke-linecap="round" />
-      </svg>
-      }
+    <div class="left-menu-button">
+      {{ drawer.opened ? 'Workspace-Menü schließen'
+      : 'Workspace-Menü öffnen' }}
     </div>
   </div>
 </div>
