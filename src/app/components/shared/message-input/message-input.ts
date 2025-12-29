@@ -13,17 +13,10 @@ import { CommonModule } from '@angular/common';
 import { Channel } from '../../../models/channel.interface';
 import { User } from '../../../models/user.model';
 import { AvatarId, getAvatarById } from '../../../../shared/data/avatars';
-
-import { MessageService } from '../../../services/message.service';
 import { MessageInputService } from '../../../services/message-intput.service';
 import { UserService } from '../../../services/user.service';
-<<<<<<< HEAD
-import { UserStoreService } from '../../../services/user-store.service';
-import { ChannelStoreService } from '../../../services/channel-store.service';
-=======
 import { NewMessageService } from '../../../services/new-message.service';
 // import { getAvatarSrc } from '../../../../shared/data/avatars';
->>>>>>> ee3eec266c2dc6cde20db4744cb51b7e99ed4fea
 
 @Component({
   selector: 'app-message-input',
@@ -41,9 +34,7 @@ export class MessageInput implements OnInit {
   @Input() forceEditable = false;
   @Input() placeholderText?: string;
 
-  @Input() set editingMessage(
-    value: { id: string; text: string } | undefined
-  ) {
+  @Input() set editingMessage(value: { id: string; text: string } | undefined) {
     this._editingMessage = value;
     this.isEditing = !!value;
 
@@ -70,26 +61,35 @@ export class MessageInput implements OnInit {
   @ViewChild('container') container!: ElementRef<HTMLDivElement>;
 
   public userService = inject(UserService);
-  private messageService = inject(MessageService);
-  private mentionService = inject(MessageInputService);
-  private userStore = inject(UserStoreService);
-  private channelStore = inject(ChannelStoreService);
 
+  users: User[] = [];
   filteredUsers: User[] = [];
+  channelsList: Channel[] = [];
   filteredChannels: Channel[] = [];
 
   activeMentionType: 'user' | 'channel' | null = null;
   showMentions = false;
   mentionPosition = { top: 0, left: 0, bottom: 0 };
 
+  constructor(private messageService: MessageInputService) { }
+
   ngOnInit(): void {
-    this.filteredUsers = this.userStore.users();
-    this.filteredChannels = this.channelStore.channels();
+    this.messageService.loadUsers().subscribe((users) => {
+      this.users = users;
+      this.filteredUsers = users;
+    });
+
+    this.messageService.loadChannels().subscribe((channels) => {
+      this.channelsList = channels;
+      this.filteredChannels = channels;
+    });
   }
 
   getAvatarSrc(id: AvatarId) {
     return getAvatarById(id).src;
   }
+
+  // ---------- Mentions ----------
 
   onKeyup(event: KeyboardEvent | Event) {
     const textarea = event.target as HTMLTextAreaElement;
@@ -112,9 +112,9 @@ export class MessageInput implements OnInit {
     this.activeMentionType = trigger === '@' ? 'user' : 'channel';
 
     if (this.activeMentionType === 'user') {
-      this.filteredUsers = this.userStore.users();
+      this.filteredUsers = this.users;
     } else {
-      this.filteredChannels = this.channelStore.channels();
+      this.filteredChannels = this.channelsList;
     }
 
     this.updateMentionPosition();
@@ -122,8 +122,7 @@ export class MessageInput implements OnInit {
 
   private filterMentions(value: string) {
     if (this.activeMentionType === 'user') {
-      const users = this.userStore.users();
-      const result = this.mentionService.filterUsersByQuery(users, value);
+      const result = this.messageService.filterUsersByQuery(this.users, value);
 
       if (result === null) {
         this.resetMentions();
@@ -135,8 +134,10 @@ export class MessageInput implements OnInit {
       return;
     }
 
-    const channels = this.channelStore.channels();
-    const result = this.mentionService.filterChannelsByQuery(channels, value);
+    const result = this.messageService.filterChannelsByQuery(
+      this.channelsList,
+      value
+    );
 
     if (result === null) {
       this.resetMentions();
@@ -151,6 +152,7 @@ export class MessageInput implements OnInit {
     this.showMentions = false;
     this.activeMentionType = null;
   }
+
 
   onEnter(event: KeyboardEvent | Event) {
     if ((event as KeyboardEvent).shiftKey) return;
@@ -205,6 +207,7 @@ async onSend() {
 }
 
 
+
   private getTrimmedText(): string {
     const textarea = this.messageInput.nativeElement;
     return textarea.value.trim();
@@ -213,11 +216,7 @@ async onSend() {
   private async sendByContext(
     text: string,
     senderId: string
-  ): Promise<{
-    contextType: 'channel' | 'conversation';
-    channelId?: string;
-    conversationId?: string;
-  }> {
+  ): Promise<{ contextType: 'channel' | 'conversation'; channelId?: string; conversationId?: string }> {
     if (this.contextType === 'channel') {
       const channelId = await this.handleChannelSend(text, senderId);
       return { contextType: 'channel', channelId };
@@ -227,36 +226,7 @@ async onSend() {
     }
   }
 
-  private async handleChannelSend(
-    text: string,
-    senderId: string
-  ): Promise<string> {
-    if (!this.channel?.id) {
-      console.warn('Kein Channel gesetzt.');
-      return '';
-    }
 
-<<<<<<< HEAD
-    const channelId = this.channel.id as string;
-
-    if (this.isEditing && this.editingMessage?.id) {
-      await this.messageService.updateChannelMessage(
-        channelId,
-        this.editingMessage.id,
-        text
-      );
-    } else {
-      await this.messageService.sendChannelMessage(channelId, text, senderId);
-    }
-
-    return channelId;
-  }
-
-  private async handleConversationSend(
-    text: string,
-    senderId: string
-  ): Promise<string> {
-=======
   private async handleChannelSend(text: string, senderId: string): Promise<string> {
     if (!this.channel?.id) {
       console.warn('Kein Channel gesetzt.');
@@ -280,7 +250,6 @@ async onSend() {
 
 
   private async handleConversationSend(text: string, senderId: string): Promise<string> {
->>>>>>> ee3eec266c2dc6cde20db4744cb51b7e99ed4fea
     if (!this.conversationId) {
       console.warn('Keine Conversation-ID gesetzt.');
       return '';
@@ -295,24 +264,13 @@ async onSend() {
         text
       );
     } else {
-<<<<<<< HEAD
-      await this.messageService.sendConversationMessage(
-        convId,
-        text,
-        senderId
-      );
-=======
       await this.messageService.sendConversationMessage(convId, text, senderId);
->>>>>>> ee3eec266c2dc6cde20db4744cb51b7e99ed4fea
     }
 
     return convId;
   }
 
-<<<<<<< HEAD
-=======
 
->>>>>>> ee3eec266c2dc6cde20db4744cb51b7e99ed4fea
   private afterSend() {
     this.messageInput.nativeElement.value = '';
     this.resetMentions();
@@ -320,6 +278,7 @@ async onSend() {
     this._editingMessage = undefined;
     this.editFinished.emit();
   }
+
 
   private updateMentionPosition() {
     const textarea = this.messageInput.nativeElement;
@@ -407,8 +366,6 @@ async onSend() {
     textarea.focus();
   }
 
-<<<<<<< HEAD
-=======
 
   // get isChannelMember(): boolean {
   //   if (this.contextType !== 'channel') return true;
@@ -416,7 +373,6 @@ async onSend() {
   //   const members = (this.channel.members ?? []) as string[];
   //   return members.includes(this.currentUserUid);
   // }
->>>>>>> ee3eec266c2dc6cde20db4744cb51b7e99ed4fea
   get isChannelMember(): boolean {
     if (this.contextType !== 'channel') return true;
 

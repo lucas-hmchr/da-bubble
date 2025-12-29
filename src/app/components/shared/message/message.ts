@@ -10,10 +10,6 @@ import {
   HostListener,
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
-<<<<<<< HEAD
-
-import { Channel } from '../../../models/channel.interface';
-=======
 import { Observable, tap } from 'rxjs';
 import { FormsModule } from '@angular/forms';
 
@@ -24,7 +20,6 @@ import { ConversationService } from '../../../services/conversation.service';
 import { MessageService } from '../../../services/message.service';
 import { MessageInputService } from '../../../services/message-intput.service';
 
->>>>>>> ee3eec266c2dc6cde20db4744cb51b7e99ed4fea
 import { MessageData } from '../../../models/message.interface';
 import { User } from '../../../models/user.model';
 import { getAvatarById } from '../../../../shared/data/avatars';
@@ -34,7 +29,6 @@ import {
   getReactionDef,
   emojiReactions as EMOJI_REACTIONS,
 } from '../../../../shared/data/reactions';
-import { MessageService } from '../../../services/message.service';
 
 @Component({
   selector: 'app-message',
@@ -48,34 +42,21 @@ export class Message implements OnChanges {
   @Input() channel?: Channel;
   @Input() conversationId?: string | null;
   @Input() currentUserUid: string | null = null;
-<<<<<<< HEAD
-  @Input() messages: MessageData[] | null = null;
-  @Input() users: User[] = [];
-
-  // neu: Kontext (Channel vs. Conversation)
-  @Input() contextType: 'channel' | 'conversation' = 'channel';
-  @Input() conversationId?: string;
-
-=======
 
   // bleibt bestehen, auch wenn Inline-Edit es im Alltag ersetzt
->>>>>>> ee3eec266c2dc6cde20db4744cb51b7e99ed4fea
   @Output() editRequested = new EventEmitter<MessageData>();
 
-  @ViewChild('bottom') bottom!: ElementRef<HTMLDivElement>;
-
+  messages$?: Observable<MessageData[]>;
+  users: User[] = [];
   hoveredReaction: ReactionId | null = null;
   hoveredMessageId: string | null = null;
   lastMessageCount = 0;
 
-  reactionPickerForMessageId: string | null = null;
-  emojiReactions: ReactionDef[] = EMOJI_REACTIONS as ReactionDef[];
-<<<<<<< HEAD
-
+  @ViewChild('bottom') bottom!: ElementRef<HTMLDivElement>;
   private userMap = new Map<string, User>();
 
-  constructor(private messageService: MessageService) {}
-=======
+  reactionPickerForMessageId: string | null = null;
+  emojiReactions: ReactionDef[] = EMOJI_REACTIONS as ReactionDef[];
   optionsMenuForMessageId: string | null = null;
   optionsMenuOpenUp = false;
   isOptionsMenuHovered = false;
@@ -110,16 +91,11 @@ export class Message implements OnChanges {
       }
     });
   }
->>>>>>> ee3eec266c2dc6cde20db4744cb51b7e99ed4fea
 
   // ---------------------------
   // Lifecycle
   // ---------------------------
   ngOnChanges(changes: SimpleChanges): void {
-<<<<<<< HEAD
-    if (changes['users']) {
-      this.buildUserMap();
-=======
     if (changes['channel'] || changes['conversationId'] || changes['contextType']) {
       this.loadMessages();
 
@@ -129,27 +105,9 @@ export class Message implements OnChanges {
       // Overlays sauber schließen
       this.closeOptionsMenu();
       this.reactionPickerForMessageId = null;
->>>>>>> ee3eec266c2dc6cde20db4744cb51b7e99ed4fea
-    }
-
-<<<<<<< HEAD
-    if (changes['messages']) {
-      const currentCount = this.messages?.length ?? 0;
-      if (currentCount > this.lastMessageCount) {
-        setTimeout(() => this.scrollToBottom(), 0);
-      }
-      this.lastMessageCount = currentCount;
     }
   }
 
-  private buildUserMap() {
-    this.userMap.clear();
-    for (const u of this.users) {
-      if (u.uid) {
-        this.userMap.set(u.uid, u);
-      }
-    }
-=======
   // ---------------------------
   // Outside Click (Idee 1)
   // ---------------------------
@@ -246,7 +204,6 @@ export class Message implements OnChanges {
       return;
     }
     this.bottom.nativeElement.scrollIntoView({ behavior: 'smooth' });
->>>>>>> ee3eec266c2dc6cde20db4744cb51b7e99ed4fea
   }
 
   // ---------------------------
@@ -260,10 +217,7 @@ export class Message implements OnChanges {
 
   getSenderAvatarUrl(senderId: string): string {
     const user = this.userMap.get(senderId);
-    if (!user) {
-      return '/images/avatars/avatar_default.svg';
-    }
-    const avatar = getAvatarById(user.avatarId);
+    const avatar = getAvatarById(user?.avatarId);
     return avatar.src;
   }
 
@@ -312,17 +266,6 @@ export class Message implements OnChanges {
     }, 0);
   }
 
-<<<<<<< HEAD
-  onEditMessage(msg: MessageData) {
-    if (!this.isOwnMessage(msg)) return;
-    this.editRequested.emit(msg);
-  }
-
-  toggleReaction(msg: MessageData, reactionId: ReactionId) {
-    // Reaktionen nur in Channels, nicht in DMs
-    if (this.contextType !== 'channel') return;
-    if (!this.channel?.id || !msg.id || !this.currentUserUid) return;
-=======
   cancelInlineEdit() {
     this.editingMessageId = null;
     this.editText = '';
@@ -338,7 +281,6 @@ export class Message implements OnChanges {
   async saveInlineEdit(msg: MessageData) {
     if (!msg?.id) return;
     if (!this.isOwnMessage(msg)) return;
->>>>>>> ee3eec266c2dc6cde20db4744cb51b7e99ed4fea
 
     const newText = (this.editText ?? '').trim();
     if (!newText) return;
@@ -367,9 +309,6 @@ export class Message implements OnChanges {
       return;
     }
 
-<<<<<<< HEAD
-    this.messageService.updateReactions(this.channel.id!, msg.id!, reactions);
-=======
     // ENTER speichert, Shift+Enter = Zeilenumbruch
     if (ev.key === 'Enter' && !ev.shiftKey) {
       ev.preventDefault();
@@ -398,7 +337,6 @@ export class Message implements OnChanges {
         this.currentUserUid
       );
     }
->>>>>>> ee3eec266c2dc6cde20db4744cb51b7e99ed4fea
   }
 
   getReactionIds(msg: MessageData): ReactionId[] {

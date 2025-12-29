@@ -1,12 +1,4 @@
 <div class="message-container">
-<<<<<<< HEAD
-  <ng-container *ngIf="messages as msgs">
-    <section *ngFor="let msg of msgs; let i = index" class="message-wrapper">
-      <div
-        class="date-separator"
-        *ngIf="i === 0 || !isSameDay(msg.createdAt, msgs[i - 1]?.createdAt)"
-      >
-=======
   <ng-container *ngIf="messages$ | async as msgs">
     <div *ngIf="msgs.length === 0" class="empty-channel-info">
       <span class="fw-700 fs-24"># {{ channel?.name }}</span>
@@ -16,53 +8,13 @@
     <section *ngFor="let msg of msgs; let i = index" class="message-wrapper"
       [class.menu-open]="optionsMenuForMessageId === msg.id">
       <div class="date-separator" *ngIf="i === 0 || !isSameDay(msg.createdAt, msgs[i - 1]?.createdAt)">
->>>>>>> ee3eec266c2dc6cde20db4744cb51b7e99ed4fea
         <span>
           {{ toDate(msg.createdAt) | date: 'EEEE, d. MMMM' }}
         </span>
       </div>
 
-      <div
-        class="message-content"
-        [ngClass]="{ fdrr: isOwnMessage(msg) }"
-        (mouseleave)="onMessageMouseLeave(msg)"
-      >
+      <div class="message-content" [ngClass]="{ fdrr: isOwnMessage(msg) }" (mouseleave)="onMessageMouseLeave(msg)">
         <div class="message-actions">
-<<<<<<< HEAD
-          <img
-            src="/icons/global/check1.svg"
-            alt=""
-            class="action-btn check-btn"
-            (click)="toggleReaction(msg, 'check')"
-          />
-          <img
-            src="/icons/global/thumbsup1.svg"
-            alt=""
-            class="action-btn thumbsup-btn"
-            (click)="toggleReaction(msg, 'thumbsup')"
-          />
-
-          <img
-            src="/icons/global/reaction1.svg"
-            alt=""
-            class="action-btn reaction-btn"
-            (click)="onToggleReactionPicker(msg)"
-          />
-
-          <img
-            src="/icons/global/answer1.svg"
-            alt=""
-            class="action-btn answer-btn"
-          />
-
-          <img
-            *ngIf="isOwnMessage(msg)"
-            src="/icons/global/option1.svg"
-            alt=""
-            class="action-btn option-btn"
-            (click)="onEditMessage(msg)"
-          />
-=======
           <img src="/assets/icons/global/check1.svg" alt="" class="action-btn check-btn"
             (click)="toggleReaction(msg, 'check')" />
           <img src="/assets/icons/global/thumbsup1.svg" alt="" class="action-btn thumbsup-btn"
@@ -91,27 +43,15 @@
             </button>
           </div>
           }
->>>>>>> ee3eec266c2dc6cde20db4744cb51b7e99ed4fea
         </div>
 
-        <div
-          class="reaction-picker"
-          *ngIf="reactionPickerForMessageId === msg.id"
-        >
-          <button
-            class="reaction-emoji-btn"
-            *ngFor="let r of emojiReactions"
-            (click)="onEmojiReaction(msg, r.id)"
-          >
+        <div class="reaction-picker" *ngIf="reactionPickerForMessageId === msg.id">
+          <button class="reaction-emoji-btn" *ngFor="let r of emojiReactions" (click)="onEmojiReaction(msg, r.id)">
             {{ r.icon }}
           </button>
         </div>
 
-        <img
-          class="profile-pic"
-          [src]="getSenderAvatarUrl(msg.senderId)"
-          [alt]="getSenderName(msg.senderId)"
-        />
+        <img class="profile-pic" [src]="getSenderAvatarUrl(msg.senderId)" [alt]="getSenderName(msg.senderId)" />
 
         <div>
           <div>
@@ -123,30 +63,6 @@
             </span>
           </div>
 
-<<<<<<< HEAD
-          <p
-            class="text bubble"
-            [ngClass]="isOwnMessage(msg) ? 'me-person' : 'other-person'"
-          >
-            {{ msg.text }}
-          </p>
-
-          <div
-            class="reactions-summary"
-            *ngIf="msg.reactions && hasReactions(msg)"
-          >
-            <button
-              class="reaction-chip"
-              *ngFor="let rid of getReactionIds(msg)"
-              [ngClass]="{
-                mine: hasCurrentUserReaction(msg, rid),
-                'own-message': isOwnMessage(msg)
-              }"
-              (click)="toggleReaction(msg, rid)"
-              (mouseenter)="onHoverReaction(msg.id!, rid)"
-              (mouseleave)="onLeaveReaction()"
-            >
-=======
           <ng-container *ngIf="editingMessageId === msg.id; else normalBubble">
             <div class="inline-edit fdc" (click)="$event.stopPropagation()">
               <textarea class="inline-edit-textarea" [attr.data-edit-id]="msg.id" [(ngModel)]="editText"
@@ -175,31 +91,17 @@
                 'own-message': isOwnMessage(msg)
               }" (click)="toggleReaction(msg, rid)" (mouseenter)="msg.id && onHoverReaction(msg.id, rid)"
               (mouseleave)="onLeaveReaction()">
->>>>>>> ee3eec266c2dc6cde20db4744cb51b7e99ed4fea
               <ng-container *ngIf="getReactionDefById(rid) as def">
-                <img
-                  *ngIf="!def.isEmoji"
-                  [src]="def.icon"
-                  alt=""
-                  class="reaction-icon"
-                />
+                <img *ngIf="!def.isEmoji" [src]="def.icon" alt="" class="reaction-icon" />
                 <span *ngIf="def.isEmoji" class="reaction-emoji">
                   {{ def.icon }}
                 </span>
               </ng-container>
 
-              <span class="reaction-count">
-                {{ getReactionCount(msg, rid) }}
-              </span>
+              <span class="reaction-count">{{ getReactionCount(msg, rid) }}</span>
 
-              <div
-                class="reaction-tooltip"
-                *ngIf="hoveredReaction === rid && hoveredMessageId === msg.id"
-              >
-                <div
-                  class="tooltip-icon"
-                  *ngIf="getReactionDefById(rid) as def"
-                >
+              <div class="reaction-tooltip" *ngIf="hoveredReaction === rid && hoveredMessageId === msg.id">
+                <div class="tooltip-icon" *ngIf="getReactionDefById(rid) as def">
                   <img *ngIf="!def.isEmoji" [src]="def.icon" alt="" />
                   <span *ngIf="def.isEmoji">
                     {{ def.icon }}
@@ -209,7 +111,9 @@
                 <div class="tooltip-name">
                   {{ getReactionUserLabel(msg, rid) }}
                 </div>
-                <div class="tooltip-text">hat reagiert</div>
+                <div class="tooltip-text">
+                  hat reagiert
+                </div>
               </div>
             </button>
           </div>
