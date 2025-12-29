@@ -7,12 +7,12 @@
     </div>
     <form class="auth-form-container" #form="ngForm" (ngSubmit)="continueRegistration()" id="registerForm">
         <div class="form-input">
-            <img src="/icons/login/person_passive.svg" alt="" class="form-input-icon">
+            <img src="/assets/icons/login/person_passive.svg" alt="" class="form-input-icon">
             <input name="name" type="text" placeholder="Name und Nachname" [(ngModel)]="fullName" required
                 minlength="4">
         </div>
         <div class="form-input">
-            <img src="/icons/login/mail_passive.svg" alt="" class="form-input-icon">
+            <img src="/assets/icons/login/mail_passive.svg" alt="" class="form-input-icon">
             <input #emailModel="ngModel" name="email" type="email" placeholder="beispielname@email.com"
                 [(ngModel)]="email" required email>
             @if (emailModel.invalid && (emailModel.dirty || emailModel.touched || form.submitted)) {
@@ -20,7 +20,7 @@
             }
         </div>
         <div class="form-input">
-            <img src="/icons/login/lock_passive.svg" alt="" class="form-input-icon">
+            <img src="/assets/icons/login/lock_passive.svg" alt="" class="form-input-icon">
             <input #passwordModel="ngModel" name="password" type="password" placeholder="Passwort" [(ngModel)]="password" required minlength="6">
             @if (passwordModel.invalid && (passwordModel.dirty || passwordModel.touched || form.submitted)) {
             <span class="error-message">Verwende min. 6 Zeichen.</span>
@@ -61,5 +61,5 @@
     </button>
     }
 
-    <img src="/icons/global/arrow_back.svg" alt="arrow_back" class="arrow-back" (click)="stepBack()">
+    <img src="/assets/icons/global/arrow_back.svg" alt="arrow_back" class="arrow-back" (click)="stepBack()">
 </div>

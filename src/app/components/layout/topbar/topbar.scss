@@ -14,6 +14,25 @@
     }
 }
 
+.topbar-resp-btn-logo-container {
+    .back-btn {
+        border: none;
+        transform: rotate(90deg);
+        background: transparent;
+    }
+}
+
+.logo-title-container {
+    display: flex;
+    align-items: center;
+    column-gap: 10px;
+
+    span {
+        font-size: 24px;
+        font-weight: bold;
+    }
+}
+
 .search-bar {
     position: relative;
     flex: 1;
@@ -21,6 +40,13 @@
 
     @media (max-width: 1630px) {
         display: none;
+    }
+
+    &.focused {
+        .search-inputs {
+            border: 2px solid #444DF2;
+            box-shadow: 0 0 0 3px rgba(68, 77, 242, 0.1);
+        }
     }
 
     .search-inputs {
@@ -31,6 +57,25 @@
         border: none;
         outline: none;
         font-size: 33px;
+    }
+
+    .search-icon-clear {
+        position: absolute;
+        right: 80px;
+        top: 50%;
+        transform: translateY(-50%);
+        width: 28px;
+        height: 28px;
+        cursor: pointer;
+        opacity: 0.5;
+        transition: opacity 0.2s ease;
+        padding: 4px;
+        border-radius: 50%;
+
+        &:hover {
+            opacity: 1;
+            background-color: rgba(0, 0, 0, 0.05);
+        }
     }
 
     .search-icon-right {

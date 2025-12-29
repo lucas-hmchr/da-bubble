@@ -7,10 +7,24 @@ import {
   ViewChild,
   Output,
   EventEmitter,
+  HostListener,
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
+<<<<<<< HEAD
 
 import { Channel } from '../../../models/channel.interface';
+=======
+import { Observable, tap } from 'rxjs';
+import { FormsModule } from '@angular/forms';
+
+import { Channel } from '../../../models/channel.interface';
+import { FirestoreService } from '../../../services/firestore';
+import { ChannelService } from '../../../services/channel.service';
+import { ConversationService } from '../../../services/conversation.service';
+import { MessageService } from '../../../services/message.service';
+import { MessageInputService } from '../../../services/message-intput.service';
+
+>>>>>>> ee3eec266c2dc6cde20db4744cb51b7e99ed4fea
 import { MessageData } from '../../../models/message.interface';
 import { User } from '../../../models/user.model';
 import { getAvatarById } from '../../../../shared/data/avatars';
@@ -25,13 +39,16 @@ import { MessageService } from '../../../services/message.service';
 @Component({
   selector: 'app-message',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, FormsModule],
   templateUrl: './message.html',
   styleUrl: './message.scss',
 })
 export class Message implements OnChanges {
+  @Input() contextType: 'channel' | 'conversation' = 'channel';
   @Input() channel?: Channel;
+  @Input() conversationId?: string | null;
   @Input() currentUserUid: string | null = null;
+<<<<<<< HEAD
   @Input() messages: MessageData[] | null = null;
   @Input() users: User[] = [];
 
@@ -39,6 +56,10 @@ export class Message implements OnChanges {
   @Input() contextType: 'channel' | 'conversation' = 'channel';
   @Input() conversationId?: string;
 
+=======
+
+  // bleibt bestehen, auch wenn Inline-Edit es im Alltag ersetzt
+>>>>>>> ee3eec266c2dc6cde20db4744cb51b7e99ed4fea
   @Output() editRequested = new EventEmitter<MessageData>();
 
   @ViewChild('bottom') bottom!: ElementRef<HTMLDivElement>;
@@ -49,16 +70,69 @@ export class Message implements OnChanges {
 
   reactionPickerForMessageId: string | null = null;
   emojiReactions: ReactionDef[] = EMOJI_REACTIONS as ReactionDef[];
+<<<<<<< HEAD
 
   private userMap = new Map<string, User>();
 
   constructor(private messageService: MessageService) {}
+=======
+  optionsMenuForMessageId: string | null = null;
+  optionsMenuOpenUp = false;
+  isOptionsMenuHovered = false;
 
+  // ---------------------------
+  // Inline Edit
+  // ---------------------------
+  editingMessageId: string | null = null;
+  editText: string = '';
+  private originalEditText: string = '';
+
+  /**
+   * OPTIONAL:
+   * true  -> wenn Text geändert ist, fragt Outside-Click/Wechsel "Änderungen verwerfen?"
+   * false -> Outside-Click/Wechsel bricht immer kommentarlos ab
+   */
+  private confirmDiscardOnOutside = true;
+
+  constructor(
+    private firestoreService: FirestoreService,
+    private channelService: ChannelService,
+    private conversationService: ConversationService,
+    private messageService: MessageService,
+    private messageInputService: MessageInputService,
+    private hostEl: ElementRef<HTMLElement>
+  ) {
+    this.firestoreService.getCollection<User>('users').subscribe((users) => {
+      this.users = users;
+      this.userMap.clear();
+      for (const u of users) {
+        if (u.uid) this.userMap.set(u.uid, u);
+      }
+    });
+  }
+>>>>>>> ee3eec266c2dc6cde20db4744cb51b7e99ed4fea
+
+  // ---------------------------
+  // Lifecycle
+  // ---------------------------
   ngOnChanges(changes: SimpleChanges): void {
+<<<<<<< HEAD
     if (changes['users']) {
       this.buildUserMap();
+=======
+    if (changes['channel'] || changes['conversationId'] || changes['contextType']) {
+      this.loadMessages();
+
+      // ✅ Idee 2: Beim Kontextwechsel Inline-Edit sauber beenden
+      this.tryDiscardInlineEdit('context-change');
+
+      // Overlays sauber schließen
+      this.closeOptionsMenu();
+      this.reactionPickerForMessageId = null;
+>>>>>>> ee3eec266c2dc6cde20db4744cb51b7e99ed4fea
     }
 
+<<<<<<< HEAD
     if (changes['messages']) {
       const currentCount = this.messages?.length ?? 0;
       if (currentCount > this.lastMessageCount) {
@@ -75,8 +149,109 @@ export class Message implements OnChanges {
         this.userMap.set(u.uid, u);
       }
     }
+=======
+  // ---------------------------
+  // Outside Click (Idee 1)
+  // ---------------------------
+  @HostListener('document:click', ['$event'])
+  onDocumentClick(ev: MouseEvent) {
+    // wenn kein Inline-Edit aktiv ist, kein Aufwand
+    if (!this.editingMessageId) return;
+
+    const target = ev.target as HTMLElement | null;
+    if (!target) return;
+
+    // nur reagieren, wenn Klick überhaupt "in" diesem Message-Component passiert oder außerhalb;
+    // relevant ist: wenn außerhalb der Inline-Edit-Box geklickt wird → abbrechen
+    this.handleOutsideClick(target);
   }
 
+  private handleOutsideClick(target: HTMLElement) {
+    // Klick innerhalb der Edit-UI? dann nichts tun
+    const insideInlineEdit = !!target.closest('.inline-edit');
+    if (insideInlineEdit) return;
+
+    // Klick im Options-Menü? dann auch nichts tun
+    const insideOptionsMenu = !!target.closest('.message-options-menu');
+    if (insideOptionsMenu) return;
+
+    // Klick auf Options-Button (3 Punkte) ebenfalls ignorieren
+    const insideOptionsButton = !!target.closest('.option-btn');
+    if (insideOptionsButton) return;
+
+    // Optional: Klick außerhalb dieses Components komplett ignorieren?
+    // Nein: Wir wollen ja genau "außerhalb" abbrechen.
+
+    this.tryDiscardInlineEdit('outside-click');
+  }
+
+  private tryDiscardInlineEdit(reason: 'outside-click' | 'context-change') {
+    if (!this.editingMessageId) return;
+
+    const dirty = this.isInlineEditDirty();
+
+    if (!dirty || !this.confirmDiscardOnOutside) {
+      this.cancelInlineEdit();
+      return;
+    }
+
+    // Bestätigung nur bei Änderungen
+    const ok = window.confirm('Änderungen verwerfen?');
+    if (ok) this.cancelInlineEdit();
+  }
+
+  private isInlineEditDirty(): boolean {
+    const a = (this.editText ?? '').trim();
+    const b = (this.originalEditText ?? '').trim();
+    return a !== b;
+  }
+
+  // ---------------------------
+  // Messages laden
+  // ---------------------------
+  private loadMessages() {
+    if (this.contextType === 'channel') {
+      if (!this.channel?.id) {
+        console.warn('MessageComponent: Channel hat keine ID → Channel-Nachrichten können nicht geladen werden.');
+        this.messages$ = undefined;
+        return;
+      }
+
+      this.messages$ = this.channelService
+        .getChannelMessages(this.channel.id)
+        .pipe(tap((msgs) => this.handleScrollOnNewMessages(msgs.length)));
+    } else {
+      if (!this.conversationId) {
+        console.warn('MessageComponent: Keine conversationId gesetzt → DM-Nachrichten können nicht geladen werden.');
+        this.messages$ = undefined;
+        return;
+      }
+
+      this.messages$ = this.conversationService
+        .getConversationMessages(this.conversationId)
+        .pipe(tap((msgs) => this.handleScrollOnNewMessages(msgs.length)));
+    }
+  }
+
+  private handleScrollOnNewMessages(currentCount: number) {
+    if (currentCount > this.lastMessageCount) {
+      setTimeout(() => this.scrollToBottom(), 0);
+    }
+    this.lastMessageCount = currentCount;
+  }
+
+  private scrollToBottom(retry: boolean = true) {
+    if (!this.bottom) {
+      if (retry) setTimeout(() => this.scrollToBottom(false), 50);
+      return;
+    }
+    this.bottom.nativeElement.scrollIntoView({ behavior: 'smooth' });
+>>>>>>> ee3eec266c2dc6cde20db4744cb51b7e99ed4fea
+  }
+
+  // ---------------------------
+  // Sender / Anzeige-Helfer
+  // ---------------------------
   getSenderName(senderId: string): string {
     const user = this.userMap.get(senderId);
     if (!user) return 'Unknown user';
@@ -115,17 +290,29 @@ export class Message implements OnChanges {
     return new Date(value);
   }
 
-  private scrollToBottom(retry: boolean = true) {
-    if (!this.bottom) {
-      if (retry) {
-        setTimeout(() => this.scrollToBottom(false), 50);
-      }
-      return;
-    }
+  // ---------------------------
+  // Inline Edit
+  // ---------------------------
+  startInlineEdit(msg: MessageData) {
+    if (!msg?.id) return;
+    if (!this.isOwnMessage(msg)) return;
 
-    this.bottom.nativeElement.scrollIntoView({ behavior: 'smooth' });
+    this.editingMessageId = msg.id;
+    this.editText = msg.text ?? '';
+    this.originalEditText = this.editText;
+
+    this.closeOptionsMenu();
+    this.reactionPickerForMessageId = null;
+
+    setTimeout(() => {
+      const el = document.querySelector<HTMLTextAreaElement>(`textarea[data-edit-id="${msg.id}"]`);
+      el?.focus();
+      const v = el?.value ?? '';
+      if (el) el.setSelectionRange(v.length, v.length);
+    }, 0);
   }
 
+<<<<<<< HEAD
   onEditMessage(msg: MessageData) {
     if (!this.isOwnMessage(msg)) return;
     this.editRequested.emit(msg);
@@ -135,24 +322,83 @@ export class Message implements OnChanges {
     // Reaktionen nur in Channels, nicht in DMs
     if (this.contextType !== 'channel') return;
     if (!this.channel?.id || !msg.id || !this.currentUserUid) return;
+=======
+  cancelInlineEdit() {
+    this.editingMessageId = null;
+    this.editText = '';
+    this.originalEditText = '';
+  }
 
-    const reactions = { ...(msg.reactions || {}) };
-    const users = reactions[reactionId] ? [...reactions[reactionId]!] : [];
-    const idx = users.indexOf(this.currentUserUid);
+  get canSaveInlineEdit(): boolean {
+    const trimmed = (this.editText ?? '').trim();
+    const original = (this.originalEditText ?? '').trim();
+    return trimmed.length > 0 && trimmed !== original;
+  }
 
-    if (idx >= 0) {
-      users.splice(idx, 1);
-    } else {
-      users.push(this.currentUserUid);
+  async saveInlineEdit(msg: MessageData) {
+    if (!msg?.id) return;
+    if (!this.isOwnMessage(msg)) return;
+>>>>>>> ee3eec266c2dc6cde20db4744cb51b7e99ed4fea
+
+    const newText = (this.editText ?? '').trim();
+    if (!newText) return;
+
+    try {
+      if (this.contextType === 'channel') {
+        const channelId = this.channel?.id;
+        if (!channelId) return;
+        await this.messageInputService.updateChannelMessage(channelId, msg.id, newText);
+      } else {
+        const convId = this.conversationId;
+        if (!convId) return;
+        await this.messageInputService.updateConversationMessage(convId, msg.id, newText);
+      }
+
+      this.cancelInlineEdit();
+    } catch (e) {
+      console.error('Fehler beim Speichern der bearbeiteten Nachricht:', e);
+    }
+  }
+
+  onInlineEditKeydown(ev: KeyboardEvent, msg: MessageData) {
+    if (ev.key === 'Escape') {
+      ev.preventDefault();
+      this.cancelInlineEdit();
+      return;
     }
 
-    if (users.length === 0) {
-      delete reactions[reactionId];
-    } else {
-      reactions[reactionId] = users;
-    }
-
+<<<<<<< HEAD
     this.messageService.updateReactions(this.channel.id!, msg.id!, reactions);
+=======
+    // ENTER speichert, Shift+Enter = Zeilenumbruch
+    if (ev.key === 'Enter' && !ev.shiftKey) {
+      ev.preventDefault();
+      if (this.canSaveInlineEdit) this.saveInlineEdit(msg);
+    }
+  }
+
+  // ---------------------------
+  // Reactions
+  // ---------------------------
+  toggleReaction(msg: MessageData, reactionId: ReactionId) {
+    if (!this.currentUserUid || !msg.id) return;
+
+    if (this.contextType === 'channel' && this.channel?.id) {
+      this.messageService.toggleReactionOnChannelMessage(
+        this.channel.id,
+        msg.id,
+        reactionId,
+        this.currentUserUid
+      );
+    } else if (this.contextType === 'conversation' && this.conversationId) {
+      this.messageService.toggleReactionOnConversationMessage(
+        this.conversationId,
+        msg.id,
+        reactionId,
+        this.currentUserUid
+      );
+    }
+>>>>>>> ee3eec266c2dc6cde20db4744cb51b7e99ed4fea
   }
 
   getReactionIds(msg: MessageData): ReactionId[] {
@@ -193,9 +439,80 @@ export class Message implements OnChanges {
     this.reactionPickerForMessageId = null;
   }
 
+  // ---------------------------
+  // Options Menü
+  // ---------------------------
+  toggleOptionsMenu(ev: MouseEvent, msgId: string) {
+    ev.stopPropagation();
+
+    if (this.optionsMenuForMessageId === msgId) {
+      this.closeOptionsMenu();
+      return;
+    }
+
+    this.optionsMenuForMessageId = msgId;
+
+    queueMicrotask(() => {
+      const btn = ev.currentTarget as HTMLElement | null;
+      if (!btn) return;
+
+      const scroll = btn.closest('.messages-scroll') as HTMLElement | null;
+      const menu = scroll?.querySelector('.message-options-menu') as HTMLElement | null;
+
+      const menuHeight = menu?.getBoundingClientRect().height ?? 160;
+      const margin = 12;
+
+      const btnRect = btn.getBoundingClientRect();
+      const scrollRect = (scroll ?? document.documentElement).getBoundingClientRect();
+
+      const spaceBelow = scrollRect.bottom - btnRect.bottom;
+      const spaceAbove = btnRect.top - scrollRect.top;
+
+      this.optionsMenuOpenUp =
+        spaceBelow < (menuHeight + margin) && spaceAbove > (menuHeight + margin);
+    });
+  }
+
+  onOptionsMenuMouseEnter() {
+    this.isOptionsMenuHovered = true;
+  }
+
+  onOptionsMenuMouseLeave() {
+    this.isOptionsMenuHovered = false;
+    this.closeOptionsMenu();
+  }
+
+  closeOptionsMenu() {
+    this.optionsMenuForMessageId = null;
+    this.optionsMenuOpenUp = false;
+    this.isOptionsMenuHovered = false;
+  }
+
+  closeOverlays() {
+    this.reactionPickerForMessageId = null;
+    this.optionsMenuForMessageId = null;
+    this.hoveredReaction = null;
+    this.hoveredMessageId = null;
+  }
+
   onMessageMouseLeave(msg: MessageData) {
-    if (this.reactionPickerForMessageId === msg.id) {
-      this.reactionPickerForMessageId = null;
+    if (this.isOptionsMenuHovered) return;
+    if (this.reactionPickerForMessageId === msg.id) this.reactionPickerForMessageId = null;
+    this.closeOverlays();
+  }
+
+  async onDeleteMessage(msg: any) {
+    if (!msg?.id) return;
+    if (!this.isOwnMessage(msg)) return;
+
+    if (this.contextType === 'channel' && this.channel?.id) {
+      await this.messageService.deleteChannelMessage(this.channel.id, msg.id);
+      return;
+    }
+
+    if (this.contextType === 'conversation' && this.conversationId) {
+      await this.messageService.deleteConversationMessage(this.conversationId, msg.id);
+      return;
     }
   }
 
@@ -222,17 +539,8 @@ export class Message implements OnChanges {
     const uids = this.getReactionUserIds(msg, reactionId);
     if (!uids.length) return '';
 
-    if (uids.length === 1) {
-      return this.getUserDisplayName(uids[0]);
-    }
-
-    if (uids.length === 2) {
-      return (
-        this.getUserDisplayName(uids[0]) +
-        ' und ' +
-        this.getUserDisplayName(uids[1])
-      );
-    }
+    if (uids.length === 1) return this.getUserDisplayName(uids[0]);
+    if (uids.length === 2) return this.getUserDisplayName(uids[0]) + ' und ' + this.getUserDisplayName(uids[1]);
 
     const others = uids.length - 1;
     return `${this.getUserDisplayName(uids[0])} und ${others} weitere`;

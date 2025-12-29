@@ -6,11 +6,11 @@
     </div>
     <form class="auth-form-container" #form="ngForm" (ngSubmit)="submitLogin()" id="loginForm">
         <div class="form-input">
-            <img src="/icons/login/mail_passive.svg" alt="" class="form-input-icon">
+            <img src="/assets/icons/login/mail_passive.svg" alt="" class="form-input-icon">
             <input name="email" type="email" placeholder="beispielname@email.com" [(ngModel)]="email" required email>
         </div>
         <div class="form-input">
-            <img src="/icons/login/lock_passive.svg" alt="" class="form-input-icon">
+            <img src="/assets/icons/login/lock_passive.svg" alt="" class="form-input-icon">
             <input name="password" type="password" placeholder="Passwort" [(ngModel)]="password" required>
             @if (showEmailLoginError) {
             <span class="error-message">Falsches Passwort oder E-Mail. Bitte erneut versuchen.</span>
@@ -24,7 +24,7 @@
     </div>
     <div class="auth-form-container">
         <button class="login-google-btn" (click)="triggerGoogleLogin()">
-            <img src="/icons/login/google.svg" alt="">
+            <img src="/assets/icons/login/google.svg" alt="">
             <span>Anmelden mit Google</span>
         </button>
     </div>

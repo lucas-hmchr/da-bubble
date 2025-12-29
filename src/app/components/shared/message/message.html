@@ -1,10 +1,22 @@
 <div class="message-container">
+<<<<<<< HEAD
   <ng-container *ngIf="messages as msgs">
     <section *ngFor="let msg of msgs; let i = index" class="message-wrapper">
       <div
         class="date-separator"
         *ngIf="i === 0 || !isSameDay(msg.createdAt, msgs[i - 1]?.createdAt)"
       >
+=======
+  <ng-container *ngIf="messages$ | async as msgs">
+    <div *ngIf="msgs.length === 0" class="empty-channel-info">
+      <span class="fw-700 fs-24"># {{ channel?.name }}</span>
+      <p>Sei der Erste, der eine Nachricht in diesem Channel schreibt!</p>
+    </div>
+
+    <section *ngFor="let msg of msgs; let i = index" class="message-wrapper"
+      [class.menu-open]="optionsMenuForMessageId === msg.id">
+      <div class="date-separator" *ngIf="i === 0 || !isSameDay(msg.createdAt, msgs[i - 1]?.createdAt)">
+>>>>>>> ee3eec266c2dc6cde20db4744cb51b7e99ed4fea
         <span>
           {{ toDate(msg.createdAt) | date: 'EEEE, d. MMMM' }}
         </span>
@@ -16,6 +28,7 @@
         (mouseleave)="onMessageMouseLeave(msg)"
       >
         <div class="message-actions">
+<<<<<<< HEAD
           <img
             src="/icons/global/check1.svg"
             alt=""
@@ -49,6 +62,36 @@
             class="action-btn option-btn"
             (click)="onEditMessage(msg)"
           />
+=======
+          <img src="/assets/icons/global/check1.svg" alt="" class="action-btn check-btn"
+            (click)="toggleReaction(msg, 'check')" />
+          <img src="/assets/icons/global/thumbsup1.svg" alt="" class="action-btn thumbsup-btn"
+            (click)="toggleReaction(msg, 'thumbsup')" />
+
+          <img src="/assets/icons/global/reaction1.svg" alt="" class="action-btn reaction-btn"
+            (click)="onToggleReactionPicker(msg)" />
+
+          <img *ngIf="contextType === 'channel'" src="/assets/icons/global/answer1.svg" alt=""
+            class="action-btn answer-btn" />
+
+          <!-- 3-Punkte nur bei eigener Message -->
+          <button *ngIf="isOwnMessage(msg)" class="action-btn option-btn"
+            (click)="msg.id && toggleOptionsMenu($event, msg.id)" type="button">
+            <img src="/assets/icons/global/option1.svg" alt="">
+          </button>
+
+          @if (optionsMenuForMessageId === msg.id) {
+          <div class="message-options-menu" [class.open-up]="optionsMenuOpenUp" (mouseenter)="onOptionsMenuMouseEnter()"
+            (mouseleave)="onOptionsMenuMouseLeave()" (click)="$event.stopPropagation()">
+            <button class="menu-item" type="button" (click)="startInlineEdit(msg); closeOptionsMenu()">
+              Nachricht bearbeiten
+            </button>
+            <button class="menu-item" type="button" (click)="onDeleteMessage(msg); closeOptionsMenu()">
+              Nachricht löschen
+            </button>
+          </div>
+          }
+>>>>>>> ee3eec266c2dc6cde20db4744cb51b7e99ed4fea
         </div>
 
         <div
@@ -80,6 +123,7 @@
             </span>
           </div>
 
+<<<<<<< HEAD
           <p
             class="text bubble"
             [ngClass]="isOwnMessage(msg) ? 'me-person' : 'other-person'"
@@ -102,6 +146,36 @@
               (mouseenter)="onHoverReaction(msg.id!, rid)"
               (mouseleave)="onLeaveReaction()"
             >
+=======
+          <ng-container *ngIf="editingMessageId === msg.id; else normalBubble">
+            <div class="inline-edit fdc" (click)="$event.stopPropagation()">
+              <textarea class="inline-edit-textarea" [attr.data-edit-id]="msg.id" [(ngModel)]="editText"
+                (keydown)="onInlineEditKeydown($event, msg)"></textarea>
+
+              <div class="inline-edit-actions">
+                <button type="button" class="inline-edit-cancel" (click)="cancelInlineEdit()">Abbrechen</button>
+                <button type="button" class="inline-edit-save" [disabled]="!canSaveInlineEdit"
+                  (click)="saveInlineEdit(msg)">
+                  Speichern
+                </button>
+              </div>
+            </div>
+          </ng-container>
+
+
+          <ng-template #normalBubble>
+            <p class="text bubble" [ngClass]="isOwnMessage(msg) ? 'me-person' : 'other-person'">
+              {{ msg.text }}
+            </p>
+          </ng-template>
+
+          <div class="reactions-summary" *ngIf="msg.reactions && hasReactions(msg)">
+            <button class="reaction-chip" *ngFor="let rid of getReactionIds(msg)" [ngClass]="{
+                'mine': hasCurrentUserReaction(msg, rid),
+                'own-message': isOwnMessage(msg)
+              }" (click)="toggleReaction(msg, rid)" (mouseenter)="msg.id && onHoverReaction(msg.id, rid)"
+              (mouseleave)="onLeaveReaction()">
+>>>>>>> ee3eec266c2dc6cde20db4744cb51b7e99ed4fea
               <ng-container *ngIf="getReactionDefById(rid) as def">
                 <img
                   *ngIf="!def.isEmoji"

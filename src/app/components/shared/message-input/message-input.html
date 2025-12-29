@@ -26,15 +26,17 @@
 
   </div>
 
-  <textarea #messageInput [placeholder]="isReadOnly ? 'Du bist kein Mitglied dieses Channels' : 'Antworten...'"
-    [disabled]="isReadOnly" (keyup)="onKeyup($event)" (keydown.enter)="onEnter($event)"></textarea>
+  <textarea #messageInput
+    [placeholder]="isReadOnly ? 'Du bist kein Mitglied dieses Channels' : (placeholderText ?? 'Antworten...')"
+    [disabled]="isReadOnly" (keyup)="onKeyup($event)" (keydown.enter)="onEnter($event)">
+</textarea>
 
   <div id="message-actions">
     <div>
-      <img src="/icons/global/smile1.svg" alt="Emoji" class="form-input-icon icon-smile" />
-      <img src="/icons/global/at1.svg" alt="Mention" class="form-input-icon icon-at" />
+      <img src="/assets/icons/global/smile1.svg" alt="Emoji" class="form-input-icon icon-smile" />
+      <img src="/assets/icons/global/at1.svg" alt="Mention" class="form-input-icon icon-at" />
     </div>
 
-    <img src="/icons/global/send1.svg" alt="Send" class="icon-send" [class.disabled]="isReadOnly" (click)="onSend()" />
+    <img src="/assets/icons/global/send1.svg" alt="Send" class="icon-send" [class.disabled]="isReadOnly" (click)="onSend()" />
   </div>
 </div>

@@ -1,12 +1,12 @@
 import { Component, computed, effect, HostListener, inject, signal } from '@angular/core';
-import { RouterOutlet, RouterLinkWithHref, ActivatedRoute, Router, NavigationEnd } from "@angular/router";
+import { RouterOutlet, RouterLinkWithHref, ActivatedRoute, Router, NavigationEnd, RouterLink } from "@angular/router";
 import { toSignal } from '@angular/core/rxjs-interop';
 import { filter, startWith, map } from 'rxjs';
 import { AuthService } from '../../../auth/auth.service';
 
 @Component({
   selector: 'app-auth-view',
-  imports: [RouterOutlet, RouterLinkWithHref],
+  imports: [RouterOutlet, RouterLinkWithHref, RouterLink],
   templateUrl: './auth-view.html',
   styleUrl: './auth-view.scss',
 })

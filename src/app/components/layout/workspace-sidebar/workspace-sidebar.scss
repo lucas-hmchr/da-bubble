@@ -31,30 +31,36 @@
     margin-left: 0 !important;
 }
 
-.left-menu-button-icon-container {
-    position: absolute;
-    left: -142px;
-    top: 60%;
-    z-index: 1;
-    transform: rotate(270deg);
-    width: 339px;
-    height: 56px;
+// .left-menu-button-icon-container {
+//     position: absolute;
+//     left: -142px;
+//     top: 60%;
+//     z-index: 1;
+//     transform: rotate(270deg);
+//     width: 339px;
+//     height: 56px;
+//     display: flex;
+//     align-items: center;
+//     justify-content: center;
+//     border-radius: 0 0 30px 30px;
+//     box-shadow: -4px 4px 7px rgba(0, 0, 0, 0.2);
+//     font-weight: 700;
+//     background-color: #ffffff;
+
+//     &:hover {
+//         color: #535AF1;
+//         font-weight: 700;
+
+//         .show-menu-icon {
+//             color: #535AF1;
+//             content: url(/assets/icons/global/show_menu_hover.svg);
+//         }
+//     }
+// }
+
+.left-menu-button {
     display: flex;
     align-items: center;
-    justify-content: center;
-    border-radius: 0 0 30px 30px;
-    box-shadow: -4px 4px 7px rgba(0, 0, 0, 0.2);
-    font-weight: 700;
-    background-color: #ffffff;
-
-    &:hover {
-        color: #535AF1;
-        font-weight: 700;
-    }
-
-    .show-menu-icon:hover {
-        content: url(/icons/global/show_menu_hover.svg);
-    }
 }
 
 .left-menu-sidenav {
@@ -67,12 +73,12 @@
     background-color: white;
 }
 
-.show-menu-icon {
-    content: url(/icons/global/show_menu.svg);
-    height: 32px;
-    width: 32px;
-    transform: rotate(90deg);
-}
+// .show-menu-icon {
+//     // content: url(/assets/icons/global/show_menu.svg);
+//     height: 32px;
+//     width: 32px;
+//     transform: rotate(90deg);
+// }
 
 .channels-button-container {
     display: flex;
@@ -98,11 +104,11 @@
 
 .edit-square-icon {
     &:hover {
-        content: url(/icons/global/edit_square_hover.svg);
+        content: url(/assets/icons/global/edit_square_hover.svg);
     }
 
     &:active {
-        content: url(/icons/global/edit_square_click.svg);
+        content: url(/assets/icons/global/edit_square_click.svg);
     }
 }
 
@@ -122,7 +128,7 @@
         font-weight: 700;
 
         img {
-            content: url(/icons/global/tag_hover.svg);
+            content: url(/assets/icons/global/tag_hover.svg);
 
         }
     }
@@ -166,13 +172,13 @@ mat-expansion-panel {
 
         .three-circle-channels-container {
             img {
-                content: url(/icons/global/workspaces_three_circles_hover.svg);
+                content: url(/assets/icons/global/workspaces_three_circles_hover.svg);
             }
         }
 
         .account-directMessage-container {
             img {
-                content: url(/icons/global/account_circle_hover.svg);
+                content: url(/assets/icons/global/account_circle_hover.svg);
             }
         }
     }
@@ -188,13 +194,13 @@ mat-expansion-panel {
         .three-circle-channels-container {
 
             img {
-                content: url(/icons/global/workspaces_three_circles_hover.svg);
+                content: url(/assets/icons/global/workspaces_three_circles_hover.svg);
             }
         }
 
         .account-directMessage-container {
             img {
-                content: url(/icons/global/account_circle_hover.svg);
+                content: url(/assets/icons/global/account_circle_hover.svg);
             }
         }
     }
@@ -220,7 +226,7 @@ mat-expansion-panel {
         color: #535AF1;
 
         img {
-            content: url(/icons/global/add_circle_hover.svg);
+            content: url(/assets/icons/global/add_circle_hover.svg);
 
         }
     }
@@ -229,7 +235,7 @@ mat-expansion-panel {
         color: #000000;
 
         img {
-            content: url(/icons/global/add_circle_hover.svg);
+            content: url(/assets/icons/global/add_circle_hover.svg);
 
         }
     }
@@ -258,11 +264,11 @@ mat-expansion-panel {
         z-index: 3;
 
         &:hover {
-            content: url(/icons/global/add_hover.svg);
+            content: url(/assets/icons/global/add_hover.svg);
         }
 
         &:active {
-            content: url(/icons/global/add_click.svg);
+            content: url(/assets/icons/global/add_click.svg);
         }
     }
 }
@@ -287,5 +293,70 @@ mat-expansion-panel {
         left: 50px;
         height: 14px;
         width: 14px;
+    }
+}
+
+.left-menu-button-icon-container {
+    z-index: 1;
+    position: absolute;
+    left: -142px;
+    top: 60%;
+    transform: rotate(270deg);
+
+    width: 339px;
+    height: 56px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+
+    background-color: #ffffff;
+    border-radius: 0 0 30px 30px;
+    box-shadow: -4px 4px 7px rgba(0, 0, 0, 0.2);
+
+    font-weight: 700;
+    color: #000;
+    transition: color 0.2s ease;
+
+    &:hover {
+        transform: rotate(270deg);
+        color: #535AF1;
+    }
+}
+
+.menu-icon {
+    transform: rotate(90deg);
+    width: 32px;
+    height: 32px;
+    fill: white;
+}
+
+
+@media (max-width: 1024px) {
+    .left-menu-button-icon-container {
+        display: none;
+    }
+
+    .mat-drawer-container {
+        margin-left: 0;
+
+        .mat-drawer {
+            width: 100%;
+            border-radius: 0;
+        }
+    }
+
+    .resp-input-workspace {
+        width: 100%;
+        height: 48px;
+        border-radius: 24px;
+        border: solid 1px #ADB0D9;
+        padding: 0 20px;
+        font-size: 17px;
+
+        &:focus-visible {
+            outline: none;
+        }
     }
 }

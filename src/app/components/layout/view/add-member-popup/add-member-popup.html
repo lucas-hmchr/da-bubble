@@ -1,0 +1,44 @@
+<div class="add-member-popup">
+    <div class="add-member-content">
+        <img src="/assets/icons/global/close.svg" class="close-icon" (click)="closePopup()">
+        <span class="fw-700 fs-24">Leute hinzufügen</span>
+        <span class="channel-name fs-18"># {{ channel()?.name }}</span>
+
+        <div class="add-member-input" (click)="focusSearchInput()">
+
+            <div class="add-member-list">
+                @for (member of addMemberList(); track member.id) {
+                <div class="member-chip">
+                    <img [src]="getAvatar(member.avatarId)">
+                    <span>{{ member.displayName }}</span>
+
+                    <img src="/assets/icons/global/close.svg" class="chip-remove" alt="Entfernen"
+                        (click)="removeMember(member); $event.stopPropagation()">
+                </div>
+                }
+            </div>
+
+            <input #searchInput type="text" [value]="query()" (input)="onQueryInput(searchInput.value)"
+                (focus)="onFocus()" (blur)="onBlur()" placeholder="Name eingeben" autocomplete="off" class="fs-18" />
+
+            @if (isFocused()) {
+            <div class="user-suggestions">
+                @for (u of filteredUsers(); track u.id) {
+                <div class="user-row" (mousedown)="$event.preventDefault()" (click)="addMember(u)">
+                    <div>
+                        <img [src]="getAvatar(u.avatarId)" class="avatar">
+                        <img [src]="getOnlineIcon(u)" class="online-icon">
+                    </div>
+                    <span class="name fs-18">{{ u.displayName }}</span>
+                </div>
+                } @empty {
+                <div class="empty">Keine Treffer</div>
+                }
+            </div>
+            }
+        </div>
+        <button class="add-members-btn fs-18 fw-600 btn-disabled" [disabled]="addMemberList().length < 1"
+            [ngClass]="addMemberList().length < 1 ? 'btn-disabled' : 'btn-enabled'"
+            (click)="pushSelectedMembersToChannel()">Hinzufügen</button>
+    </div>
+</div>

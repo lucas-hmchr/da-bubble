@@ -1,26 +1,57 @@
-import { Component, HostListener, inject } from '@angular/core';
+import { Component, EventEmitter, HostListener, inject, Input, Output, signal } from '@angular/core';
 import { BreakpointObserver } from '@angular/cdk/layout';
-import { AuthService } from '../../../auth/auth.service'; // Pfad ggf. anpassen
+import { AuthService } from '../../../auth/auth.service';
+import { SearchService } from '../../../services/search.topbar.service';
+import { FormsModule } from '@angular/forms';
+import { CommonModule } from '@angular/common';
 
 @Component({
   selector: 'app-topbar',
-  imports: [],
+  imports: [FormsModule, CommonModule],
   templateUrl: './topbar.html',
   styleUrl: './topbar.scss',
 })
 export class Topbar {
   private breakpointObserver = inject(BreakpointObserver);
+  @Input() isNewMessageMode = false;
+  @Output() back = new EventEmitter<void>();
 
+  isMobile = signal(window.innerWidth < 1024);
   isDropdownMenuOpen = false;
   isProfilModalOpen = false;
   isProfilEditModalOpen = false;
   activeProfilName: string | null = null;
   MobileProfil = false;
 
-  constructor(private auth: AuthService) {
+  searchQuery = '';
+  isSearchFocused = false;
+
+  constructor(private auth: AuthService, private searchService: SearchService) {
     this.breakpointObserver.observe(['(max-width: 375px)']).subscribe((result) => {
       this.MobileProfil = result.matches;
     });
+    window.addEventListener('resize', () => {
+      this.isMobile.set(window.innerWidth < 1024);
+    });
+  }
+
+  onSearchInput() {
+    this.searchService.updateSearchQuery(this.searchQuery);
+  }
+
+  onSearchFocus() {
+    this.isSearchFocused = true;
+  }
+
+  onSearchBlur() {
+    setTimeout(() => {
+      this.isSearchFocused = false;
+    }, 200);
+  }
+
+  clearSearch() {
+    this.searchQuery = '';
+    this.searchService.clearSearch();
   }
 
   toggleDropdownMenu(event: Event) {

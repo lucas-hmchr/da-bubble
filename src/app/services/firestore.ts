@@ -1,4 +1,4 @@
-import { Injectable, inject } from '@angular/core';
+import { Injectable, inject, signal } from '@angular/core';
 import {
   Firestore,
   collection,
@@ -12,8 +12,9 @@ import {
   where,
   orderBy,
   serverTimestamp,
+  getDocs,
 } from '@angular/fire/firestore';
-import { Observable, BehaviorSubject } from 'rxjs';
+import { Observable, BehaviorSubject, Subscription } from 'rxjs';
 import { User } from '../models/user.model';
 
 export interface ChannelMessage {
@@ -36,10 +37,19 @@ export interface ChannelMessage {
 export class FirestoreService {
   firestore: Firestore = inject(Firestore);
 
+  userList = signal<User[]>([])
+  userListSub: Subscription | undefined
+
   constructor() { }
 
   getUsers(): Observable<User[]> {
     return this.getCollection<User>('users');
+  }
+
+  subscribeUsers() {
+    this.userListSub = this.getUsers().subscribe(u => {
+      this.userList.set(u);
+    });
   }
 
   getCollection<T extends object>(path: string): Observable<T[]> {

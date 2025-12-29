@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 import {
   Component,
   Input,
@@ -9,8 +10,17 @@ import {
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 
+=======
+import { Component, Input, effect, inject, signal } from '@angular/core';
+import { CommonModule } from '@angular/common';
+
+import { FirestoreService } from '../../../services/firestore';
+import { MessageInput } from '../../shared/message-input/message-input';
+import { Message } from '../../shared/message/message';
+>>>>>>> ee3eec266c2dc6cde20db4744cb51b7e99ed4fea
 import { Channel } from '../../../models/channel.interface';
 import { User } from '../../../models/user.model';
+<<<<<<< HEAD
 import { MessageData } from '../../../models/message.interface';
 
 import { Message } from '../../shared/message/message';
@@ -27,6 +37,17 @@ import { ChannelStoreService } from '../../../services/channel-store.service';
 
 import { getAvatarById } from '../../../../shared/data/avatars';
 import { Observable, of } from 'rxjs';
+=======
+import { UserService } from '../../../services/user.service';
+import { ChatContextService, ChatContextType } from '../../../services/chat-context.service';
+import { ChannelService } from '../../../services/channel.service';
+import { ConversationService } from '../../../services/conversation.service';
+import { NewMessageService } from '../../../services/new-message.service';
+import { ViewStateService } from '../../../services/view-state.service';
+import { ProfilePopup } from "../../shared/profile-popup/profile-popup";
+import { ProfilePopupService } from '../../../services/profile-popup.service';
+import { AddMemberPopup } from "./add-member-popup/add-member-popup";
+>>>>>>> ee3eec266c2dc6cde20db4744cb51b7e99ed4fea
 
 type RecipientType = 'channel' | 'user' | 'email';
 
@@ -40,10 +61,15 @@ interface RecipientSuggestion {
 @Component({
   selector: 'app-view',
   standalone: true,
+<<<<<<< HEAD
   imports: [CommonModule, Message, MessageInput],
+=======
+  imports: [CommonModule, MessageInput, Message, ProfilePopup, AddMemberPopup],
+>>>>>>> ee3eec266c2dc6cde20db4744cb51b7e99ed4fea
   templateUrl: './view.html',
   styleUrl: './view.scss',
 })
+<<<<<<< HEAD
 export class View implements OnInit, OnChanges {
   /**
    * Optional: kann vom Parent gesetzt werden.
@@ -64,13 +90,24 @@ export class View implements OnInit, OnChanges {
 
   // Editier-Status für Nachrichten
   editingMessage?: { id: string; text: string };
+=======
+export class View {
+  public newMessage = inject(NewMessageService);
+  public viewState = inject(ViewStateService);
+  @Input() currentUserUid: string | null = null;
+  contextType: ChatContextType = 'channel';
+  editingMessage: { id: string; text: string } | null = null;
+>>>>>>> ee3eec266c2dc6cde20db4744cb51b7e99ed4fea
 
   // Neue Nachricht (ViewMode 'newMessage')
   recipientInputValue = '';
   showRecipientSuggestions = false;
   recipientSuggestions: RecipientSuggestion[] = [];
   selectedRecipient: RecipientSuggestion | null = null;
+  showChannelMemberList = signal<Boolean>(false);
+  showAddChannelMemberPopup = signal<Boolean>(false);
 
+<<<<<<< HEAD
   readonly userService = inject(UserService);
   private channelSelection = inject(ChannelSelectionService);
   private messageService = inject(MessageService);
@@ -177,6 +214,79 @@ export class View implements OnInit, OnChanges {
     if (changes['channel']) {
       this.updateMessagesStream();
     }
+=======
+  constructor(
+    private firestore: FirestoreService,
+    private channelService: ChannelService,
+    private conversationService: ConversationService,
+    private chatContext: ChatContextService,
+    public userService: UserService,
+    private profilePopupService: ProfilePopupService,
+  ) {
+    console.log('Neu Nachricht: s',this.newMessage);
+
+    effect(() => {
+      const type = this.chatContext.contextType();
+      const channelId = this.chatContext.channelId();
+      const convId = this.chatContext.convId();
+      this.showChannelMemberList.set(false);
+
+      this.contextType = type;
+
+      if (type === 'channel' && channelId) {
+        this.channelService.subscribeSelectedChannel(channelId);
+        this.conversationService.cleanup();
+        this.resetNewMessageState();
+      } else if (type === 'dm' && convId) {
+        this.conversationService.subscribeToConversation(convId);
+        this.resetNewMessageState();
+      } else if (type === 'new') {
+        this.conversationService.cleanup();
+        this.channelService.cleanUp();
+        this.resetNewMessageState();
+      }
+    });
+  }
+
+  get channel(): Channel | null {
+    return this.channelService.activeChannel();
+  }
+
+  get channelMessages(): MessageData[] {
+    return this.channelService.activeChannelMessages();
+  }
+
+  get channelMembers(): User[] {
+    return this.channelService.channelMembers();
+  }
+
+  get allChannels(): Channel[] {
+    return this.channelService.channels();
+  }
+
+  get allUsers(): User[] {
+    return this.firestore.userList();
+  }
+
+  get dmMessages(): MessageData[] {
+    return this.conversationService.activeConversationMessages();
+  }
+
+  get dmPartner(): User | null {
+    return this.conversationService.activeConversationPartner();
+  }
+
+  get dmConversationId(): string | null {
+    return this.conversationService.activeConversationId();
+  }
+
+  get isChannelEmpty(): boolean {
+    return this.channelService.isActiveChannelEmpty();
+  }
+
+  dmLoaded(): boolean {
+    return this.conversationService.dmLoaded();
+>>>>>>> ee3eec266c2dc6cde20db4744cb51b7e99ed4fea
   }
 
   private updateMessagesStream() {
@@ -201,6 +311,7 @@ export class View implements OnInit, OnChanges {
     this.messages$ = of([]);
   }
 
+<<<<<<< HEAD
   // --- Helper: Datums-Konvertierung ---
 
   private toDate(value: any): Date | null {
@@ -347,4 +458,64 @@ export class View implements OnInit, OnChanges {
       this.channelSelection.setActiveChannelId(event.channelId);
     }
   }
+=======
+  private resetNewMessageState() {
+    this.recipientInputValue = '';
+    this.recipientSuggestions = [];
+    this.showRecipientSuggestions = false;
+    this.selectedRecipient = null;
+  }
+
+  onNewMessageSent(evt: {
+    contextType: 'channel' | 'conversation';
+    channelId?: string;
+    conversationId?: string;
+  }) {
+    if (evt.contextType === 'channel' && evt.channelId) {
+      this.chatContext.openChannel(evt.channelId);
+    }
+
+    if (evt.contextType === 'conversation' && evt.conversationId) {
+      this.chatContext.openConversation(evt.conversationId);
+    }
+  }
+
+  getSelectedRecipientChannel(): Channel | undefined {
+    if (!this.selectedRecipient || this.selectedRecipient.type !== 'channel') {
+      return undefined;
+    }
+    return this.allChannels.find(c => c.id === this.selectedRecipient!.id);
+  }
+
+  onEditRequested(msg: MessageData) {
+    if (!msg.id) return;
+    this.editingMessage = { id: msg.id, text: msg.text };
+  }
+
+  onEditFinished() {
+    this.editingMessage = null;
+  }
+
+  onNewMessageToKeyup(event: KeyboardEvent) {
+    const input = event.target as HTMLInputElement;
+    this.newMessage.setQuery(input.value);
+  }
+
+  toggleChannelMemberList() {
+    this.showChannelMemberList.set(!this.showChannelMemberList());
+  }
+
+  openProfile(uid: string) {
+    this.profilePopupService.open(uid);
+  }
+
+  toggleAddChannelMemberPopup() {
+    this.showAddChannelMemberPopup.set(!this.showAddChannelMemberPopup())
+  }
+
+  openAddingPopupFromMemberList() {
+    this.showChannelMemberList.set(false);
+    this.showAddChannelMemberPopup.set(true);
+  }
+>>>>>>> ee3eec266c2dc6cde20db4744cb51b7e99ed4fea
 }
