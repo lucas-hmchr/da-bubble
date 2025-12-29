@@ -19,6 +19,7 @@ import { NewMessageService } from '../../../services/new-message.service';
 import { ViewStateService } from '../../../services/view-state.service';
 import { ProfilePopup } from '../../shared/profile-popup/profile-popup';
 import { ProfilePopupService } from '../../../services/profile-popup.service';
+import { AddMemberPopup } from "./add-member-popup/add-member-popup";
 
 type RecipientType = 'channel' | 'user' | null;
 
@@ -35,7 +36,7 @@ type ThreadRequest = { channelId: string; message: MessageData };
 @Component({
   selector: 'app-view',
   standalone: true,
-  imports: [CommonModule, MessageInput, Message, ProfilePopup],
+  imports: [CommonModule, MessageInput, Message, ProfilePopup, AddMemberPopup],
   templateUrl: './view.html',
   styleUrls: ['./view.scss'],
 })
@@ -54,6 +55,7 @@ export class View {
   selectedRecipient: RecipientSuggestion | null = null;
 
   showChannelMemberList = signal<Boolean>(false);
+  showAddChannelMemberPopup = signal<Boolean>(false);
 
   // =========================================================
   // THREAD STATE (rechts im Panel)
@@ -75,6 +77,8 @@ export class View {
     public userService: UserService,
     private profilePopupService: ProfilePopupService
   ) {
+    console.log('Neu Nachricht: s',this.newMessage);
+
     effect(() => {
       const type = this.chatContext.contextType();
       const channelId = this.chatContext.channelId();
@@ -152,30 +156,6 @@ export class View {
     return this.conversationService.dmLoaded();
   }
 
-  // =========================================================
-  // THREAD API (wird aus message.html per Output aufgerufen)
-  // =========================================================
-
-  /** Wird aufgerufen, wenn in einer Channel-Message Answer/Thread geklickt wurde */
-  openThread(req: ThreadRequest) {
-    // Nur im Channel sinnvoll
-    if (this.contextType !== 'channel') return;
-
-    this._threadChannelId.set(req.channelId);
-    this._threadParentMessage.set(req.message);
-    this._threadOpen.set(true);
-  }
-
-  closeThread() {
-    this._threadOpen.set(false);
-    this._threadChannelId.set(null);
-    this._threadParentMessage.set(null);
-  }
-
-  // =========================================================
-  // UI HELPERS
-  // =========================================================
-
   getAvatarSrc(user: User): string {
     if (user.avatarId) {
       return getAvatarById(user.avatarId).src;
@@ -200,8 +180,6 @@ export class View {
     }
 
     if (evt.contextType === 'conversation' && evt.conversationId) {
-      // Hinweis: hier wird noch die conversationId übergeben (nicht Partner-UID).
-      // Falls euer ChatContext dafür openConversationByConvId hat, wäre das korrekt.
       this.chatContext.openConversation(evt.conversationId);
     }
   }
@@ -233,5 +211,14 @@ export class View {
 
   openProfile(uid: string) {
     this.profilePopupService.open(uid);
+  }
+
+  toggleAddChannelMemberPopup() {
+    this.showAddChannelMemberPopup.set(!this.showAddChannelMemberPopup())
+  }
+
+  openAddingPopupFromMemberList() {
+    this.showChannelMemberList.set(false);
+    this.showAddChannelMemberPopup.set(true);
   }
 }

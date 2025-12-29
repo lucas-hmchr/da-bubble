@@ -1,7 +1,18 @@
 <section class="header">
     <div class="top-bar">
         <div class="topbar">
+            @if (isNewMessageMode && isMobile()) {
+            <div class="topbar-resp-btn-logo-container df cp" (click)="back.emit()">
+                <img src="/assets/icons/global/keyboard_arrow_down.svg" class="back-btn">
+
+                <div class="logo-title-container">
+                    <img src="/assets/icons/global/workspace_logo.svg" />
+                    <span>Devspace</span>
+                </div>
+            </div>
+            }@else {
             <img src="/assets/icons/global/logo-header.svg" alt="logo">
+            }
         </div>
         <div class="search-bar">
             <input type="text" id="name" name="name" placeholder="Devspace durchsuchen" class="search-inputs"

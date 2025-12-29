@@ -1,0 +1,208 @@
+.add-member-popup {
+    position: absolute;
+    width: 420px;
+    height: fit-content;
+    background-color: var(--clr-white);
+    top: 0;
+    right: 0;
+    border-radius: 30px 0px 30px 30px;
+    padding: 40px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    box-shadow: var(--box-shadow);
+    z-index: 10000;
+
+    >.add-member-content {
+        position: relative;
+        width: 100%;
+        display: flex;
+        flex-direction: column;
+        align-items: baseline;
+        justify-content: baseline;
+        gap: 16px;
+
+        >.close-icon {
+            position: absolute;
+            top: 0;
+            right: 0;
+            width: 18px;
+            aspect-ratio: 1/1;
+            cursor: pointer;
+        }
+
+        >.member-list {
+            display: flex;
+            flex-direction: column;
+            align-items: baseline;
+            justify-content: baseline;
+            width: 100%;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+    }
+}
+
+.member {
+    display: flex;
+    align-items: center;
+    justify-content: baseline;
+    gap: 12px;
+    border-radius: 16px;
+    transition: 0.1s ease-in-out;
+    padding: 12px;
+    width: 100%;
+    cursor: pointer;
+
+    &:hover {
+        background-color: var(--bg-clr);
+    }
+
+    >div {
+        position: relative;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+
+        >.user-icon {
+            aspect-ratio: 1/1;
+            border-radius: 50%;
+            width: 50px;
+        }
+
+        >.status-icon {
+            position: absolute;
+            bottom: 0px;
+            right: 0px;
+            width: 12px;
+        }
+    }
+}
+
+.channel-name {
+    color: var(--clr-purple-2);
+}
+
+.add-member-input {
+    position: relative;
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    border: 2px solid var(--clr-purple-1);
+    border-radius: 24px;
+    width: 100%;
+    padding: 8px 16px;
+
+    .add-member-list {
+        display: flex;
+        height: 100%;
+        max-width: 100%;
+        flex-wrap: wrap;
+        gap: 8px;
+        max-height: 240px;
+        overflow-y: auto;
+    }
+
+    input {
+        border: none;
+        outline: none;
+        height: 100%;
+        background-color: transparent;
+    }
+}
+
+.member-chip {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 8px;
+    height: 32px;
+    background-color: var(--bg-clr);
+    padding: 4px 12px;
+    border-radius: 50px;
+
+    >img {
+        height: 100%;
+        aspect-ratio: 1/1;
+        border-radius: 50%;
+    }
+
+}
+
+.user-suggestions {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    margin-top: 8px;
+    background-color: white;
+    border-radius: 0px 24px 24px 24px;
+    box-shadow: var(--box-shadow);
+    display: flex;
+    flex-direction: column;
+    align-items: baseline;
+    justify-content: baseline;
+    max-height: 300px;
+    overflow-y: auto;
+    padding: 16px;
+    width: 100%;
+
+    .user-row {
+        display: flex;
+        align-items: center;
+        width: 100%;
+        padding: 8px 16px;
+        gap: 8px;
+        border-radius: 50px;
+
+        div {
+            position: relative;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+
+            >.avatar {
+                aspect-ratio: 1/1;
+                width: 40px;
+                border-radius: 50%;
+            }
+
+            >.online-icon {
+                width: 12px;
+                position: absolute;
+                bottom: 0;
+                right: 0;
+            }
+        }
+
+        &:hover {
+            background-color: var(--bg-clr);
+        }
+    }
+}
+
+.add-members-btn {
+    background-color: var(--clr-purple-1);
+    color: white;
+    padding: 12px 20px;
+    border-radius: 50px;
+    border: none;
+    cursor: pointer;
+    transition: 0.1s ease-in-out;
+    margin-left: auto;
+}
+
+.btn-disabled {
+    background-color: var(--clr-gray);
+    cursor: not-allowed;
+}
+
+.btn-enabled {
+    background-color: var(--clr-purple-1);
+    cursor: pointer;
+
+    &:hover {
+        background-color: var(--clr-purple-2);
+    }
+}
