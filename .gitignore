@@ -47,3 +47,4 @@ Thumbs.db
 .runtimeconfig.json
 src/app/components/layout/view/copy/view copy.html
 src/app/components/layout/view/copy/view copy.scss
+src/app/components/layout/view/view copy.scss
