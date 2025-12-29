@@ -24,7 +24,7 @@
             (click)="onToggleReactionPicker(msg)" />
 
           <img *ngIf="contextType === 'channel'" src="/assets/icons/global/answer1.svg" alt=""
-            class="action-btn answer-btn" />
+            class="action-btn answer-btn" (click)="onOpenThread(msg)" />
 
           <!-- 3-Punkte nur bei eigener Message -->
           <button *ngIf="isOwnMessage(msg)" class="action-btn option-btn"

@@ -121,7 +121,7 @@
     >
 
       @if (viewState.isChannel() && channel) {
-      <app-message [channel]="channel" [currentUserUid]="currentUserUid" (editRequested)="onEditRequested($event)">
+      <app-message [channel]="channel" [currentUserUid]="currentUserUid" (editRequested)="onEditRequested($event)" (threadRequested)="openThread($event)">
       </app-message>
       }
 
