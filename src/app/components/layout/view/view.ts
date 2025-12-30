@@ -40,6 +40,9 @@ export class View {
   @Input() currentUserUid: string | null = null;
   contextType: ChatContextType = 'channel';
   editingMessage: { id: string; text: string } | null = null;
+  threadOpen = false;
+  threadChannelId: string | null = null;
+  threadParentMessage: MessageData | null = null;
 
   recipientInputValue = '';
   recipientSuggestions: RecipientSuggestion[] = [];
@@ -56,7 +59,7 @@ export class View {
     public userService: UserService,
     private profilePopupService: ProfilePopupService,
   ) {
-    console.log('Neu Nachricht: s',this.newMessage);
+    console.log('Neu Nachricht: s', this.newMessage);
 
     effect(() => {
       const type = this.chatContext.contextType();
@@ -186,4 +189,18 @@ export class View {
     this.showChannelMemberList.set(false);
     this.showAddChannelMemberPopup.set(true);
   }
+
+  openThread(ev: { channelId: string; message: MessageData }) {
+    this.threadChannelId = ev.channelId;
+    this.threadParentMessage = ev.message;
+    this.threadOpen = true;
+  }
+
+  closeThread() {
+    this.threadOpen = false;
+    this.threadParentMessage = null;
+    this.threadChannelId = null;
+  }
+
+
 }

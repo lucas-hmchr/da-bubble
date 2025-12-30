@@ -38,13 +38,17 @@ import {
   styleUrl: './message.scss',
 })
 export class Message implements OnChanges {
-  @Input() contextType: 'channel' | 'conversation' = 'channel';
+  // @Input() contextType: 'channel' | 'conversation' = 'channel';
+  @Input() contextType: 'channel' | 'conversation' | 'thread' = 'channel';
   @Input() channel?: Channel;
   @Input() conversationId?: string | null;
   @Input() currentUserUid: string | null = null;
-
+  @Input() threadChannelId?: string | null;
+  @Input() threadParentMessageId?: string | null;
+  
   // bleibt bestehen, auch wenn Inline-Edit es im Alltag ersetzt
   @Output() editRequested = new EventEmitter<MessageData>();
+  @Output() threadRequested = new EventEmitter<{ channelId: string; message: MessageData }>();
 
   messages$?: Observable<MessageData[]>;
   users: User[] = [];
@@ -106,6 +110,14 @@ export class Message implements OnChanges {
       this.closeOptionsMenu();
       this.reactionPickerForMessageId = null;
     }
+  }
+
+  onOpenThread(msg: MessageData) {
+    if (this.contextType !== 'channel') return;
+    if (!this.channel?.id) return;
+    if (!msg?.id) return;
+
+    this.threadRequested.emit({ channelId: this.channel.id, message: msg });
   }
 
   // ---------------------------
