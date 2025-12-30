@@ -147,10 +147,13 @@ export class WorkspaceSidebar implements OnInit, OnDestroy {
   }
 
   openAddChannelDialog() {
+    const isMobile = window.innerWidth < 1024;
+
     this.dialog.open(AddChannelDialog, {
-      width: '872px',
-      maxWidth: 'none',
-      height: '539px',
+      width: isMobile ? '100vw' : '872px',
+      height: isMobile ? '100vh' : 'auto',
+      maxWidth: isMobile ? '100vw' : 'none',
+      panelClass: isMobile ? 'fullscreen-dialog' : '',
       data: { uid: this.currentUserUid },
     });
   }
@@ -187,7 +190,7 @@ export class WorkspaceSidebar implements OnInit, OnDestroy {
   }
 
 
-    private autoOpenPanels = effect(() => {
+  private autoOpenPanels = effect(() => {
     const mode = this.newMessage$.mode();
 
     if (mode === 'user') {
