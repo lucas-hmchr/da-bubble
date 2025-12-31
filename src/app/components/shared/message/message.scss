@@ -272,8 +272,10 @@ p {
   top: 0;
   transform: translateY(40px);
   display: flex;
+  flex-direction: row !important;
   gap: 6px;
   padding: 6px 10px;
+  // background: red;
   background: #fff;
   border-radius: 999px;
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.12);
@@ -288,6 +290,7 @@ p {
 
 .reaction-emoji-btn {
   border: none;
+  // background: green;
   background: transparent;
   cursor: pointer;
   font-size: 18px;

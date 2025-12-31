@@ -381,9 +381,9 @@ export class Message implements OnChanges {
   onToggleReactionPicker(msg: MessageData) {
     if (!msg.id) return;
     this.reactionPickerForMessageId =
-      this.reactionPickerForMessageId === msg.id ? null : msg.id;
+    this.reactionPickerForMessageId === msg.id ? null : msg.id;
   }
-
+  
   onEmojiReaction(msg: MessageData, reactionId: ReactionId) {
     this.toggleReaction(msg, reactionId);
     this.reactionPickerForMessageId = null;
