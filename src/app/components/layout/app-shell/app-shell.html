@@ -19,7 +19,7 @@
 
   @if (!isMobile() || activeMobileView() === 'sidebar') {
   <app-workspace-sidebar [isMobile]="isMobile()" [currentUserUid]="currentUserUid"
-    (newMessage)="openNewMessage()"></app-workspace-sidebar>
+    (newMessage)="openNewMessage()" (mobileViewChange)="activeMobileView.set($event)"></app-workspace-sidebar>
   }
 
   @if (!isMobile() || activeMobileView() === 'chat') {
