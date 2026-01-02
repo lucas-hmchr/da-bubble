@@ -215,6 +215,7 @@ body {
    – aber OHNE background-color auf .message-container selbst.
 */
 
+// workspace.sidebar.ts
 @media (max-width: 1023px) {
   .fullscreen-dialog .mat-mdc-dialog-surface {
     border-radius: 0 !important;

@@ -49,6 +49,7 @@ export class WorkspaceSidebar implements OnInit, OnDestroy {
   @Input() currentUserUid: string | null = null;
   @Input() isMobile = false;
   @Output() newMessage = new EventEmitter<void>();
+@Output() mobileViewChange = new EventEmitter<'sidebar' | 'chat' | 'thread'>();
 
   newMessage$ = inject(NewMessageService);
 
@@ -171,6 +172,9 @@ export class WorkspaceSidebar implements OnInit, OnDestroy {
   openDirectMessage(user: User) {
     if (!user.uid) return;
     this.chatContext.openConversation(user.uid);
+    if (this.isMobile) {
+      this.mobileViewChange.emit('chat');
+    }
     this.clearSearchIfActive();
   }
 
