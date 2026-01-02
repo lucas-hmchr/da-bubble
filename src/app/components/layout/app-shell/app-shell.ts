@@ -8,7 +8,8 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
 import { ChatContextService } from '../../../services/chat-context.service';
 
-export type MobileView = 'sidebar' | 'chat' | 'thread';
+export type MobileView = 'sidebar' | 'new-message' | 'chat' | 'thread';
+
 
 @Component({
   selector: 'app-app-shell',
@@ -42,17 +43,32 @@ export class AppShell {
     this.chatContext.openNewMessage();
 
     if (this.isMobile()) {
-      this.activeMobileView.set('chat');
+      this.activeMobileView.set('new-message');
     }
   }
 
-closeNewMessage() {
-  this.isNewMessageMode.set(false);
 
-  if (this.isMobile()) {
+  closeNewMessage() {
+    this.isNewMessageMode.set(false);
+
+    if (this.isMobile()) {
+      this.activeMobileView.set('sidebar');
+    }
+  }
+
+  backOneLevel() {
+    const view = this.activeMobileView();
+
+    if (view === 'thread') {
+      this.activeMobileView.set('chat');
+      return;
+    }
+
+    // new-message ODER chat → zurück zur sidebar
+    this.isNewMessageMode.set(false);
     this.activeMobileView.set('sidebar');
   }
-}
+
 
 
 }

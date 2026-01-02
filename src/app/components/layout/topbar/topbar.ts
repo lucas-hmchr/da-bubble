@@ -14,6 +14,8 @@ import { CommonModule } from '@angular/common';
 export class Topbar {
   private breakpointObserver = inject(BreakpointObserver);
   @Input() isNewMessageMode = false;
+  @Input() showMobileBack = false;
+
   @Output() back = new EventEmitter<void>();
 
   isMobile = signal(window.innerWidth < 1024);
