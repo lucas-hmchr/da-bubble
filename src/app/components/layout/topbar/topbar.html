@@ -1,7 +1,7 @@
 <section class="header">
     <div class="top-bar">
         <div class="topbar">
-            @if (isNewMessageMode && isMobile()) {
+            @if ((isNewMessageMode || showMobileBack) && isMobile()) {
             <div class="topbar-resp-btn-logo-container df cp" (click)="back.emit()">
                 <img src="/assets/icons/global/keyboard_arrow_down.svg" class="back-btn">
 

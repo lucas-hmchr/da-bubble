@@ -49,6 +49,7 @@ export class WorkspaceSidebar implements OnInit, OnDestroy {
   @Input() currentUserUid: string | null = null;
   @Input() isMobile = false;
   @Output() newMessage = new EventEmitter<void>();
+@Output() mobileViewChange = new EventEmitter<'sidebar' | 'chat' | 'thread'>();
 
   newMessage$ = inject(NewMessageService);
 
@@ -147,10 +148,13 @@ export class WorkspaceSidebar implements OnInit, OnDestroy {
   }
 
   openAddChannelDialog() {
+    const isMobile = window.innerWidth < 1024;
+
     this.dialog.open(AddChannelDialog, {
-      width: '872px',
-      maxWidth: 'none',
-      height: '539px',
+      width: isMobile ? '100vw' : '872px',
+      height: isMobile ? '100vh' : 'auto',
+      maxWidth: isMobile ? '100vw' : 'none',
+      panelClass: isMobile ? 'fullscreen-dialog' : '',
       data: { uid: this.currentUserUid },
     });
   }
@@ -168,6 +172,9 @@ export class WorkspaceSidebar implements OnInit, OnDestroy {
   openDirectMessage(user: User) {
     if (!user.uid) return;
     this.chatContext.openConversation(user.uid);
+    if (this.isMobile) {
+      this.mobileViewChange.emit('chat');
+    }
     this.clearSearchIfActive();
   }
 
@@ -187,7 +194,7 @@ export class WorkspaceSidebar implements OnInit, OnDestroy {
   }
 
 
-    private autoOpenPanels = effect(() => {
+  private autoOpenPanels = effect(() => {
     const mode = this.newMessage$.mode();
 
     if (mode === 'user') {

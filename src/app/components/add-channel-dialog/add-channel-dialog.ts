@@ -1,14 +1,14 @@
 import { Component, Inject } from '@angular/core';
 import { MatInputModule } from '@angular/material/input';
 import { MatButtonModule } from '@angular/material/button';
-import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
+import { MAT_DIALOG_DATA, MatDialogRef, MatDialogModule } from '@angular/material/dialog';
 import { FormsModule } from "@angular/forms";
 import { Channel } from '../../models/channel.interface';
 import { FirestoreService } from '../../services/firestore';
 
 @Component({
   selector: 'app-add-channel-dialog',
-  imports: [MatInputModule, MatButtonModule, FormsModule],
+  imports: [MatInputModule, MatButtonModule, FormsModule, MatDialogModule],
   templateUrl: './add-channel-dialog.html',
   styleUrl: './add-channel-dialog.scss',
 })
@@ -25,7 +25,7 @@ export class AddChannelDialog {
     this.dialogRef.close();
   }
 
-  creatChannel() {
+  createChannel() {
     if (!this.channelName.trim()) return;
 
     const newChannel: Channel = {
@@ -41,5 +41,5 @@ export class AddChannelDialog {
       this.dialogRef.close(); // Fenster schließen
     });
   }
-  
+
 }
