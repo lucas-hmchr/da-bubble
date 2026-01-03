@@ -23,8 +23,8 @@
           <img src="/assets/icons/global/reaction1.svg" alt="" class="action-btn reaction-btn"
             (click)="onToggleReactionPicker(msg)" />
 
-          <img *ngIf="contextType === 'channel'" src="/assets/icons/global/answer1.svg" alt=""
-            class="action-btn answer-btn" (click)="onOpenThread(msg)"/>
+          <img *ngIf="contextType === 'channel'" src="/assets/icons/global/answer1.svg" alt="Thread öffnen"
+            class="action-btn answer-btn" (click)="onOpenThread(msg)" />
 
           <!-- 3-Punkte nur bei eigener Message -->
           <button *ngIf="isOwnMessage(msg)" class="action-btn option-btn"
@@ -118,10 +118,18 @@
             </button>
           </div>
 
-          <div *ngIf="msg.threadCount > 0">
+          <!-- <div *ngIf="msg.threadCount > 0">
             <a href="javascript:void(0)">
               {{ msg.threadCount }} Antworten
             </a>
+          </div> -->
+          <div *ngIf="msg.threadCount > 0" class="thread-replies">
+            <a href="javascript:void(0)" (click)="onOpenThread(msg)" class="thread-link">
+              {{ msg.threadCount }} {{ msg.threadCount === 1 ? 'Antwort' : 'Antworten' }}
+            </a>
+            <span class="last-reply-time" *ngIf="msg.lastReplyAt">
+              Letzte Antwort: {{ toDate(msg.lastReplyAt) | date: 'HH:mm' }} Uhr
+            </span>
           </div>
         </div>
       </div>

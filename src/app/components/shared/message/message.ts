@@ -45,10 +45,11 @@ export class Message implements OnChanges {
   @Input() currentUserUid: string | null = null;
   @Input() threadChannelId?: string | null;
   @Input() threadParentMessageId?: string | null;
-  
+
   // bleibt bestehen, auch wenn Inline-Edit es im Alltag ersetzt
   @Output() editRequested = new EventEmitter<MessageData>();
-  @Output() threadRequested = new EventEmitter<{ channelId: string; message: MessageData }>();
+  // @Output() threadRequested = new EventEmitter<{ channelId: string; message: MessageData }>();
+  @Output() threadRequested = new EventEmitter<MessageData>();
 
   messages$?: Observable<MessageData[]>;
   users: User[] = [];
@@ -113,11 +114,16 @@ export class Message implements OnChanges {
   }
 
   onOpenThread(msg: MessageData) {
-    if (this.contextType !== 'channel') return;
-    if (!this.channel?.id) return;
-    if (!msg?.id) return;
+    if (!msg.id) {
+      console.warn('Message has no ID, cannot open thread');
+      return;
+    }
 
-    this.threadRequested.emit({ channelId: this.channel.id, message: msg });
+    // VORHER (mit channelId):
+    // this.threadRequested.emit({ channelId: this.channel?.id ?? '', message: msg });
+
+    // NACHHER (nur Message):
+    this.threadRequested.emit(msg);
   }
 
   // ---------------------------
@@ -381,9 +387,9 @@ export class Message implements OnChanges {
   onToggleReactionPicker(msg: MessageData) {
     if (!msg.id) return;
     this.reactionPickerForMessageId =
-    this.reactionPickerForMessageId === msg.id ? null : msg.id;
+      this.reactionPickerForMessageId === msg.id ? null : msg.id;
   }
-  
+
   onEmojiReaction(msg: MessageData, reactionId: ReactionId) {
     this.toggleReaction(msg, reactionId);
     this.reactionPickerForMessageId = null;

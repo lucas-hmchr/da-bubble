@@ -1,5 +1,100 @@
-<section>
-    <div>
-        <p>THREAD</p>
+<aside class="thread-panel" *ngIf="threadService.isOpen()">
+  
+  <!-- HEADER -->
+  <header class="thread-header">
+    <div class="thread-title">
+      <span class="thread-label">Thread</span>
+      <span class="channel-name"># {{ threadService.channelName() }}</span>
     </div>
-</section>
+    <button class="close-btn" (click)="closeThread()" type="button">
+      <img src="/assets/icons/global/close.svg" alt="Schließen">
+    </button>
+  </header>
+
+  <!-- CONTENT -->
+  <div class="thread-content">
+    
+    <!-- PARENT MESSAGE -->
+    <div class="parent-message" *ngIf="threadService.parentMessage() as parent">
+      <img [src]="getAvatarSrc(parent.senderId)" class="avatar" [alt]="getSenderName(parent.senderId)" />
+      
+      <div>
+        <div class="message-header">
+          <span class="sender-name">{{ getSenderName(parent.senderId) }}</span>
+          <span class="timestamp">{{ toDate(parent.createdAt) | date: 'HH:mm' }} Uhr</span>
+        </div>
+        
+        <p class="message-text">{{ parent.text }}</p>
+        
+        <!-- Reactions auf Parent Message -->
+        <div class="reactions-summary" *ngIf="hasReactions(parent)">
+          <button 
+            class="reaction-chip" 
+            *ngFor="let rid of getReactionIds(parent)"
+            [class.mine]="hasCurrentUserReaction(parent, rid)"
+            (click)="toggleReaction(parent, rid)">
+            <span class="reaction-emoji">{{ rid }}</span>
+            <span class="reaction-count">{{ getReactionCount(parent, rid) }}</span>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- SEPARATOR -->
+    <div class="thread-separator">
+      <span class="replies-count">
+        {{ threadService.threadMessages().length }} 
+        {{ threadService.threadMessages().length === 1 ? 'Antwort' : 'Antworten' }}
+      </span>
+    </div>
+
+    <!-- THREAD MESSAGES -->
+    <div class="thread-messages">
+      <div 
+        *ngFor="let msg of threadService.threadMessages(); let i = index" 
+        class="thread-message"
+        [class.own-message]="isOwnMessage(msg)">
+        
+        <img [src]="getAvatarSrc(msg.senderId)" class="avatar" [alt]="getSenderName(msg.senderId)" />
+        
+        <div class="message-body">
+          <div class="message-header">
+            <span class="sender-name">{{ getSenderName(msg.senderId) }}</span>
+            <span class="timestamp">{{ toDate(msg.createdAt) | date: 'HH:mm' }} Uhr</span>
+          </div>
+          
+          <p class="message-text" [class.own-text]="isOwnMessage(msg)">{{ msg.text }}</p>
+          
+          <!-- Reactions -->
+          <div class="reactions-summary" *ngIf="hasReactions(msg)">
+            <button 
+              class="reaction-chip" 
+              *ngFor="let rid of getReactionIds(msg)"
+              [class.mine]="hasCurrentUserReaction(msg, rid)"
+              [class.own-message]="isOwnMessage(msg)"
+              (click)="toggleReaction(msg, rid)">
+              <span class="reaction-emoji">{{ rid }}</span>
+              <span class="reaction-count">{{ getReactionCount(msg, rid) }}</span>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Empty State -->
+      <div class="thread-empty" *ngIf="threadService.threadMessages().length === 0">
+        <p>Noch keine Antworten. Sei der Erste!</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- REPLY INPUT -->
+  <div class="thread-input">
+    <app-message-input
+      [currentUserUid]="currentUserUid"
+      [contextType]="'thread'"
+      [placeholderText]="'Antworten...'"
+      (threadMessageSent)="onThreadMessageSent($event)">
+    </app-message-input>
+  </div>
+
+</aside>

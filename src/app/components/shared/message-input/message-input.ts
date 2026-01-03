@@ -16,12 +16,14 @@ import { AvatarId, getAvatarById } from '../../../../shared/data/avatars';
 import { MessageInputService } from '../../../services/message-intput.service';
 import { UserService } from '../../../services/user.service';
 import { NewMessageService } from '../../../services/new-message.service';
+import { ThreadService } from '../../../services/thread.service';
+import { FormsModule } from '@angular/forms';
 // import { getAvatarSrc } from '../../../../shared/data/avatars';
 
 @Component({
   selector: 'app-message-input',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, FormsModule],
   templateUrl: './message-input.html',
   styleUrl: './message-input.scss',
 })
@@ -29,7 +31,8 @@ export class MessageInput implements OnInit {
 
   @Input() channel?: Channel;
   @Input() currentUserUid: string | null = null;
-  @Input() contextType: 'channel' | 'conversation' = 'channel';
+  // @Input() contextType: 'channel' | 'conversation' = 'channel';
+  @Input() contextType: 'channel' | 'conversation' | 'thread' = 'channel';
   @Input() conversationId?: string | null;
   @Input() forceEditable = false;
   @Input() placeholderText?: string;
@@ -52,11 +55,13 @@ export class MessageInput implements OnInit {
     channelId?: string;
     conversationId?: string;
   }>();
+  @Output() threadMessageSent = new EventEmitter<{ text: string }>();
 
   isEditing = false;
   private _editingMessage?: { id: string; text: string };
   private newMessage = inject(NewMessageService);
-
+  private threadService = inject(ThreadService);
+  
   @ViewChild('messageInput') messageInput!: ElementRef<HTMLTextAreaElement>;
   @ViewChild('container') container!: ElementRef<HTMLDivElement>;
 
@@ -170,41 +175,49 @@ export class MessageInput implements OnInit {
     this.onSend();
   }
 
-async onSend() {
-  const text = this.getTrimmedText();
-  if (!text) return;
+  async onSend() {
+    const text = this.getTrimmedText();
+    if (!text) return;
 
-  // NEW MESSAGE FLOW:
-  // forceEditable = true, wir sind im conversation-mode (weil app-message-input nur 1x gerendert wird),
-  // aber ohne conversationId und ohne channel -> Ziel kommt aus NewMessageService (Header-Input)
-  const isNewMessageFlow =
-    this.forceEditable &&
-    this.contextType === 'conversation' &&
-    !this.conversationId &&
-    !this.channel;
+    // ========== NEU: THREAD HANDLING ==========
+    if (this.contextType === 'thread') {
+      // Event emiten für Thread-Component
+      this.threadMessageSent.emit({ text });
+      this.afterSend();
+      return;
+    }
 
-  if (isNewMessageFlow) {
-    const ok = await this.newMessage.sendAndNavigate(text);
-    if (ok) this.afterSend(); // nur leeren wenn wirklich gesendet wurde
-    return;
+    // NEW MESSAGE FLOW:
+    // forceEditable = true, wir sind im conversation-mode (weil app-message-input nur 1x gerendert wird),
+    // aber ohne conversationId und ohne channel -> Ziel kommt aus NewMessageService (Header-Input)
+    const isNewMessageFlow =
+      this.forceEditable &&
+      this.contextType === 'conversation' &&
+      !this.conversationId &&
+      !this.channel;
+
+    if (isNewMessageFlow) {
+      const ok = await this.newMessage.sendAndNavigate(text);
+      if (ok) this.afterSend(); // nur leeren wenn wirklich gesendet wurde
+      return;
+    }
+
+    // NORMALER FLOW (Channel oder bestehende Conversation)
+    if (!this.currentUserUid) {
+      console.warn('Kein aktueller Benutzer (UID).');
+      return;
+    }
+
+    try {
+      const ctx = await this.sendByContext(text, this.currentUserUid);
+
+      this.afterSend();
+
+      this.messageSent.emit(ctx);
+    } catch (error) {
+      console.error('Fehler beim Senden der Nachricht:', error);
+    }
   }
-
-  // NORMALER FLOW (Channel oder bestehende Conversation)
-  if (!this.currentUserUid) {
-    console.warn('Kein aktueller Benutzer (UID).');
-    return;
-  }
-
-  try {
-    const ctx = await this.sendByContext(text, this.currentUserUid);
-
-    this.afterSend();
-
-    this.messageSent.emit(ctx);
-  } catch (error) {
-    console.error('Fehler beim Senden der Nachricht:', error);
-  }
-}
 
 
 
@@ -390,6 +403,8 @@ async onSend() {
   // }
 
   get isReadOnly(): boolean {
+    // Thread-Context ist nie read-only
+    if (this.contextType === 'thread') return false;
     // NEW MESSAGE VIEW / freier Modus: niemals read-only
     if (this.forceEditable) return false;
     return this.contextType === 'channel' && !this.isChannelMember;

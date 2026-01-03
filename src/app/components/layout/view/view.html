@@ -117,7 +117,8 @@
       }">
 
       @if (viewState.isChannel() && channel) {
-      <app-message [channel]="channel" [currentUserUid]="currentUserUid" (editRequested)="onEditRequested($event)">
+      <app-message [channel]="channel" [currentUserUid]="currentUserUid" (editRequested)="onEditRequested($event)"
+        (threadRequested)="onThreadRequested($event)">
       </app-message>
       }
 
@@ -148,7 +149,7 @@
 
       @else {
       <app-message [contextType]="'conversation'" [conversationId]="dmConversationId" [currentUserUid]="currentUserUid"
-        (editRequested)="onEditRequested($event)">
+        (editRequested)="onEditRequested($event)" (threadRequested)="onThreadRequested($event)">
       </app-message>
       }
       }

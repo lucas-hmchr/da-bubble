@@ -1,12 +1,14 @@
 import { Component, effect, HostListener, inject, signal } from '@angular/core';
 import { Topbar } from '../topbar/topbar';
-import { View } from '../view/view';
+
 import { WorkspaceSidebar } from '../workspace-sidebar/workspace-sidebar';
 import { ThreadMenu } from '../thread-menu/thread-menu';
 import { AuthService } from '../../../auth/auth.service';
 import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
 import { ChatContextService } from '../../../services/chat-context.service';
+import { View } from '../view/view';
+import { ThreadService } from '../../../services/thread.service';
 
 export type MobileView = 'sidebar' | 'new-message' | 'chat' | 'thread';
 
@@ -14,7 +16,7 @@ export type MobileView = 'sidebar' | 'new-message' | 'chat' | 'thread';
 @Component({
   selector: 'app-app-shell',
   standalone: true,
-  imports: [Topbar, View, WorkspaceSidebar, ThreadMenu, MatIconModule, MatButtonModule],
+  imports: [Topbar, WorkspaceSidebar, ThreadMenu, MatIconModule, MatButtonModule, View],
   templateUrl: './app-shell.html',
   styleUrl: './app-shell.scss',
 })
@@ -25,6 +27,7 @@ export class AppShell {
   isNewMessageMode = signal(false);
   activeMobileView = signal<MobileView>('sidebar');
   private authService = inject(AuthService);
+  private threadService = inject(ThreadService);
   isMobile = signal(window.innerWidth < 1024);
 
   constructor(private chatContext: ChatContextService,) {
@@ -35,6 +38,14 @@ export class AppShell {
     });
     window.addEventListener('resize', () => {
       this.isMobile.set(window.innerWidth < 1024);
+    });
+    effect(() => {
+      // Wenn sich der Chat-Context ändert, Thread schließen
+      const channelId = this.chatContext.channelId();
+      const convId = this.chatContext.convId();
+
+      // Bei Navigation zu neuem Channel/DM → Thread schließen
+      this.threadService.close();
     });
   }
 
@@ -47,6 +58,11 @@ export class AppShell {
     }
   }
 
+  openThread() {
+    if (this.isMobile()) {
+      this.activeMobileView.set('thread');
+    }
+  }
 
   closeNewMessage() {
     this.isNewMessageMode.set(false);
@@ -60,6 +76,8 @@ export class AppShell {
     const view = this.activeMobileView();
 
     if (view === 'thread') {
+      // Thread schließen
+      this.threadService.close();
       this.activeMobileView.set('chat');
       return;
     }

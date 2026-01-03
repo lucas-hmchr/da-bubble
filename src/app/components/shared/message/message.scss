@@ -46,7 +46,7 @@
   padding: 10px 24px;
   overflow: visible;
 
-  > div {
+  >div {
     min-width: 0;
     flex: 1 1 auto;
   }
@@ -71,7 +71,7 @@
   flex-direction: row-reverse;
 }
 
-.message-content.fdrr > div {
+.message-content.fdrr>div {
   display: flex;
   flex-direction: column;
   align-items: flex-end;
@@ -459,4 +459,28 @@ p {
 
 .fdc {
   flex-direction: column;
+}
+
+.thread-replies {
+  margin-top: 8px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+
+  .thread-link {
+    color: #535af1;
+    font-size: 13px;
+    font-weight: 600;
+    text-decoration: none;
+    cursor: pointer;
+
+    &:hover {
+      text-decoration: underline;
+    }
+  }
+
+  .last-reply-time {
+    font-size: 12px;
+    color: #888;
+  }
 }
