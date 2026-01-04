@@ -21,13 +21,12 @@
     <!-- MESSAGES SCROLL - Exakt wie View -->
     <div class="messages-scroll">
 
-      <!-- PARENT MESSAGE - Nutzt app-message -->
-      <div class="parent-message-section" *ngIf="threadService.parentMessage() as parent">
+      <!-- PARENT MESSAGE - Mit externalMessages ABER mit channel/conversationId für Actions -->
+      <div *ngIf="threadService.parentMessage() as parent">
         <app-message
           [contextType]="threadService.contextType()"
           [currentUserUid]="currentUserUid"
           [externalMessages]="[parent]"
-          [isThreadContext]="false"
           [channel]="threadService.contextType() === 'channel' ? getChannelById(threadService.contextId()) : undefined"
           [conversationId]="threadService.contextType() === 'conversation' ? threadService.contextId() : null">
         </app-message>
@@ -41,7 +40,7 @@
         </span>
       </div>
 
-      <!-- THREAD MESSAGES - Nutzt app-message -->
+      <!-- THREAD MESSAGES - Nutzt externalMessages -->
       <div class="thread-messages-section">
         
         <div *ngIf="threadService.threadMessages().length === 0" class="thread-empty">

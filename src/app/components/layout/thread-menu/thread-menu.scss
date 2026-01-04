@@ -94,12 +94,6 @@ app-message-input {
   }
 }
 
-// Parent-Message Section (Border unten)
-.parent-message-section {
-  padding-bottom: 16px;
-  border-bottom: 1px solid #e0e0e0;
-  margin-bottom: 24px;
-}
 
 // Thread-Separator (wie date-separator)
 .thread-separator {
@@ -108,23 +102,20 @@ app-message-input {
   display: flex;
   align-items: center;
   width: 100%;
-  margin: 20px 0;
+  margin: 20px 0px;
 
-  &::before,
   &::after {
     content: "";
     flex: 1;
     border-bottom: 1px solid #ccc;
+    margin-left: 20px;
   }
 
   span {
     position: relative;
     z-index: 0;
-    padding: 6px 14px;
-    border: 1px solid #d0d0e0;
-    border-radius: 20px;
-    background: #fff;
     font-size: 18px;
+    color: #ADB0D9;
   }
 }
 
