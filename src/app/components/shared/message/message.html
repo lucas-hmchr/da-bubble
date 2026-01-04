@@ -54,7 +54,7 @@
         <img class="profile-pic" [src]="getSenderAvatarUrl(msg.senderId)" [alt]="getSenderName(msg.senderId)" />
 
         <div>
-          <div>
+          <div [class.message-header-reverse]="isOwnMessage(msg)">
             <span class="send-name">
               {{ getSenderName(msg.senderId) }}
             </span>

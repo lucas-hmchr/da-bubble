@@ -34,8 +34,8 @@
     border: 1px solid #d0d0e0;
     border-radius: 20px;
     background: #fff;
-    font-family: sans-serif;
-    font-size: 14px;
+    // font-family: sans-serif;
+    font-size: 18px;
   }
 }
 
@@ -77,6 +77,12 @@
   align-items: flex-end;
 }
 
+.message-header-reverse{
+  display: flex;
+  gap: 5px;
+  flex-direction: row-reverse;
+  justify-content: center;
+}
 
 .profile-pic {
   height: 70px;
@@ -87,11 +93,16 @@
 .send-name {
   font-weight: bold;
   font-size: 18px;
+  // background-color: green;
 }
 
 .send-info {
   font-size: 14px;
   color: #686868;
+}
+
+.green {
+  background-color: green;
 }
 
 a {

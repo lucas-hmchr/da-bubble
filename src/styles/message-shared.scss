@@ -33,7 +33,7 @@
 
 // Sender Name
 @mixin sender-name {
-  font-size: 16px;
+  font-size: 18px;
   font-weight: 600;
   color: #000000;
 }
@@ -41,7 +41,7 @@
 // Timestamp
 @mixin timestamp {
   font-size: 14px;
-  color: #797ef3;
+  color: #686868;
   font-weight: 400;
 }
 
@@ -78,7 +78,7 @@
   background: #ffffff;
   cursor: pointer;
   transition: all 0.2s;
-  font-size: 14px;
+  font-size: 18px;
 
   &:hover {
     background: #f5f5f5;
@@ -128,7 +128,7 @@
 
   span {
     padding: 0 16px;
-    font-size: 14px;
+    font-size: 18px;
     color: #888888;
     font-weight: 500;
     white-space: nowrap;
@@ -144,6 +144,7 @@
   
   .thread-link {
     color: #535af1;
+    // color: red;
     font-size: 13px;
     font-weight: 600;
     text-decoration: none;

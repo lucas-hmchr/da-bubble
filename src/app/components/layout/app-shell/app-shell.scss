@@ -12,6 +12,12 @@ app-view {
     height: calc(100% - 10px);
 }
 
+app-thread-menu {
+    min-width: 485px;
+    height: calc(100% - 10px);
+    margin-right: 10px;
+}
+
 .shell {
     background-color: var(--bg-clr);
     display: flex;
