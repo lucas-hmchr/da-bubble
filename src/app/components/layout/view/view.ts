@@ -1,4 +1,4 @@
-import { Component, Input, effect, inject, signal } from '@angular/core';
+import { Component, EventEmitter, Input, Output, effect, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 
 import { FirestoreService } from '../../../services/firestore';
@@ -52,6 +52,7 @@ export class View {
   selectedRecipient: RecipientSuggestion | null = null;
   showChannelMemberList = signal<Boolean>(false);
   showAddChannelMemberPopup = signal<Boolean>(false);
+@Output() openThread = new EventEmitter<MessageData>();
 
   constructor(
     private firestore: FirestoreService,
@@ -238,6 +239,7 @@ export class View {
     this.threadOpen = false;
     this.threadChannelId = null;
     this.threadParentMessage = null;
+    this.openThread.emit(msg);
   }
 
   closeThread() {
