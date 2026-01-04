@@ -87,6 +87,10 @@ export class AppShell {
     this.activeMobileView.set('sidebar');
   }
 
-
+  onOpenThread() {
+    if (this.isMobile()) {
+      this.activeMobileView.set('thread');
+    }
+  }
 
 }

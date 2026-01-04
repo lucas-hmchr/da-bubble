@@ -26,13 +26,13 @@
   }
 
   @if (!isMobile() || activeMobileView() === 'chat' || activeMobileView() === 'new-message') {
-  <app-view [currentUserUid]="currentUserUid"></app-view>
+  <app-view [currentUserUid]="currentUserUid" (openThread)="onOpenThread()"></app-view>
   }
 
 
   @if (!isMobile() || activeMobileView() === 'thread') {
   <!-- <app-thread-menu></app-thread-menu> -->
-   <app-thread-menu [currentUserUid]="currentUserUid"></app-thread-menu>
+  <app-thread-menu [currentUserUid]="currentUserUid"></app-thread-menu>
   }
 
 </section>
