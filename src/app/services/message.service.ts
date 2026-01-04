@@ -116,4 +116,44 @@ export class MessageService {
             userId
         );
     }
+
+    deleteThreadMessage(
+        contextType: 'channel' | 'conversation',
+        contextId: string,
+        parentMessageId: string,
+        threadMessageId: string
+    ) {
+        const basePath = contextType === 'channel'
+            ? `channels/${contextId}/messages`
+            : `conversations/${contextId}/messages`;
+
+        const threadPath = `${basePath}/${parentMessageId}/threadMessages`;
+
+        return this.firestore.deleteDocument(threadPath, threadMessageId);
+    }
+
+    /**
+     * Toggle Reaction on Thread-Message
+     */
+    toggleReactionOnThreadMessage(
+        contextType: 'channel' | 'conversation',
+        contextId: string,
+        parentMessageId: string,
+        threadMessageId: string,
+        reactionId: ReactionId,
+        userId: string
+    ): Promise<void> {
+        const basePath = contextType === 'channel'
+            ? `channels/${contextId}/messages`
+            : `conversations/${contextId}/messages`;
+
+        const threadPath = `${basePath}/${parentMessageId}/threadMessages`;
+
+        return this.toggleReactionForCollection(
+            threadPath,
+            threadMessageId,
+            reactionId,
+            userId
+        );
+    }
 }

@@ -10,7 +10,7 @@ import {
   HostListener,
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { Observable, tap } from 'rxjs';
+import { Observable, tap, of } from 'rxjs';
 import { FormsModule } from '@angular/forms';
 
 import { Channel } from '../../../models/channel.interface';
@@ -38,17 +38,16 @@ import {
   styleUrl: './message.scss',
 })
 export class Message implements OnChanges {
-  // @Input() contextType: 'channel' | 'conversation' = 'channel';
   @Input() contextType: 'channel' | 'conversation' | 'thread' = 'channel';
   @Input() channel?: Channel;
   @Input() conversationId?: string | null;
   @Input() currentUserUid: string | null = null;
   @Input() threadChannelId?: string | null;
   @Input() threadParentMessageId?: string | null;
-
-  // bleibt bestehen, auch wenn Inline-Edit es im Alltag ersetzt
+  @Input() externalMessages?: MessageData[] | null;
+  @Input() isThreadContext?: boolean;
+  // @Input() threadParentMessageId?: string;
   @Output() editRequested = new EventEmitter<MessageData>();
-  // @Output() threadRequested = new EventEmitter<{ channelId: string; message: MessageData }>();
   @Output() threadRequested = new EventEmitter<MessageData>();
 
   messages$?: Observable<MessageData[]>;
@@ -66,9 +65,6 @@ export class Message implements OnChanges {
   optionsMenuOpenUp = false;
   isOptionsMenuHovered = false;
 
-  // ---------------------------
-  // Inline Edit
-  // ---------------------------
   editingMessageId: string | null = null;
   editText: string = '';
   private originalEditText: string = '';
@@ -97,17 +93,19 @@ export class Message implements OnChanges {
     });
   }
 
-  // ---------------------------
-  // Lifecycle
-  // ---------------------------
   ngOnChanges(changes: SimpleChanges): void {
+
+    if (changes['externalMessages']) {
+      if (this.externalMessages && this.externalMessages.length > 0) {
+        this.messages$ = of(this.externalMessages);
+        return;
+      }
+    }
     if (changes['channel'] || changes['conversationId'] || changes['contextType']) {
       this.loadMessages();
 
-      // ✅ Idee 2: Beim Kontextwechsel Inline-Edit sauber beenden
       this.tryDiscardInlineEdit('context-change');
 
-      // Overlays sauber schließen
       this.closeOptionsMenu();
       this.reactionPickerForMessageId = null;
     }
@@ -119,16 +117,9 @@ export class Message implements OnChanges {
       return;
     }
 
-    // VORHER (mit channelId):
-    // this.threadRequested.emit({ channelId: this.channel?.id ?? '', message: msg });
-
-    // NACHHER (nur Message):
     this.threadRequested.emit(msg);
   }
 
-  // ---------------------------
-  // Outside Click (Idee 1)
-  // ---------------------------
   @HostListener('document:click', ['$event'])
   onDocumentClick(ev: MouseEvent) {
     // wenn kein Inline-Edit aktiv ist, kein Aufwand
@@ -182,9 +173,6 @@ export class Message implements OnChanges {
     return a !== b;
   }
 
-  // ---------------------------
-  // Messages laden
-  // ---------------------------
   private loadMessages() {
     if (this.contextType === 'channel') {
       if (!this.channel?.id) {
@@ -224,9 +212,6 @@ export class Message implements OnChanges {
     this.bottom.nativeElement.scrollIntoView({ behavior: 'smooth' });
   }
 
-  // ---------------------------
-  // Sender / Anzeige-Helfer
-  // ---------------------------
   getSenderName(senderId: string): string {
     const user = this.userMap.get(senderId);
     if (!user) return 'Unknown user';
@@ -262,9 +247,6 @@ export class Message implements OnChanges {
     return new Date(value);
   }
 
-  // ---------------------------
-  // Inline Edit
-  // ---------------------------
   startInlineEdit(msg: MessageData) {
     if (!msg?.id) return;
     if (!this.isOwnMessage(msg)) return;
@@ -296,29 +278,58 @@ export class Message implements OnChanges {
     return trimmed.length > 0 && trimmed !== original;
   }
 
-  async saveInlineEdit(msg: MessageData) {
-    if (!msg?.id) return;
-    if (!this.isOwnMessage(msg)) return;
+async saveInlineEdit(msg: MessageData) {
+  if (!msg?.id) return;
+  if (!this.isOwnMessage(msg)) return;
 
-    const newText = (this.editText ?? '').trim();
-    if (!newText) return;
+  const newText = (this.editText ?? '').trim();
+  if (!newText) return;
 
-    try {
+  try {
+    // ========== NEU: Thread-Message Edit ==========
+    if (this.isThreadContext && this.threadParentMessageId) {
       if (this.contextType === 'channel') {
         const channelId = this.channel?.id;
         if (!channelId) return;
-        await this.messageInputService.updateChannelMessage(channelId, msg.id, newText);
-      } else {
+        
+        // Thread-Message in Channel
+        await this.messageInputService.updateThreadMessage(
+          'channel',
+          channelId,
+          this.threadParentMessageId,
+          msg.id,
+          newText
+        );
+      } else if (this.contextType === 'conversation') {
         const convId = this.conversationId;
         if (!convId) return;
-        await this.messageInputService.updateConversationMessage(convId, msg.id, newText);
+        
+        // Thread-Message in Conversation
+        await this.messageInputService.updateThreadMessage(
+          'conversation',
+          convId,
+          this.threadParentMessageId,
+          msg.id,
+          newText
+        );
       }
-
-      this.cancelInlineEdit();
-    } catch (e) {
-      console.error('Fehler beim Speichern der bearbeiteten Nachricht:', e);
     }
+    // ========== BESTEHEND: Normal Message Edit ==========
+    else if (this.contextType === 'channel') {
+      const channelId = this.channel?.id;
+      if (!channelId) return;
+      await this.messageInputService.updateChannelMessage(channelId, msg.id, newText);
+    } else {
+      const convId = this.conversationId;
+      if (!convId) return;
+      await this.messageInputService.updateConversationMessage(convId, msg.id, newText);
+    }
+
+    this.cancelInlineEdit();
+  } catch (e) {
+    console.error('Fehler beim Speichern der bearbeiteten Nachricht:', e);
   }
+}
 
   onInlineEditKeydown(ev: KeyboardEvent, msg: MessageData) {
     if (ev.key === 'Escape') {
@@ -327,35 +338,59 @@ export class Message implements OnChanges {
       return;
     }
 
-    // ENTER speichert, Shift+Enter = Zeilenumbruch
     if (ev.key === 'Enter' && !ev.shiftKey) {
       ev.preventDefault();
       if (this.canSaveInlineEdit) this.saveInlineEdit(msg);
     }
   }
 
-  // ---------------------------
-  // Reactions
-  // ---------------------------
-  toggleReaction(msg: MessageData, reactionId: ReactionId) {
-    if (!this.currentUserUid || !msg.id) return;
+toggleReaction(msg: MessageData, reactionId: ReactionId) {
+  if (!this.currentUserUid || !msg.id) return;
 
+  // ========== NEU: Thread-Message Reactions ==========
+  if (this.isThreadContext && this.threadParentMessageId) {
     if (this.contextType === 'channel' && this.channel?.id) {
-      this.messageService.toggleReactionOnChannelMessage(
+      this.messageService.toggleReactionOnThreadMessage(
+        'channel',
         this.channel.id,
+        this.threadParentMessageId,
         msg.id,
         reactionId,
         this.currentUserUid
       );
-    } else if (this.contextType === 'conversation' && this.conversationId) {
-      this.messageService.toggleReactionOnConversationMessage(
+      return;
+    }
+
+    if (this.contextType === 'conversation' && this.conversationId) {
+      this.messageService.toggleReactionOnThreadMessage(
+        'conversation',
         this.conversationId,
+        this.threadParentMessageId,
         msg.id,
         reactionId,
         this.currentUserUid
       );
+      return;
     }
   }
+
+  // ========== BESTEHEND: Normal Message Reactions ==========
+  if (this.contextType === 'channel' && this.channel?.id) {
+    this.messageService.toggleReactionOnChannelMessage(
+      this.channel.id,
+      msg.id,
+      reactionId,
+      this.currentUserUid
+    );
+  } else if (this.contextType === 'conversation' && this.conversationId) {
+    this.messageService.toggleReactionOnConversationMessage(
+      this.conversationId,
+      msg.id,
+      reactionId,
+      this.currentUserUid
+    );
+  }
+}
 
   getReactionIds(msg: MessageData): ReactionId[] {
     const reactions: any = msg.reactions || {};
@@ -395,9 +430,6 @@ export class Message implements OnChanges {
     this.reactionPickerForMessageId = null;
   }
 
-  // ---------------------------
-  // Options Menü
-  // ---------------------------
   toggleOptionsMenu(ev: MouseEvent, msgId: string) {
     ev.stopPropagation();
 
@@ -457,20 +489,44 @@ export class Message implements OnChanges {
     this.closeOverlays();
   }
 
-  async onDeleteMessage(msg: any) {
-    if (!msg?.id) return;
-    if (!this.isOwnMessage(msg)) return;
+async onDeleteMessage(msg: any) {
+  if (!msg?.id) return;
+  if (!this.isOwnMessage(msg)) return;
 
+  // ========== NEU: Thread-Message Delete ==========
+  if (this.isThreadContext && this.threadParentMessageId) {
     if (this.contextType === 'channel' && this.channel?.id) {
-      await this.messageService.deleteChannelMessage(this.channel.id, msg.id);
+      await this.messageService.deleteThreadMessage(
+        'channel',
+        this.channel.id,
+        this.threadParentMessageId,
+        msg.id
+      );
       return;
     }
 
     if (this.contextType === 'conversation' && this.conversationId) {
-      await this.messageService.deleteConversationMessage(this.conversationId, msg.id);
+      await this.messageService.deleteThreadMessage(
+        'conversation',
+        this.conversationId,
+        this.threadParentMessageId,
+        msg.id
+      );
       return;
     }
   }
+
+  // ========== BESTEHEND: Normal Message Delete ==========
+  if (this.contextType === 'channel' && this.channel?.id) {
+    await this.messageService.deleteChannelMessage(this.channel.id, msg.id);
+    return;
+  }
+
+  if (this.contextType === 'conversation' && this.conversationId) {
+    await this.messageService.deleteConversationMessage(this.conversationId, msg.id);
+    return;
+  }
+}
 
   onHoverReaction(messageId: string, reactionId: ReactionId) {
     this.hoveredMessageId = messageId;

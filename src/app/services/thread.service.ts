@@ -25,6 +25,7 @@ export class ThreadService {
 
   // Subscription für Thread-Messages
   private threadMessagesSub?: Subscription;
+  private parentMessageSub?: Subscription;
 
   // Public readonly signals
   readonly isOpen = this._isOpen.asReadonly();
@@ -63,7 +64,8 @@ export class ThreadService {
     this._isOpen.set(true);
     this._contextType.set(contextType);
     this._contextId.set(contextId);
-    this._parentMessage.set(parentMessage);
+    // this._parentMessage.set(parentMessage);
+    this.subscribeToParentMessage(contextType, contextId, parentMessage.id);
 
     // Thread-Messages laden
     this.subscribeToThreadMessages(contextType, contextId, parentMessage.id);
@@ -81,6 +83,8 @@ export class ThreadService {
     // Subscription cleanup
     this.threadMessagesSub?.unsubscribe();
     this.threadMessagesSub = undefined;
+    this.parentMessageSub?.unsubscribe();
+    this.parentMessageSub = undefined;
   }
 
   /**
@@ -102,6 +106,25 @@ export class ThreadService {
     });
   }
 
+  private subscribeToParentMessage(
+    contextType: 'channel' | 'conversation',
+    contextId: string,
+    parentMessageId: string
+  ) {
+    this.parentMessageSub?.unsubscribe();
+
+    const docPath = contextType === 'channel'
+      ? `channels/${contextId}/messages/${parentMessageId}`
+      : `conversations/${contextId}/messages/${parentMessageId}`;
+
+    const parentMessage$ = this.firestore.getDocument<MessageData>(docPath);
+
+    this.parentMessageSub = parentMessage$.subscribe((msg) => {
+      if (msg) {
+        this._parentMessage.set(msg);
+      }
+    });
+  }
   /**
    * Thread-Messages Observable
    */
@@ -183,15 +206,13 @@ export class ThreadService {
       lastReplyAt: new Date(),
     });
 
-    // Lokalen State aktualisieren
-    const updatedParent = { ...this._parentMessage()!, threadCount: newCount };
-    this._parentMessage.set(updatedParent);
   }
 
   /**
    * Cleanup beim Service-Destroy
    */
   ngOnDestroy() {
+    this.parentMessageSub?.unsubscribe();  // ← NEU
     this.threadMessagesSub?.unsubscribe();
   }
 }

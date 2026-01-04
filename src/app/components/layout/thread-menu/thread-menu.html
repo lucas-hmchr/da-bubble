@@ -1,100 +1,76 @@
-<section class="thread-panel" *ngIf="threadService.isOpen()">
-  
-  <!-- HEADER -->
-  <header class="thread-header">
-    <div class="thread-title">
-      <span class="thread-label">Thread</span>
-      <span class="channel-name"># {{ threadService.channelName() }}</span>
+<section *ngIf="threadService.isOpen()">
+
+  <!-- HEADER - Exakt wie View -->
+  <header class="dm-header dm-header-small">
+    <div style="width: 100%;">
+      <div id="header-left" style="display: flex; align-items: center; gap: 8px;">
+        <h2>Thread</h2>
+        <span class="channel-name"># {{ threadService.channelName() }}</span>
+      </div>
     </div>
+
+    <!-- Close-Button -->
     <button class="close-btn" (click)="closeThread()" type="button">
       <img src="/assets/icons/global/close.svg" alt="Schließen">
     </button>
   </header>
 
-  <!-- CONTENT -->
-  <div class="thread-content">
-    
-    <!-- PARENT MESSAGE -->
-    <div class="parent-message" *ngIf="threadService.parentMessage() as parent">
-      <img [src]="getAvatarSrc(parent.senderId)" class="avatar" [alt]="getSenderName(parent.senderId)" />
-      
-      <div>
-        <div class="message-header">
-          <span class="sender-name">{{ getSenderName(parent.senderId) }}</span>
-          <span class="timestamp">{{ toDate(parent.createdAt) | date: 'HH:mm' }} Uhr</span>
-        </div>
-        
-        <p class="message-text">{{ parent.text }}</p>
-        
-        <!-- Reactions auf Parent Message -->
-        <div class="reactions-summary" *ngIf="hasReactions(parent)">
-          <button 
-            class="reaction-chip" 
-            *ngFor="let rid of getReactionIds(parent)"
-            [class.mine]="hasCurrentUserReaction(parent, rid)"
-            (click)="toggleReaction(parent, rid)">
-            <span class="reaction-emoji">{{ rid }}</span>
-            <span class="reaction-count">{{ getReactionCount(parent, rid) }}</span>
-          </button>
-        </div>
-      </div>
-    </div>
+  <!-- CHAT CONTAINER - Exakt wie View -->
+  <div id="chat-container-new">
 
-    <!-- SEPARATOR -->
-    <div class="thread-separator">
-      <span class="replies-count">
-        {{ threadService.threadMessages().length }} 
-        {{ threadService.threadMessages().length === 1 ? 'Antwort' : 'Antworten' }}
-      </span>
-    </div>
+    <!-- MESSAGES SCROLL - Exakt wie View -->
+    <div class="messages-scroll">
 
-    <!-- THREAD MESSAGES -->
-    <div class="thread-messages">
-      <div 
-        *ngFor="let msg of threadService.threadMessages(); let i = index" 
-        class="thread-message"
-        [class.own-message]="isOwnMessage(msg)">
-        
-        <img [src]="getAvatarSrc(msg.senderId)" class="avatar" [alt]="getSenderName(msg.senderId)" />
-        
-        <div class="message-body">
-          <div class="message-header">
-            <span class="sender-name">{{ getSenderName(msg.senderId) }}</span>
-            <span class="timestamp">{{ toDate(msg.createdAt) | date: 'HH:mm' }} Uhr</span>
-          </div>
-          
-          <p class="message-text" [class.own-text]="isOwnMessage(msg)">{{ msg.text }}</p>
-          
-          <!-- Reactions -->
-          <div class="reactions-summary" *ngIf="hasReactions(msg)">
-            <button 
-              class="reaction-chip" 
-              *ngFor="let rid of getReactionIds(msg)"
-              [class.mine]="hasCurrentUserReaction(msg, rid)"
-              [class.own-message]="isOwnMessage(msg)"
-              (click)="toggleReaction(msg, rid)">
-              <span class="reaction-emoji">{{ rid }}</span>
-              <span class="reaction-count">{{ getReactionCount(msg, rid) }}</span>
-            </button>
-          </div>
-        </div>
+      <!-- PARENT MESSAGE - Nutzt app-message -->
+      <div class="parent-message-section" *ngIf="threadService.parentMessage() as parent">
+        <app-message
+          [contextType]="threadService.contextType()"
+          [currentUserUid]="currentUserUid"
+          [externalMessages]="[parent]"
+          [isThreadContext]="false"
+          [channel]="threadService.contextType() === 'channel' ? getChannelById(threadService.contextId()) : undefined"
+          [conversationId]="threadService.contextType() === 'conversation' ? threadService.contextId() : null">
+        </app-message>
       </div>
 
-      <!-- Empty State -->
-      <div class="thread-empty" *ngIf="threadService.threadMessages().length === 0">
-        <p>Noch keine Antworten. Sei der Erste!</p>
+      <!-- SEPARATOR -->
+      <div class="thread-separator">
+        <span>
+          {{ threadService.threadMessages().length }} 
+          {{ threadService.threadMessages().length === 1 ? 'Antwort' : 'Antworten' }}
+        </span>
       </div>
-    </div>
-  </div>
 
-  <!-- REPLY INPUT -->
-  <div class="thread-input">
+      <!-- THREAD MESSAGES - Nutzt app-message -->
+      <div class="thread-messages-section">
+        
+        <div *ngIf="threadService.threadMessages().length === 0" class="thread-empty">
+          <p>Noch keine Antworten. Sei der Erste!</p>
+        </div>
+
+        <app-message
+          *ngIf="threadService.threadMessages().length > 0"
+          [contextType]="threadService.contextType()"
+          [currentUserUid]="currentUserUid"
+          [externalMessages]="threadService.threadMessages()"
+          [isThreadContext]="true"
+          [threadParentMessageId]="threadService.parentMessage()?.id"
+          [channel]="threadService.contextType() === 'channel' ? getChannelById(threadService.contextId()) : undefined"
+          [conversationId]="threadService.contextType() === 'conversation' ? threadService.contextId() : null">
+        </app-message>
+
+      </div>
+
+    </div>
+
+    <!-- MESSAGE INPUT - Exakt wie View -->
     <app-message-input
       [currentUserUid]="currentUserUid"
       [contextType]="'thread'"
       [placeholderText]="'Antworten...'"
       (threadMessageSent)="onThreadMessageSent($event)">
     </app-message-input>
+
   </div>
 
 </section>
