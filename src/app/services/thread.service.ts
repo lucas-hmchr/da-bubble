@@ -111,20 +111,31 @@ export class ThreadService {
     contextId: string,
     parentMessageId: string
   ) {
+    // Alte Subscription aufräumen
     this.parentMessageSub?.unsubscribe();
 
+    // Pfad zur Parent-Message
     const docPath = contextType === 'channel'
       ? `channels/${contextId}/messages/${parentMessageId}`
       : `conversations/${contextId}/messages/${parentMessageId}`;
 
+    // Observable für Parent-Message
     const parentMessage$ = this.firestore.getDocument<MessageData>(docPath);
 
+    // Subscription
     this.parentMessageSub = parentMessage$.subscribe((msg) => {
       if (msg) {
+        // ========== FIX: ID setzen falls nicht vorhanden ==========
+        if (!msg.id) {
+          msg.id = parentMessageId;
+        }
+        // ========== FIX END ==========
+
         this._parentMessage.set(msg);
       }
     });
   }
+
   /**
    * Thread-Messages Observable
    */
@@ -208,9 +219,6 @@ export class ThreadService {
 
   }
 
-  /**
-   * Cleanup beim Service-Destroy
-   */
   ngOnDestroy() {
     this.parentMessageSub?.unsubscribe();  // ← NEU
     this.threadMessagesSub?.unsubscribe();

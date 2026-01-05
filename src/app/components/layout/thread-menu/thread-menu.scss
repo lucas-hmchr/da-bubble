@@ -94,6 +94,9 @@ app-message-input {
   }
 }
 
+.date-separator {
+  display: none !important;
+}
 
 // Thread-Separator (wie date-separator)
 .thread-separator {
@@ -150,6 +153,23 @@ app-message-input {
 
     &:hover {
       background: #a0a0a0;
+    }
+  }
+}
+
+:host {
+  ::ng-deep {
+    app-message {
+      // Date-Separator ausblenden (nur in Thread)
+      .date-separator {
+        display: none !important;
+      }
+      
+      // Thread-Link ausblenden (nur in Thread)
+      .thread-replies,
+      .thread-link {
+        display: none !important;
+      }
     }
   }
 }
