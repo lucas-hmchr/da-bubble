@@ -3,20 +3,28 @@ app-workspace-sidebar {
 }
 
 app-thread-menu {
-    width: 485px;
+    // ========== DYNAMIC WIDTH ==========
+    width: 0;
+    min-width: 0;
+    opacity: 0;
+    overflow: hidden;
+    transition: width 0.3s ease, min-width 0.3s ease, opacity 0.3s ease, margin 0.3s ease;
+    
+    // Wenn Thread offen ist
+    &.thread-open {
+        width: 485px;
+        min-width: 485px;
+        opacity: 1;
+        margin-right: 10px;
+    }
+    // ========== DYNAMIC WIDTH END ==========
+    
     height: calc(100% - 10px);
 }
 
 app-view {
     width: 100%;
     height: calc(100% - 10px);
-}
-
-app-thread-menu {
-    min-width: 485px;
-    // height: 100%;
-    height: calc(100% - 10px);
-    margin-right: 10px;
 }
 
 .shell {

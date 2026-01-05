@@ -27,7 +27,7 @@ export class AppShell {
   isNewMessageMode = signal(false);
   activeMobileView = signal<MobileView>('sidebar');
   private authService = inject(AuthService);
-  private threadService = inject(ThreadService);
+  public threadService = inject(ThreadService);
   isMobile = signal(window.innerWidth < 1024);
 
   constructor(private chatContext: ChatContextService,) {

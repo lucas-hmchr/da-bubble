@@ -18,12 +18,54 @@ export class MessageService {
     ) { }
 
     // new 14.12.:
-    deleteChannelMessage(channelId: string, messageId: string) {
+    async deleteChannelMessage(channelId: string, messageId: string): Promise<void> {
+        // ========== CASCADE-DELETE: Lösche erst alle Thread-Messages ==========
+        try {
+            const threadMessagesPath = `channels/${channelId}/messages/${messageId}/threadMessages`;
+            const threadMessages = await firstValueFrom(
+                this.firestore.getCollection<MessageData>(threadMessagesPath)
+            );
+
+            // Lösche alle Thread-Messages
+            for (const threadMsg of threadMessages) {
+                if (threadMsg.id) {
+                    await this.firestore.deleteDocument(threadMessagesPath, threadMsg.id);
+                }
+            }
+
+            console.log(`✅ ${threadMessages.length} Thread-Messages gelöscht`);
+        } catch (error) {
+            console.log('ℹ️ Keine Thread-Messages zum Löschen (oder Fehler)');
+        }
+        // ========== CASCADE-DELETE END ==========
+
+        // Dann lösche die Parent-Message
         return this.firestore.deleteDocument(`channels/${channelId}/messages`, messageId);
     }
 
     // new 14.12.:
-    deleteConversationMessage(conversationId: string, messageId: string) {
+    async deleteConversationMessage(conversationId: string, messageId: string): Promise<void> {
+        // ========== CASCADE-DELETE: Lösche erst alle Thread-Messages ==========
+        try {
+            const threadMessagesPath = `conversations/${conversationId}/messages/${messageId}/threadMessages`;
+            const threadMessages = await firstValueFrom(
+                this.firestore.getCollection<MessageData>(threadMessagesPath)
+            );
+
+            // Lösche alle Thread-Messages
+            for (const threadMsg of threadMessages) {
+                if (threadMsg.id) {
+                    await this.firestore.deleteDocument(threadMessagesPath, threadMsg.id);
+                }
+            }
+
+            console.log(`✅ ${threadMessages.length} Thread-Messages gelöscht`);
+        } catch (error) {
+            console.log('ℹ️ Keine Thread-Messages zum Löschen (oder Fehler)');
+        }
+        // ========== CASCADE-DELETE END ==========
+
+        // Dann lösche die Parent-Message
         return this.firestore.deleteDocument(`conversations/${conversationId}/messages`, messageId);
     }
 

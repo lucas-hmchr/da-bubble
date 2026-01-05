@@ -493,7 +493,7 @@ export class Message implements OnChanges {
     if (!msg?.id) return;
     if (!this.isOwnMessage(msg)) return;
 
-    // ========== NEU: Thread-Message Delete ==========
+    // ========== THREAD-MESSAGE DELETE (mit threadCount Update) ==========
     if (this.isThreadContext && this.threadParentMessageId) {
       if (this.contextType === 'channel' && this.channel?.id) {
         await this.messageService.deleteThreadMessage(
@@ -516,12 +516,24 @@ export class Message implements OnChanges {
       }
     }
 
-    // ========== BESTEHEND: Normal Message Delete ==========
+    // ========== PARENT-MESSAGE DELETE (mit Cascade) ==========
+
+    // Confirm-Dialog wenn Thread-Messages vorhanden
+    if (msg.threadCount > 0) {
+      const confirmed = window.confirm(
+        `Diese Nachricht hat ${msg.threadCount} Antwort(en).\n\n` +
+        `Soll die Nachricht samt allen Antworten gelöscht werden?`
+      );
+      if (!confirmed) return;
+    }
+
+    // Channel-Message löschen
     if (this.contextType === 'channel' && this.channel?.id) {
       await this.messageService.deleteChannelMessage(this.channel.id, msg.id);
       return;
     }
 
+    // Conversation-Message löschen
     if (this.contextType === 'conversation' && this.conversationId) {
       await this.messageService.deleteConversationMessage(this.conversationId, msg.id);
       return;

@@ -1,18 +1,3 @@
-<!-- <app-topbar></app-topbar>
-
-<section>
-  <app-workspace-sidebar
-    [currentUserUid]="currentUserUid"
-  ></app-workspace-sidebar>
-
-  <app-view
-    [currentUserUid]="currentUserUid"
-  ></app-view>
-
-  <app-thread-menu></app-thread-menu>
-</section> -->
-
-
 <app-topbar [isNewMessageMode]="isNewMessageMode()" [showMobileBack]="isMobile() && activeMobileView() !== 'sidebar'"
   (back)="backOneLevel()">
 </app-topbar>
@@ -31,8 +16,12 @@
 
 
   @if (!isMobile() || activeMobileView() === 'thread') {
-  <!-- <app-thread-menu></app-thread-menu> -->
-  <app-thread-menu [currentUserUid]="currentUserUid"></app-thread-menu>
+  <!-- ========== DYNAMIC CLASS BINDING ========== -->
+  <app-thread-menu 
+    [currentUserUid]="currentUserUid"
+    [class.thread-open]="threadService.isOpen()">
+  </app-thread-menu>
+  <!-- ========== DYNAMIC CLASS BINDING END ========== -->
   }
 
 </section>

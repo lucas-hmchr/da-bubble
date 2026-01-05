@@ -18,6 +18,7 @@ import { UserService } from '../../../services/user.service';
 import { NewMessageService } from '../../../services/new-message.service';
 import { ThreadService } from '../../../services/thread.service';
 import { FormsModule } from '@angular/forms';
+import { emojiReactions } from '../../../../shared/data/reactions';
 // import { getAvatarSrc } from '../../../../shared/data/avatars';
 
 @Component({
@@ -58,11 +59,17 @@ export class MessageInput implements OnInit {
   @Output() threadMessageSent = new EventEmitter<{ text: string }>();
 
   isEditing = false;
+
+  showEmojiPicker = false;
+  emojiReactions = emojiReactions;
+
+
   private _editingMessage?: { id: string; text: string };
   private newMessage = inject(NewMessageService);
   private threadService = inject(ThreadService);
-  
-  @ViewChild('messageInput') messageInput!: ElementRef<HTMLTextAreaElement>;
+
+  // @ViewChild('messageInput') messageInput!: ElementRef<HTMLTextAreaElement>;
+  @ViewChild('messageInput') messageInput?: ElementRef<HTMLTextAreaElement>;
   @ViewChild('container') container!: ElementRef<HTMLDivElement>;
 
   public userService = inject(UserService);
@@ -220,9 +227,9 @@ export class MessageInput implements OnInit {
   }
 
 
-
   private getTrimmedText(): string {
-    const textarea = this.messageInput.nativeElement;
+    const textarea = this.messageInput?.nativeElement;
+    if (!textarea) return '';  // ← NULL-CHECK!
     return textarea.value.trim();
   }
 
@@ -285,7 +292,10 @@ export class MessageInput implements OnInit {
 
 
   private afterSend() {
-    this.messageInput.nativeElement.value = '';
+    const textarea = this.messageInput?.nativeElement;
+    if (textarea) {  // ← NULL-CHECK!
+      textarea.value = '';
+    }
     this.resetMentions();
     this.isEditing = false;
     this._editingMessage = undefined;
@@ -294,7 +304,9 @@ export class MessageInput implements OnInit {
 
 
   private updateMentionPosition() {
-    const textarea = this.messageInput.nativeElement;
+    const textarea = this.messageInput?.nativeElement;
+    if (!textarea) return;  // ← NULL-CHECK!
+
     const containerEl = this.container.nativeElement;
     const caretIndex = textarea.selectionStart ?? textarea.value.length;
 
@@ -368,7 +380,9 @@ export class MessageInput implements OnInit {
   }
 
   private replaceTriggerWithText(trigger: string, text: string) {
-    const textarea = this.messageInput.nativeElement;
+    const textarea = this.messageInput?.nativeElement;
+    if (!textarea) return;  // ← NULL-CHECK!
+
     const value = textarea.value;
     const lastIndex = value.lastIndexOf(trigger);
 
@@ -380,12 +394,6 @@ export class MessageInput implements OnInit {
   }
 
 
-  // get isChannelMember(): boolean {
-  //   if (this.contextType !== 'channel') return true;
-  //   if (!this.channel || !this.currentUserUid) return false;
-  //   const members = (this.channel.members ?? []) as string[];
-  //   return members.includes(this.currentUserUid);
-  // }
   get isChannelMember(): boolean {
     if (this.contextType !== 'channel') return true;
 
@@ -408,5 +416,70 @@ export class MessageInput implements OnInit {
     // NEW MESSAGE VIEW / freier Modus: niemals read-only
     if (this.forceEditable) return false;
     return this.contextType === 'channel' && !this.isChannelMember;
+  }
+
+  onAtButtonClick() {
+    if (this.isReadOnly) return;
+
+    const textarea = this.messageInput?.nativeElement;  // ← FIX 1
+    if (!textarea) return;
+
+    // Focus auf Textarea setzen
+    textarea.focus();
+
+    // Aktuelle Cursor-Position
+    const cursorPos = textarea.selectionStart ?? 0;
+    const currentValue = textarea.value;
+
+    // @ an Cursor-Position einfügen
+    const newValue =
+      currentValue.slice(0, cursorPos) +
+      '@' +
+      currentValue.slice(cursorPos);
+
+    // Neuen Wert setzen
+    textarea.value = newValue;
+
+    // Cursor NACH dem @ positionieren
+    const newCursorPos = cursorPos + 1;
+    textarea.setSelectionRange(newCursorPos, newCursorPos);
+
+    // Mention-Dropdown triggern
+    this.startMention('@');  // ← FIX 2
+
+    console.log('@ eingefügt an Position', cursorPos);
+  }
+
+  toggleEmojiPicker() {
+    this.showEmojiPicker = !this.showEmojiPicker;
+  }
+
+  onEmojiButtonClick() {
+    if (this.isReadOnly) return;
+    this.toggleEmojiPicker();
+  }
+
+  onEmojiSelect(emoji: string) {
+    const textarea = this.messageInput?.nativeElement;
+    if (!textarea) return;
+
+    textarea.focus();
+
+    const cursorPos = textarea.selectionStart ?? 0;
+    const currentValue = textarea.value;
+
+    const newValue =
+      currentValue.slice(0, cursorPos) +
+      emoji +
+      currentValue.slice(cursorPos);
+
+    textarea.value = newValue;
+
+    const newCursorPos = cursorPos + emoji.length;
+    textarea.setSelectionRange(newCursorPos, newCursorPos);
+
+    this.showEmojiPicker = false;
+
+    console.log('Emoji eingefügt:', emoji);
   }
 }
