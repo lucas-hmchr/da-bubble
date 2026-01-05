@@ -9,7 +9,8 @@
       [class.menu-open]="optionsMenuForMessageId === msg.id">
       <div class="date-separator" *ngIf="i === 0 || !isSameDay(msg.createdAt, msgs[i - 1]?.createdAt)">
         <span>
-          {{ toDate(msg.createdAt) | date: 'EEEE, d. MMMM' }}
+          <!-- {{ toDate(msg.createdAt) | date: 'EEEE, d. MMMM' }} -->
+            {{ getFormattedDateWithWeekday(msg.createdAt) }}
         </span>
       </div>
 
@@ -59,6 +60,10 @@
               {{ getSenderName(msg.senderId) }}
             </span>
             <span class="send-info">
+              <ng-container *ngIf="showFullDate">
+                <!-- {{ toDate(msg.createdAt) | date: 'd. MMMM' }} -->
+                  {{ getFormattedDate(msg.createdAt) }}
+              </ng-container>
               {{ toDate(msg.createdAt) | date: 'HH:mm' }} Uhr
             </span>
           </div>

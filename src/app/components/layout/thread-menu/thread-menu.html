@@ -1,6 +1,6 @@
 <section *ngIf="threadService.isOpen()">
 
-  <!-- HEADER - Exakt wie View -->
+  <!-- HEADER -->
   <header class="dm-header dm-header-small">
     <div style="width: 100%;">
       <div id="header-left" style="display: flex; align-items: center; gap: 8px;">
@@ -15,18 +15,19 @@
     </button>
   </header>
 
-  <!-- CHAT CONTAINER - Exakt wie View -->
+  <!-- CHAT CONTAINER -->
   <div id="chat-container-new">
 
-    <!-- MESSAGES SCROLL - Exakt wie View -->
+    <!-- MESSAGES SCROLL -->
     <div class="messages-scroll">
 
-      <!-- PARENT MESSAGE - Mit externalMessages ABER mit channel/conversationId für Actions -->
-      <div *ngIf="threadService.parentMessage() as parent">
+      <!-- PARENT MESSAGE - Mit showFullDate! -->
+      <div class="parent-message-section" *ngIf="threadService.parentMessage() as parent">
         <app-message
           [contextType]="threadService.contextType()"
           [currentUserUid]="currentUserUid"
           [externalMessages]="[parent]"
+          [showFullDate]="true"
           [channel]="threadService.contextType() === 'channel' ? getChannelById(threadService.contextId()) : undefined"
           [conversationId]="threadService.contextType() === 'conversation' ? threadService.contextId() : null">
         </app-message>
@@ -40,7 +41,7 @@
         </span>
       </div>
 
-      <!-- THREAD MESSAGES - Nutzt externalMessages -->
+      <!-- THREAD MESSAGES - Mit showFullDate! -->
       <div class="thread-messages-section">
         
         <div *ngIf="threadService.threadMessages().length === 0" class="thread-empty">
@@ -54,6 +55,7 @@
           [externalMessages]="threadService.threadMessages()"
           [isThreadContext]="true"
           [threadParentMessageId]="threadService.parentMessage()?.id"
+          [showFullDate]="true"
           [channel]="threadService.contextType() === 'channel' ? getChannelById(threadService.contextId()) : undefined"
           [conversationId]="threadService.contextType() === 'conversation' ? threadService.contextId() : null">
         </app-message>
@@ -62,7 +64,7 @@
 
     </div>
 
-    <!-- MESSAGE INPUT - Exakt wie View -->
+    <!-- MESSAGE INPUT -->
     <app-message-input
       [currentUserUid]="currentUserUid"
       [contextType]="'thread'"

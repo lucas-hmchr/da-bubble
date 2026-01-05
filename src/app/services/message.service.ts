@@ -117,24 +117,42 @@ export class MessageService {
         );
     }
 
-    deleteThreadMessage(
+    async deleteThreadMessage(
         contextType: 'channel' | 'conversation',
         contextId: string,
         parentMessageId: string,
         threadMessageId: string
-    ) {
+    ): Promise<void> {
         const basePath = contextType === 'channel'
             ? `channels/${contextId}/messages`
             : `conversations/${contextId}/messages`;
 
         const threadPath = `${basePath}/${parentMessageId}/threadMessages`;
 
-        return this.firestore.deleteDocument(threadPath, threadMessageId);
+        // 1. Lösche Thread-Message
+        await this.firestore.deleteDocument(threadPath, threadMessageId);
+
+        // 2. Hole Parent-Message
+        const parentDoc = await firstValueFrom(
+            this.firestore.getDocument<MessageData>(`${basePath}/${parentMessageId}`)
+        );
+
+        if (!parentDoc) {
+            console.warn('Parent-Message nicht gefunden');
+            return;
+        }
+
+        // 3. Dekrementiere threadCount
+        const currentCount = parentDoc.threadCount ?? 0;
+        const newCount = Math.max(0, currentCount - 1);  // Nie negativ!
+
+        await this.firestore.updateDocument(basePath, parentMessageId, {
+            threadCount: newCount,
+        });
+
+        console.log(`Thread-Message gelöscht. ThreadCount: ${currentCount} → ${newCount}`);
     }
 
-    /**
-     * Toggle Reaction on Thread-Message
-     */
     toggleReactionOnThreadMessage(
         contextType: 'channel' | 'conversation',
         contextId: string,

@@ -46,7 +46,7 @@ export class Message implements OnChanges {
   @Input() threadParentMessageId?: string | null;
   @Input() externalMessages?: MessageData[] | null;
   @Input() isThreadContext?: boolean;
-  // @Input() threadParentMessageId?: string;
+  @Input() showFullDate?: boolean = false;
   @Output() editRequested = new EventEmitter<MessageData>();
   @Output() threadRequested = new EventEmitter<MessageData>();
 
@@ -278,58 +278,58 @@ export class Message implements OnChanges {
     return trimmed.length > 0 && trimmed !== original;
   }
 
-async saveInlineEdit(msg: MessageData) {
-  if (!msg?.id) return;
-  if (!this.isOwnMessage(msg)) return;
+  async saveInlineEdit(msg: MessageData) {
+    if (!msg?.id) return;
+    if (!this.isOwnMessage(msg)) return;
 
-  const newText = (this.editText ?? '').trim();
-  if (!newText) return;
+    const newText = (this.editText ?? '').trim();
+    if (!newText) return;
 
-  try {
-    // ========== NEU: Thread-Message Edit ==========
-    if (this.isThreadContext && this.threadParentMessageId) {
-      if (this.contextType === 'channel') {
+    try {
+      // ========== NEU: Thread-Message Edit ==========
+      if (this.isThreadContext && this.threadParentMessageId) {
+        if (this.contextType === 'channel') {
+          const channelId = this.channel?.id;
+          if (!channelId) return;
+
+          // Thread-Message in Channel
+          await this.messageInputService.updateThreadMessage(
+            'channel',
+            channelId,
+            this.threadParentMessageId,
+            msg.id,
+            newText
+          );
+        } else if (this.contextType === 'conversation') {
+          const convId = this.conversationId;
+          if (!convId) return;
+
+          // Thread-Message in Conversation
+          await this.messageInputService.updateThreadMessage(
+            'conversation',
+            convId,
+            this.threadParentMessageId,
+            msg.id,
+            newText
+          );
+        }
+      }
+      // ========== BESTEHEND: Normal Message Edit ==========
+      else if (this.contextType === 'channel') {
         const channelId = this.channel?.id;
         if (!channelId) return;
-        
-        // Thread-Message in Channel
-        await this.messageInputService.updateThreadMessage(
-          'channel',
-          channelId,
-          this.threadParentMessageId,
-          msg.id,
-          newText
-        );
-      } else if (this.contextType === 'conversation') {
+        await this.messageInputService.updateChannelMessage(channelId, msg.id, newText);
+      } else {
         const convId = this.conversationId;
         if (!convId) return;
-        
-        // Thread-Message in Conversation
-        await this.messageInputService.updateThreadMessage(
-          'conversation',
-          convId,
-          this.threadParentMessageId,
-          msg.id,
-          newText
-        );
+        await this.messageInputService.updateConversationMessage(convId, msg.id, newText);
       }
-    }
-    // ========== BESTEHEND: Normal Message Edit ==========
-    else if (this.contextType === 'channel') {
-      const channelId = this.channel?.id;
-      if (!channelId) return;
-      await this.messageInputService.updateChannelMessage(channelId, msg.id, newText);
-    } else {
-      const convId = this.conversationId;
-      if (!convId) return;
-      await this.messageInputService.updateConversationMessage(convId, msg.id, newText);
-    }
 
-    this.cancelInlineEdit();
-  } catch (e) {
-    console.error('Fehler beim Speichern der bearbeiteten Nachricht:', e);
+      this.cancelInlineEdit();
+    } catch (e) {
+      console.error('Fehler beim Speichern der bearbeiteten Nachricht:', e);
+    }
   }
-}
 
   onInlineEditKeydown(ev: KeyboardEvent, msg: MessageData) {
     if (ev.key === 'Escape') {
@@ -344,53 +344,53 @@ async saveInlineEdit(msg: MessageData) {
     }
   }
 
-toggleReaction(msg: MessageData, reactionId: ReactionId) {
-  if (!this.currentUserUid || !msg.id) return;
+  toggleReaction(msg: MessageData, reactionId: ReactionId) {
+    if (!this.currentUserUid || !msg.id) return;
 
-  // ========== NEU: Thread-Message Reactions ==========
-  if (this.isThreadContext && this.threadParentMessageId) {
+    // ========== NEU: Thread-Message Reactions ==========
+    if (this.isThreadContext && this.threadParentMessageId) {
+      if (this.contextType === 'channel' && this.channel?.id) {
+        this.messageService.toggleReactionOnThreadMessage(
+          'channel',
+          this.channel.id,
+          this.threadParentMessageId,
+          msg.id,
+          reactionId,
+          this.currentUserUid
+        );
+        return;
+      }
+
+      if (this.contextType === 'conversation' && this.conversationId) {
+        this.messageService.toggleReactionOnThreadMessage(
+          'conversation',
+          this.conversationId,
+          this.threadParentMessageId,
+          msg.id,
+          reactionId,
+          this.currentUserUid
+        );
+        return;
+      }
+    }
+
+    // ========== BESTEHEND: Normal Message Reactions ==========
     if (this.contextType === 'channel' && this.channel?.id) {
-      this.messageService.toggleReactionOnThreadMessage(
-        'channel',
+      this.messageService.toggleReactionOnChannelMessage(
         this.channel.id,
-        this.threadParentMessageId,
         msg.id,
         reactionId,
         this.currentUserUid
       );
-      return;
-    }
-
-    if (this.contextType === 'conversation' && this.conversationId) {
-      this.messageService.toggleReactionOnThreadMessage(
-        'conversation',
+    } else if (this.contextType === 'conversation' && this.conversationId) {
+      this.messageService.toggleReactionOnConversationMessage(
         this.conversationId,
-        this.threadParentMessageId,
         msg.id,
         reactionId,
         this.currentUserUid
       );
-      return;
     }
   }
-
-  // ========== BESTEHEND: Normal Message Reactions ==========
-  if (this.contextType === 'channel' && this.channel?.id) {
-    this.messageService.toggleReactionOnChannelMessage(
-      this.channel.id,
-      msg.id,
-      reactionId,
-      this.currentUserUid
-    );
-  } else if (this.contextType === 'conversation' && this.conversationId) {
-    this.messageService.toggleReactionOnConversationMessage(
-      this.conversationId,
-      msg.id,
-      reactionId,
-      this.currentUserUid
-    );
-  }
-}
 
   getReactionIds(msg: MessageData): ReactionId[] {
     const reactions: any = msg.reactions || {};
@@ -489,44 +489,44 @@ toggleReaction(msg: MessageData, reactionId: ReactionId) {
     this.closeOverlays();
   }
 
-async onDeleteMessage(msg: any) {
-  if (!msg?.id) return;
-  if (!this.isOwnMessage(msg)) return;
+  async onDeleteMessage(msg: any) {
+    if (!msg?.id) return;
+    if (!this.isOwnMessage(msg)) return;
 
-  // ========== NEU: Thread-Message Delete ==========
-  if (this.isThreadContext && this.threadParentMessageId) {
+    // ========== NEU: Thread-Message Delete ==========
+    if (this.isThreadContext && this.threadParentMessageId) {
+      if (this.contextType === 'channel' && this.channel?.id) {
+        await this.messageService.deleteThreadMessage(
+          'channel',
+          this.channel.id,
+          this.threadParentMessageId,
+          msg.id
+        );
+        return;
+      }
+
+      if (this.contextType === 'conversation' && this.conversationId) {
+        await this.messageService.deleteThreadMessage(
+          'conversation',
+          this.conversationId,
+          this.threadParentMessageId,
+          msg.id
+        );
+        return;
+      }
+    }
+
+    // ========== BESTEHEND: Normal Message Delete ==========
     if (this.contextType === 'channel' && this.channel?.id) {
-      await this.messageService.deleteThreadMessage(
-        'channel',
-        this.channel.id,
-        this.threadParentMessageId,
-        msg.id
-      );
+      await this.messageService.deleteChannelMessage(this.channel.id, msg.id);
       return;
     }
 
     if (this.contextType === 'conversation' && this.conversationId) {
-      await this.messageService.deleteThreadMessage(
-        'conversation',
-        this.conversationId,
-        this.threadParentMessageId,
-        msg.id
-      );
+      await this.messageService.deleteConversationMessage(this.conversationId, msg.id);
       return;
     }
   }
-
-  // ========== BESTEHEND: Normal Message Delete ==========
-  if (this.contextType === 'channel' && this.channel?.id) {
-    await this.messageService.deleteChannelMessage(this.channel.id, msg.id);
-    return;
-  }
-
-  if (this.contextType === 'conversation' && this.conversationId) {
-    await this.messageService.deleteConversationMessage(this.conversationId, msg.id);
-    return;
-  }
-}
 
   onHoverReaction(messageId: string, reactionId: ReactionId) {
     this.hoveredMessageId = messageId;
@@ -556,5 +556,56 @@ async onDeleteMessage(msg: any) {
 
     const others = uids.length - 1;
     return `${this.getUserDisplayName(uids[0])} und ${others} weitere`;
+  }
+
+  getFormattedDate(date: Date | any): string {
+    const msgDate = this.toDate(date);
+
+    if (!msgDate) {
+      return '';
+    }
+
+    const currentYear = new Date().getFullYear();
+    const messageYear = msgDate.getFullYear();
+
+    if (messageYear === currentYear) {
+      return this.formatDate(msgDate, 'd. MMMM');
+    }
+
+    return this.formatDate(msgDate, 'd. MMMM yyyy');
+  }
+
+  getFormattedDateWithWeekday(date: Date | any): string {
+    const msgDate = this.toDate(date);
+    if (!msgDate) return '';
+
+    const currentYear = new Date().getFullYear();
+    const messageYear = msgDate.getFullYear();
+
+    const weekday = msgDate.toLocaleString('de-DE', { weekday: 'long' });
+
+    // Wenn aktuelles Jahr: Wochentag + Tag + Monat
+    if (messageYear === currentYear) {
+      const dayMonth = this.formatDate(msgDate, 'd. MMMM');
+      return `${weekday}, ${dayMonth}`;
+    }
+
+    // Wenn anderes Jahr: Wochentag + Tag + Monat + Jahr
+    const dayMonthYear = this.formatDate(msgDate, 'd. MMMM yyyy');
+    return `${weekday}, ${dayMonthYear}`;
+  }
+
+  /**
+   * Helper für Date-Formatting
+   */
+  private formatDate(date: Date, format: string): string {
+    const day = date.getDate();
+    const month = date.toLocaleString('de-DE', { month: 'long' });
+    const year = date.getFullYear();
+
+    return format
+      .replace('d', day.toString())
+      .replace('MMMM', month)
+      .replace('yyyy', year.toString());
   }
 }

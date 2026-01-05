@@ -157,17 +157,23 @@ app-message-input {
   }
 }
 
+
 :host {
   ::ng-deep {
     app-message {
-      // Date-Separator ausblenden (nur in Thread)
+      // Date-Separator ausblenden
       .date-separator {
         display: none !important;
       }
       
-      // Thread-Link ausblenden (nur in Thread)
+      // Thread-Link ausblenden
       .thread-replies,
       .thread-link {
+        display: none !important;
+      }
+
+      // Answer-Button ausblenden (NEU!)
+      .answer-btn {
         display: none !important;
       }
     }
