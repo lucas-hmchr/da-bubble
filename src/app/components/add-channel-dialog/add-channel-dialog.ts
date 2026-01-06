@@ -36,10 +36,15 @@ export class AddChannelDialog {
       lastMessageAt: null
     };
 
-    this.firestore.addDocument('channels', newChannel).then(() => {
-      console.log('Channel wurde gespeichert:', newChannel);
-      this.dialogRef.close(); // Fenster schließen
+    this.firestore.addDocument('channels', newChannel).then((docRef) => {
+      const channelId = docRef.id; // 🔑 sehr wichtig
+
+      this.dialogRef.close({
+        created: true,
+        channelId: channelId
+      });
     });
+
   }
 
 }

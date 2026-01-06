@@ -30,6 +30,7 @@ import { ConversationService } from '../../../services/conversation.service';
 import { SearchService } from '../../../services/search.topbar.service';
 import { NewMessageService } from '../../../services/new-message.service';
 import { getAvatarById } from '../../../../shared/data/avatars';
+import { AddPeopleDialog } from '../../add-people-dialog/add-people-dialog';
 
 @Component({
   selector: 'app-workspace-sidebar',
@@ -150,14 +151,28 @@ export class WorkspaceSidebar implements OnInit, OnDestroy {
   openAddChannelDialog() {
     const isMobile = window.innerWidth < 1024;
 
-    this.dialog.open(AddChannelDialog, {
+    const dialogRef = this.dialog.open(AddChannelDialog, {
       width: isMobile ? '100vw' : '872px',
       height: isMobile ? '100vh' : 'auto',
       maxWidth: isMobile ? '100vw' : 'none',
       panelClass: isMobile ? 'fullscreen-dialog' : '',
       data: { uid: this.currentUserUid },
     });
+
+    dialogRef.afterClosed().subscribe(result => {
+      if (result?.created && result.channelId) {
+        this.openAddPeopleDialog(result.channelId);
+      }
+    });
+
   }
+
+  openAddPeopleDialog(channelId: string) {
+  this.dialog.open(AddPeopleDialog, {
+    width: '600px',
+    data: { channelId }
+  });
+}
 
   selectChannel(ch: Channel) {
     if (!ch.id) return;
