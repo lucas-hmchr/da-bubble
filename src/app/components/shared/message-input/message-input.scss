@@ -186,31 +186,43 @@ textarea:disabled {
     left: 20px;
     z-index: 100;
 
-    background: white;
-    border-radius: 20px 20px 20px 0;
-    box-shadow: 0 6px 14px 0 rgba(0, 0, 0, 0.15);
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 6px;
+
+      max-height: 150px;        // feste maximale Höhe
+  overflow-y: auto;         // vertikales Scrollen
+  overflow-x: hidden; 
+  
+    background: #fff;
+    border-radius: 16px;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.12);
     padding: 10px;
 
-    display: flex;
-    gap: 8px;
-    flex-wrap: wrap;
-    max-width: 250px;
+    // display: flex;
+    // flex-wrap: wrap;
+    // gap: 8px;
+    // max-width: 200px;
+    // overflow: visible;
 
     .emoji-btn {
         background: none;
         border: none;
         cursor: pointer;
-        font-size: 28px;
-        padding: 8px;
+        font-size: 24px;
+        width: 40px;
+        height: 40px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
         border-radius: 8px;
         transition: background-color 0.2s ease;
+        padding: 0;
+        line-height: 1;
+        flex-shrink: 0;
 
         &:hover {
-            background-color: #f0f0f0;
-        }
-
-        &:active {
-            transform: scale(0.95);
+            background-color: var(--bg-clr);
         }
     }
 }

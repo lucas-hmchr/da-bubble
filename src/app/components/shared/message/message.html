@@ -9,17 +9,18 @@
       [class.menu-open]="optionsMenuForMessageId === msg.id">
       <div class="date-separator" *ngIf="i === 0 || !isSameDay(msg.createdAt, msgs[i - 1]?.createdAt)">
         <span>
-          <!-- {{ toDate(msg.createdAt) | date: 'EEEE, d. MMMM' }} -->
-            {{ getFormattedDateWithWeekday(msg.createdAt) }}
+          {{ getFormattedDateWithWeekday(msg.createdAt) }}
         </span>
       </div>
 
       <div class="message-content" [ngClass]="{ fdrr: isOwnMessage(msg) }" (mouseleave)="onMessageMouseLeave(msg)">
         <div class="message-actions">
-          <img src="/assets/icons/global/check1.svg" alt="" class="action-btn check-btn"
-            (click)="toggleReaction(msg, 'check')" />
-          <img src="/assets/icons/global/thumbsup1.svg" alt="" class="action-btn thumbsup-btn"
-            (click)="toggleReaction(msg, 'thumbsup')" />
+          <button class="emoji-quick-btn" (click)="toggleReaction(msg, 'check')">
+            ✅
+          </button>
+          <button class="emoji-quick-btn" (click)="toggleReaction(msg, 'thumbsup')">
+            👍
+          </button>
 
           <img src="/assets/icons/global/reaction1.svg" alt="" class="action-btn reaction-btn"
             (click)="onToggleReactionPicker(msg)" />
@@ -27,7 +28,6 @@
           <img *ngIf="contextType === 'channel'" src="/assets/icons/global/answer1.svg" alt="Thread öffnen"
             class="action-btn answer-btn" (click)="onOpenThread(msg)" />
 
-          <!-- 3-Punkte nur bei eigener Message -->
           <button *ngIf="isOwnMessage(msg)" class="action-btn option-btn"
             (click)="msg.id && toggleOptionsMenu($event, msg.id)" type="button">
             <img src="/assets/icons/global/option1.svg" alt="">
@@ -47,10 +47,11 @@
         </div>
 
         <div class="reaction-picker" *ngIf="reactionPickerForMessageId === msg.id">
-          <button class="reaction-emoji-btn" *ngFor="let r of emojiReactions" (click)="onEmojiReaction(msg, r.id)">
+          <button class="reaction-emoji-btn" *ngFor="let r of emojiReactions" (click)="onEmojiReaction(msg, r.id)" >
             {{ r.icon }}
           </button>
         </div>
+
 
         <img class="profile-pic" [src]="getSenderAvatarUrl(msg.senderId)" [alt]="getSenderName(msg.senderId)" />
 
@@ -61,8 +62,7 @@
             </span>
             <span class="send-info">
               <ng-container *ngIf="showFullDate">
-                <!-- {{ toDate(msg.createdAt) | date: 'd. MMMM' }} -->
-                  {{ getFormattedDate(msg.createdAt) }}
+                {{ getFormattedDate(msg.createdAt) }}
               </ng-container>
               {{ toDate(msg.createdAt) | date: 'HH:mm' }} Uhr
             </span>
@@ -123,11 +123,6 @@
             </button>
           </div>
 
-          <!-- <div *ngIf="msg.threadCount > 0">
-            <a href="javascript:void(0)">
-              {{ msg.threadCount }} Antworten
-            </a>
-          </div> -->
           <div *ngIf="msg.threadCount > 0" class="thread-replies">
             <a href="javascript:void(0)" (click)="onOpenThread(msg)" class="thread-link">
               {{ msg.threadCount }} {{ msg.threadCount === 1 ? 'Antwort' : 'Antworten' }}

@@ -1,3 +1,4 @@
+
 import {
   Component,
   Input,
@@ -7,9 +8,9 @@ import {
   Output,
   EventEmitter,
   inject,
+  HostListener,
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
-
 import { Channel } from '../../../models/channel.interface';
 import { User } from '../../../models/user.model';
 import { AvatarId, getAvatarById } from '../../../../shared/data/avatars';
@@ -480,6 +481,21 @@ export class MessageInput implements OnInit {
 
     this.showEmojiPicker = false;
 
-    console.log('Emoji eingefügt:', emoji);
+    // console.log('Emoji eingefügt:', emoji);
+  }
+
+  @HostListener('document:click', ['$event'])
+  onDocumentClick(event: MouseEvent) {
+    if (!this.showEmojiPicker) return;
+
+    const target = event.target as HTMLElement;
+
+    // Check ob Click innerhalb von emoji-picker oder emoji-button
+    const isInsidePicker = target.closest('.emoji-picker');
+    const isEmojiButton = target.closest('.icon-smile');
+
+    if (!isInsidePicker && !isEmojiButton) {
+      this.showEmojiPicker = false;
+    }
   }
 }
