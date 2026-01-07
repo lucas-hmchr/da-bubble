@@ -87,4 +87,63 @@ export class ChannelService {
             throw error;
         }
     }
+
+    async updateChannelDescription(channelId: string, newDescription: string): Promise<void> {
+        try {
+            await this.firestore.updateDocument('channels', channelId, {
+                description: newDescription,
+                updatedAt: Timestamp.now()
+            });
+            console.log('✅ Channel description updated in Firebase');
+        } catch (error) {
+            console.error('❌ Error updating channel description:', error);
+            throw error;
+        }
+    }
+
+    async leaveChannel(channelId: string, userId: string): Promise<void> {
+        try {
+            console.log('🚪 Leaving channel...');
+            console.log('Channel ID:', channelId);
+            console.log('User ID:', userId);
+
+            // Hole aktuelles Channel-Dokument
+            const channel = await this.getChannelById(channelId);
+
+            if (!channel) {
+                throw new Error('Channel not found');
+            }
+
+            // Aktuelle Members-Liste
+            const currentMembers = (channel.members || []) as string[];
+
+            // User aus Members entfernen
+            const updatedMembers = currentMembers.filter(id => id !== userId);
+
+            console.log('Current members:', currentMembers);
+            console.log('Updated members:', updatedMembers);
+
+            // Firebase updaten
+            await this.firestore.updateDocument('channels', channelId, {
+                members: updatedMembers,
+                updatedAt: Timestamp.now()
+            });
+
+            console.log('✅ Successfully left channel');
+
+        } catch (error) {
+            console.error('❌ Error leaving channel:', error);
+            throw error;
+        }
+    }
+
+    private async getChannelById(channelId: string): Promise<Channel | null> {
+        return new Promise((resolve) => {
+            const sub = this.getChannel(channelId).subscribe(channel => {
+                sub.unsubscribe();
+                resolve(channel || null);
+            });
+        });
+    }
+
 }
