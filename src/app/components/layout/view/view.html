@@ -8,7 +8,7 @@
         @if (viewState.isChannel() && channel; as ch) {
         <img src="/assets/icons/global/tag.svg" alt="">
         <h2>{{ ch.name }}</h2>
-        <img src="/assets/icons/global/keyboard_arrow_down.svg" alt="" style="cursor: pointer;">
+        <img src="/assets/icons/global/keyboard_arrow_down.svg" alt="" (click)="openChannelInfo()" style="cursor: pointer;">
         }
 
         @else if (viewState.isDm()) {
@@ -21,7 +21,7 @@
         </div>
         <h2>{{ dmPartner.displayName || dmPartner.name || 'Unbekannter Nutzer' }}</h2>
         } @else {
-        <h2>Direktnachricht</h2>
+        <h2>Direktnachricht</h2> 
         }
         }
 
@@ -171,3 +171,5 @@
 
   </div>
 </section>
+
+<app-channel-info-popup></app-channel-info-popup>

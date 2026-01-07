@@ -4,6 +4,8 @@ import { MessageData } from "../models/message.interface";
 import { FirestoreService } from "./firestore";
 import { Observable, Subscription } from "rxjs";
 import { User } from "../models/user.model";
+import { Timestamp } from 'firebase/firestore';
+
 
 @Injectable({ providedIn: 'root' })
 
@@ -71,5 +73,18 @@ export class ChannelService {
     cleanUp() {
         this.activeChannelSub?.unsubscribe();
         this.activeMessagesSub?.unsubscribe();
+    }
+
+    async updateChannelName(channelId: string, newName: string): Promise<void> {
+        try {
+            await this.firestore.updateDocument('channels', channelId, {
+                name: newName,
+                updatedAt: Timestamp.now()
+            });
+            console.log('✅ Channel name updated in Firebase');
+        } catch (error) {
+            console.error('❌ Error updating channel name:', error);
+            throw error;
+        }
     }
 }
