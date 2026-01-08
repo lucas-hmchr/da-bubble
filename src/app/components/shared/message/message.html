@@ -53,11 +53,8 @@
         </div>
 
 
-        <img class="profile-pic" 
-     [src]="getSenderAvatarUrl(msg.senderId)" 
-     [alt]="getSenderName(msg.senderId)"
-     (click)="openUserProfile(msg.senderId, $event)"
-     style="cursor: pointer;" />
+        <img class="profile-pic" [src]="getSenderAvatarUrl(msg.senderId)" [alt]="getSenderName(msg.senderId)"
+          (click)="openUserProfile(msg.senderId, $event)" style="cursor: pointer;" />
 
         <div>
           <div [class.message-header-reverse]="isOwnMessage(msg)">
@@ -89,8 +86,8 @@
 
 
           <ng-template #normalBubble>
-            <p class="text bubble" [ngClass]="isOwnMessage(msg) ? 'me-person' : 'other-person'">
-              {{ msg.text }}
+            <p class="text bubble" [ngClass]="isOwnMessage(msg) ? 'me-person' : 'other-person'"
+              [innerHTML]="parseMessageText(msg.text)" (click)="onMessageTextClick($event)">
             </p>
           </ng-template>
 

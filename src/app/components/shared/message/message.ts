@@ -637,4 +637,94 @@ export class Message implements OnChanges {
     this.profilePopupService.open(userId);
   }
 
+  /**
+ * Parsed einen Message-Text und wandelt @Mentions in klickbare Spans um
+ */
+  /**
+   * Parsed einen Message-Text und wandelt @Mentions in klickbare Spans um
+   */
+  parseMessageText(text: string): string {
+    if (!text) return '';
+
+    console.log('🔍 parseMessageText called with:', text);
+    console.log('👥 Available users:', this.users.length);
+
+    const mentionRegex = /@\[([^\]]+)\]|@([A-Za-zäöüÄÖÜß]+(?: [A-Za-zäöüÄÖÜß]+)*)/g;
+
+    const result = text.replace(mentionRegex, (match, bracketName, simpleName) => {
+      const displayName = bracketName || simpleName;
+      console.log('📝 Found mention:', match, 'Display name:', displayName);
+
+      const user = this.findUserByDisplayName(displayName);
+      console.log('👤 User found:', user?.displayName, 'UID:', user?.uid);
+
+      if (user && user.uid) {
+        const span = `<span class="mention" data-user-id="${user.uid}">${match}</span>`;
+        console.log('✅ Created span:', span);
+        return span;
+      }
+
+      console.log('❌ No user found, returning original:', match);
+      return match;
+    });
+
+    console.log('📤 Final result:', result);
+    return result;
+  }
+
+  /**
+   * Findet einen User anhand des Display-Namens
+   */
+  private findUserByDisplayName(displayName: string): User | undefined {
+    const trimmedName = displayName.trim().toLowerCase();
+
+    return this.users.find(user => {
+      const userDisplayName = (user.displayName ?? user.name ?? '').toLowerCase();
+      return userDisplayName === trimmedName;
+    });
+  }
+
+  /**
+   * Findet User-ID aus dem geklickten Element
+   */
+  private getUserIdFromElement(element: HTMLElement): string | null {
+    // Prüfe ob Element selbst ein Mention ist
+    if (element.classList.contains('mention')) {
+      return element.getAttribute('data-user-id');
+    }
+
+    // Prüfe ob Parent ein Mention ist
+    const mentionParent = element.closest('.mention') as HTMLElement | null;
+    if (mentionParent) {
+      return mentionParent.getAttribute('data-user-id');
+    }
+
+    return null;
+  }
+
+  /**
+   * Handler für Klicks auf Message-Text
+   */
+  /**
+   * Handler für Klicks auf Message-Text
+   */
+  onMessageTextClick(event: MouseEvent) {
+    console.log('🖱️ Click event:', event);
+
+    const target = event.target as HTMLElement;
+    console.log('🎯 Click target:', target);
+    console.log('🏷️ Target classes:', target.className);
+
+    const userId = this.getUserIdFromElement(target);
+    console.log('🆔 User ID from element:', userId);
+
+    if (userId) {
+      event.preventDefault();
+      event.stopPropagation();
+      console.log('✅ Opening profile for user:', userId);
+      this.openUserProfile(userId, event);
+    } else {
+      console.log('❌ No user ID found');
+    }
+  }
 }
