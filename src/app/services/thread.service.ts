@@ -139,16 +139,22 @@ export class ThreadService {
     contextId: string,
     parentMessageId: string
   ): Observable<MessageData[]> {
-    const basePath = contextType === 'channel'
-      ? `channels/${contextId}/messages/${parentMessageId}`
-      : `conversations/${contextId}/messages/${parentMessageId}`;
 
-    const [collection, docId, , msgId] = basePath.split('/');
+    const parentPath = contextType === 'channel' ? 'channels' : 'conversations';
+    const subcollectionPath = `messages/${parentMessageId}/threadMessages`;
+
+    // ========== DEBUG ==========
+    console.log('🔍 Thread: Loading messages from:');
+    console.log('Parent Path:', parentPath);
+    console.log('Parent ID:', contextId);
+    console.log('Subcollection:', subcollectionPath);
+    console.log('Full Path:', `${parentPath}/${contextId}/${subcollectionPath}`);
+    // ===========================
 
     return this.firestore.getSubcollection<MessageData>(
-      collection,
-      `${docId}/messages/${msgId}`,
-      'threadMessages',
+      parentPath,
+      contextId,
+      subcollectionPath,
       'createdAt'
     );
   }
