@@ -36,7 +36,7 @@ import { ProfilePopup } from '../profile-popup/profile-popup';
 @Component({
   selector: 'app-message',
   standalone: true,
-  imports: [CommonModule, FormsModule,ProfilePopup],
+  imports: [CommonModule, FormsModule, ProfilePopup],
   templateUrl: './message.html',
   styleUrl: './message.scss',
 })
@@ -97,6 +97,7 @@ export class Message implements OnChanges {
     });
   }
 
+
   ngOnChanges(changes: SimpleChanges): void {
 
     if (changes['externalMessages']) {
@@ -105,11 +106,15 @@ export class Message implements OnChanges {
         return;
       }
     }
+
     if (changes['channel'] || changes['conversationId'] || changes['contextType']) {
-      this.loadMessages();
+
+      // ⭐ NEU: Nur laden wenn KEINE externalMessages!
+      if (!this.externalMessages || this.externalMessages.length === 0) {
+        this.loadMessages();
+      }
 
       this.tryDiscardInlineEdit('context-change');
-
       this.closeOptionsMenu();
       this.reactionPickerForMessageId = null;
     }
