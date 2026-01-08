@@ -2,7 +2,7 @@
 <div class="overlay" (click)="close()">
     <div class="popup" (click)="$event.stopPropagation()">
         <div class="popup-content">
-            <img src="/assets/icons/global/close.svg" class="close-icon">
+            <img src="/assets/icons/global/close.svg" class="close-icon" (click)="close()">
             <span class="fw-700 fs-24">Profil</span>
             <img [src]="popup.getAvatarSrc()" class="avatar">
             <div>
@@ -21,7 +21,8 @@
                     <img src="/assets/icons/login/mail_active.svg" >
                     <span class="fw-700 fs-20">E-Mail-Adresse</span>
                 </div>
-                <span class="fs-18 email">{{ popup.user()?.email }}</span>
+                <a class="fs-18 email" [href]="'mailto:' + (popup.user()?.email ?? '')">{{ popup.user()?.email }}</a>
+                <!-- <span class="fs-18 email">{{ popup.user()?.email }}</span> -->
             </div>
             <div class="contact-btn" (click)="popup.navigateToChat()">
                 <img src="/assets/icons/global/message.svg" alt="">

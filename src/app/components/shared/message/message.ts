@@ -7,6 +7,7 @@ import {
   ViewChild,
   Output,
   EventEmitter,
+  inject,
   HostListener,
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
@@ -29,11 +30,13 @@ import {
   getReactionDef,
   emojiReactions as EMOJI_REACTIONS,
 } from '../../../../shared/data/reactions';
+import { ProfilePopupService } from '../../../services/profile-popup.service';
+import { ProfilePopup } from '../profile-popup/profile-popup';
 
 @Component({
   selector: 'app-message',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule,ProfilePopup],
   templateUrl: './message.html',
   styleUrl: './message.scss',
 })
@@ -58,6 +61,7 @@ export class Message implements OnChanges {
 
   @ViewChild('bottom') bottom!: ElementRef<HTMLDivElement>;
   private userMap = new Map<string, User>();
+  private profilePopupService = inject(ProfilePopupService);
 
   reactionPickerForMessageId: string | null = null;
   emojiReactions: ReactionDef[] = EMOJI_REACTIONS as ReactionDef[];
@@ -620,4 +624,12 @@ export class Message implements OnChanges {
       .replace('MMMM', month)
       .replace('yyyy', year.toString());
   }
+
+  openUserProfile(userId: string, event?: Event) {
+    if (event) {
+      event.stopPropagation();  // Verhindert andere Click-Events
+    }
+    this.profilePopupService.open(userId);
+  }
+
 }

@@ -47,17 +47,21 @@
         </div>
 
         <div class="reaction-picker" *ngIf="reactionPickerForMessageId === msg.id">
-          <button class="reaction-emoji-btn" *ngFor="let r of emojiReactions" (click)="onEmojiReaction(msg, r.id)" >
+          <button class="reaction-emoji-btn" *ngFor="let r of emojiReactions" (click)="onEmojiReaction(msg, r.id)">
             {{ r.icon }}
           </button>
         </div>
 
 
-        <img class="profile-pic" [src]="getSenderAvatarUrl(msg.senderId)" [alt]="getSenderName(msg.senderId)" />
+        <img class="profile-pic" 
+     [src]="getSenderAvatarUrl(msg.senderId)" 
+     [alt]="getSenderName(msg.senderId)"
+     (click)="openUserProfile(msg.senderId, $event)"
+     style="cursor: pointer;" />
 
         <div>
           <div [class.message-header-reverse]="isOwnMessage(msg)">
-            <span class="send-name">
+            <span class="send-name clickable" (click)="openUserProfile(msg.senderId, $event)">
               {{ getSenderName(msg.senderId) }}
             </span>
             <span class="send-info">
@@ -138,3 +142,4 @@
     <div #bottom></div>
   </ng-container>
 </div>
+<!-- <app-profile-popup></app-profile-popup> -->
