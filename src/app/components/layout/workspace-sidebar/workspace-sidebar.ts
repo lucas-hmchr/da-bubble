@@ -40,8 +40,9 @@ import { AddPeopleDialog } from '../../add-people-dialog/add-people-dialog';
     MatSidenavModule,
     MatButtonModule,
     MatExpansionModule,
-    MatIconModule
-  ],
+    MatIconModule,
+    AddPeopleDialog
+],
   templateUrl: './workspace-sidebar.html',
   styleUrl: './workspace-sidebar.scss',
 })
@@ -64,8 +65,10 @@ export class WorkspaceSidebar implements OnInit, OnDestroy {
   filteredChannels = signal<Channel[]>([]);
   filteredUsers = signal<User[]>([]);
 
-  private destroy$ = new Subject<void>();
+  showAddPeopleDialog = false;
+  createdChannelId: string | null = null;
 
+  private destroy$ = new Subject<void>();
   constructor(
     private dialog: MatDialog,
     private firestore: FirestoreService,
@@ -162,17 +165,16 @@ export class WorkspaceSidebar implements OnInit, OnDestroy {
     dialogRef.afterClosed().subscribe(result => {
       if (result?.created && result.channelId) {
         this.openAddPeopleDialog(result.channelId);
+        this.showAddPeopleDialog = true;
       }
     });
 
   }
 
   openAddPeopleDialog(channelId: string) {
-  this.dialog.open(AddPeopleDialog, {
-    width: '600px',
-    data: { channelId }
-  });
-}
+    this.createdChannelId = channelId;
+    this.showAddPeopleDialog = true;
+  }
 
   selectChannel(ch: Channel) {
     if (!ch.id) return;

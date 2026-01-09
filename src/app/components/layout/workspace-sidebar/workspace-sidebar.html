@@ -179,3 +179,11 @@
     </div>
   </div>
 </div>
+
+@if (showAddPeopleDialog) {
+  <app-add-people-dialog
+  [channelId]="createdChannelId!"
+  (close)="showAddPeopleDialog = false">
+</app-add-people-dialog>
+}
+

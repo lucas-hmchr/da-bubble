@@ -1,1 +1,21 @@
-<p>add-people-dialog works!</p>
+<div class="overlay" (click)="close.emit()"></div>
+<div class="dialog">
+    <div class="text-closeIcon-container">
+        <h1>Leute hinzufügen</h1>
+        <img src="/assets/icons/global/close_right_top.svg" class="close-icon cp" (click)="close.emit()" alt="">
+    </div>
+    <div class="radio-group">
+        <label class="radio-option">
+            <input type="radio" name="addMode" required>
+            <span>Alle Mitglieder von Entwicklerteam hinzufügen</span>
+        </label>
+
+        <label class="radio-option">
+            <input type="radio" name="addMode"/>
+            <span>Bestimmte Leute hinzufügen</span>
+        </label>
+    </div>
+    <div class="button-add-container">
+        <button class="button-add-people cp">Erstellen</button>
+    </div>
+</div>
