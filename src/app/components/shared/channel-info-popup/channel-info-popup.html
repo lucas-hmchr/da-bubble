@@ -1,0 +1,84 @@
+@if (isOpen()) {
+<div class="overlay" (click)="close()">
+    <div class="popup" (click)="$event.stopPropagation()">
+        <div class="popup-header">
+            <h2># {{ channel()?.name }}</h2>
+            <img src="/assets/icons/global/close.svg" class="close-icon" (click)="close()" style="cursor: pointer;">
+        </div>
+
+        <div class="popup-content">
+            <!-- Channel-Name Section -->
+            <div class="info-section section-border">
+                <div class="section-header">
+                    <span class="section-label">Channel-Name</span>
+
+                    @if (!isEditingName()) {
+                    <span class="edit-link" (click)="editChannelName()">Bearbeiten</span>
+                    } @else {
+                    <span class="edit-link save-link" (click)="saveChannelName()">Speichern</span>
+                    }
+                </div>
+
+                @if (!isEditingName()) {
+                <!-- Normal View -->
+                <div class="channel-name">
+                    # {{ channel()?.name }}
+                </div>
+                } @else {
+                <!-- Edit Mode -->
+                <div class="edit-input-wrapper">
+                    <span class="input-prefix">#</span>
+                    <input type="text" class="edit-input" [(ngModel)]="editNameValue"
+                        [placeholder]="channel()?.name || ''" (keydown.enter)="saveChannelName()"
+                        (keydown.escape)="cancelEditName()" autofocus>
+                </div>
+                }
+            </div>
+            <div class="section-border">
+                <!-- Beschreibung Section -->
+                <!-- <div class="info-section"> -->
+                <!-- Beschreibung Section -->
+                <div class="info-section">
+                    <div class="section-header">
+                        <span class="section-label">Beschreibung</span>
+
+                        @if (!isEditingDescription()) {
+                        <span class="edit-link" (click)="editDescription()">Bearbeiten</span>
+                        } @else {
+                        <span class="edit-link save-link" (click)="saveDescription()">Speichern</span>
+                        }
+                    </div>
+
+                    @if (!isEditingDescription()) {
+                    <!-- Normal View -->
+                    <p class="description">
+                        {{ channel()?.description || 'Keine Beschreibung' }}
+                    </p>
+                    } @else {
+                    <!-- Edit Mode -->
+                    <div class="edit-textarea-wrapper">
+                        <textarea class="edit-textarea" [(ngModel)]="editDescriptionValue" placeholder="Dein Text hier"
+                            (keydown.escape)="cancelEditDescription()" rows="4" autofocus></textarea>
+                    </div>
+                    }
+                </div>
+                <nav class="separator"></nav>
+                <!-- Erstellt von Section -->
+                <div class="info-section" style="display: flex; flex-direction: column;">
+                    <span class="section-label">Erstellt von</span>
+                    <span class="creator-name" (click)="openCreatorProfile()">
+                        <!-- {{ channel()?.creatorName || 'Unbekannt' }} -->
+                          {{ creatorName() }}
+                    </span>
+                </div>
+            </div>
+            <!-- Channel verlassen Button -->
+            <div class="leave-container">
+                <button class="leave-btn" (click)="leaveChannel()">
+                    Channel verlassen
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+}

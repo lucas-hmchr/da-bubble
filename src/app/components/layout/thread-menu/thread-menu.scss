@@ -179,3 +179,9 @@ app-message-input {
     }
   }
 }
+
+@media (max-width: 1024px) {
+  .close-btn {
+    display: none !important;
+  }
+}

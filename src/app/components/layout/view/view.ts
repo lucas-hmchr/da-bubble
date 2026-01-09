@@ -18,6 +18,8 @@ import { ProfilePopup } from "../../shared/profile-popup/profile-popup";
 import { ProfilePopupService } from '../../../services/profile-popup.service';
 import { AddMemberPopup } from "./add-member-popup/add-member-popup";
 import { ThreadService } from '../../../services/thread.service';
+import { ChannelInfoService } from '../../../services/channel-info.service';
+import { ChannelInfoPopup } from '../../shared/channel-info-popup/channel-info-popup';
 
 type RecipientType = 'channel' | 'user' | null;
 
@@ -31,7 +33,7 @@ interface RecipientSuggestion {
 @Component({
   selector: 'app-view',
   standalone: true,
-  imports: [CommonModule, MessageInput, Message, ProfilePopup, AddMemberPopup],
+  imports: [CommonModule, MessageInput, Message, ProfilePopup, AddMemberPopup,ChannelInfoPopup],
   templateUrl: './view.html',
   styleUrls: ['./view.scss'],
 })
@@ -39,6 +41,7 @@ export class View {
   public newMessage = inject(NewMessageService);
   public viewState = inject(ViewStateService);
   private threadService = inject(ThreadService);
+  private channelInfoService = inject(ChannelInfoService);
   @Input() currentUserUid: string | null = null;
   contextType: ChatContextType = 'channel';
   editingMessage: { id: string; text: string } | null = null;
@@ -52,7 +55,7 @@ export class View {
   selectedRecipient: RecipientSuggestion | null = null;
   showChannelMemberList = signal<Boolean>(false);
   showAddChannelMemberPopup = signal<Boolean>(false);
-@Output() openThread = new EventEmitter<MessageData>();
+  @Output() openThread = new EventEmitter<MessageData>();
 
   constructor(
     private firestore: FirestoreService,
@@ -249,6 +252,12 @@ export class View {
     this.threadOpen = false;
     this.threadChannelId = null;
     this.threadParentMessage = null;
+  }
+
+  openChannelInfo() {
+    if (this.channel) {
+      this.channelInfoService.open(this.channel);
+    }
   }
 
 }
