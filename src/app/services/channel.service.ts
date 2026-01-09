@@ -146,4 +146,31 @@ export class ChannelService {
         });
     }
 
+    async addMembersToChannel(channelId: string, userIds: string[]): Promise<void> {
+  try {
+    const channel = await this.getChannelById(channelId);
+
+    if (!channel) {
+      throw new Error('Channel not found');
+    }
+
+    const currentMembers = (channel.members || []) as string[];
+
+    // 🔑 doppelte vermeiden
+    const updatedMembers = Array.from(
+      new Set([...currentMembers, ...userIds])
+    );
+
+    await this.firestore.updateDocument('channels', channelId, {
+      members: updatedMembers,
+      updatedAt: Timestamp.now()
+    });
+
+    console.log('✅ Members added to channel:', updatedMembers);
+  } catch (error) {
+    console.error('❌ Error adding members to channel:', error);
+    throw error;
+  }
+}
+
 }

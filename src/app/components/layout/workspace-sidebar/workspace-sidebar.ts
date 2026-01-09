@@ -30,7 +30,8 @@ import { ConversationService } from '../../../services/conversation.service';
 import { SearchService } from '../../../services/search.topbar.service';
 import { NewMessageService } from '../../../services/new-message.service';
 import { getAvatarById } from '../../../../shared/data/avatars';
-import { AddPeopleDialog } from '../../add-people-dialog/add-people-dialog';
+import { AddPeopleDialogComponent } from '../../add-people-dialog/add-people-dialog';
+
 
 @Component({
   selector: 'app-workspace-sidebar',
@@ -41,7 +42,7 @@ import { AddPeopleDialog } from '../../add-people-dialog/add-people-dialog';
     MatButtonModule,
     MatExpansionModule,
     MatIconModule,
-    AddPeopleDialog
+    AddPeopleDialogComponent
 ],
   templateUrl: './workspace-sidebar.html',
   styleUrl: './workspace-sidebar.scss',
@@ -247,5 +248,19 @@ export class WorkspaceSidebar implements OnInit, OnDestroy {
   isNormalView = computed(() =>
     this.newMessage$.mode() === null
   );
+
+onAddPeopleDone(event: { mode: 'all' | 'specific'; channelId: string; userIds: string[] }) {
+  this.showAddPeopleDialog = false;
+
+  if (event.mode === 'all') {
+    const allUserIds = this.firestore.userList().map(u => u.uid!).filter(Boolean);
+    this.channelService.addMembersToChannel(event.channelId, allUserIds);
+    return;
+  }
+
+  // specific
+  this.channelService.addMembersToChannel(event.channelId, event.userIds);
+}
+
 
 }
