@@ -31,8 +31,14 @@
                 alt="arrow-drop-down">
 
             <div class="dropdown-menu" [class.show]="isDropdownMenuOpen">
-                <div class="menu-name" (click)="openProfilModal()">Profil</div>
-                <div class="menu-name" (click)="onLogout($event)">Log out</div>
+                <div class="menu-name" [class.active]="activeProfilName === 'profil' && MobileProfil" (click)="openProfilModal()">
+                    <img src="/assets/icons/global/account_circle.svg" alt="profil" class="menu-icon">
+                    Profil
+                </div>
+                <div class="menu-name" (click)="onLogout($event)">
+                    <img src="/assets/icons/global/logout.svg" alt="profil" class="menu-icon">
+                    Log out
+                </div>
             </div>
 
             <div class="profil-modal" [class.show]="isProfilModalOpen" (click)="$event.stopPropagation()">
@@ -52,9 +58,8 @@
                         <div class="profil-info-details">
                             <h3>Frederik Beck</h3>
                             <button class="edit-button" (click)="openProfilEditModal()">Bearbeiten</button>
-                            <div class="testos" (click)="openProfilEditModal()">
-                                <img src="/assets/icons/global/edit-profil-mobil.svg"
-                                    alt="open-edit-profil">
+                            <div class="testos activee" (click)="openProfilEditModal()">
+                                <img src="/assets/icons/global/edit-profil-mobil.svg" alt="open-edit-profil">
                             </div>
                         </div>
 
