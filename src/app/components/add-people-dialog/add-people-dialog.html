@@ -6,16 +6,55 @@
     </div>
     <div class="radio-group">
         <label class="radio-option">
-            <input type="radio" name="addMode" required>
+            <input type="radio" name="addPeople" value="all" (change)="selectedOption = 'all'">
             <span>Alle Mitglieder von Entwicklerteam hinzufügen</span>
         </label>
 
         <label class="radio-option">
-            <input type="radio" name="addMode"/>
+            <input type="radio" name="addPeople" value="specific" (change)="selectedOption = 'specific'">
             <span>Bestimmte Leute hinzufügen</span>
         </label>
     </div>
+
+    <!-- INPUT + DROPDOWN -->
+    @if (selectedOption === 'specific') {
+
+    <div class="user-select">
+
+        <input type="text" placeholder="Personen auswählen" [(ngModel)]="searchTerm" />
+
+        @if (selectedUsers.length) {
+        <div class="chips">
+
+            @for (user of selectedUsers; track user.uid) {
+            <div class="chip">
+                <span class="chip-name">{{ user.name }}</span>
+                <span class="chip-remove" (click)="removeUser(user)">✕</span>
+            </div>
+            }
+
+        </div>
+        }
+
+        @if (searchTerm && filteredUsers().length) {
+        <div class="dropdown">
+
+            @for (user of filteredUsers(); track user.uid) {
+            <div class="dropdown-item" [class.selected]="isUserSelected(user)"
+                (click)="toggleUser(user); searchTerm = ''">
+                {{ user.name }}
+            </div>
+            }
+
+        </div>
+        }
+
+
+    </div>
+    }
+
+
     <div class="button-add-container">
-        <button class="button-add-people cp">Erstellen</button>
+        <button class="button-add-people cp" [disabled]="!canSubmit()" (click)="onDone()">Erstellen</button>
     </div>
 </div>

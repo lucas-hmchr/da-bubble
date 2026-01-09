@@ -16,7 +16,7 @@
 
   width: 710px;
   max-width: 90vw;
-  height: 279px;
+  min-height: 279px;
   background: white;
   border-radius: 30px;
   padding: 40px;
@@ -66,4 +66,55 @@
   font-size: 18px;
   font-weight: 700;
 
+  &:disabled {
+    background: #cfcfff;
+    cursor: not-allowed;
+    opacity: 0.6;
+  }
+}
+
+.dropdown {
+  position: absolute;
+}
+
+.user-select {
+  margin-bottom: 16px;
+
+  input {
+    height: 55px;
+    width: 100%;
+    border-radius: 30px;
+    border: solid 1px #ADB0D9;
+    font-size: 18px;
+    padding-left: 20px;
+
+    &:focus-visible {
+      outline: solid 1px #444DF2;
+    }
+  }
+}
+
+.chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 8px;
+}
+
+.chip {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+
+  background: #eef0ff;
+  color: #333;
+
+  padding: 6px 10px;
+  border-radius: 16px;
+  font-size: 14px;
+}
+
+.chip-remove {
+  cursor: pointer;
+  font-weight: bold;
 }
