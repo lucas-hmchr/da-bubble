@@ -28,7 +28,8 @@
 
             @for (user of selectedUsers; track user.uid) {
             <div class="chip">
-                <span class="chip-name">{{ user.name }}</span>
+                <img class="chip-avatar" [src]="getAvatarSrc(user)" alt="avatar" />
+                <span class="chip-name">{{ user.displayName }}</span>
                 <span class="chip-remove" (click)="removeUser(user)">✕</span>
             </div>
             }
@@ -40,9 +41,15 @@
         <div class="dropdown">
 
             @for (user of filteredUsers(); track user.uid) {
-            <div class="dropdown-item" [class.selected]="isUserSelected(user)"
+            <div class="dropdown-item cp" [class.selected]="isUserSelected(user)"
                 (click)="toggleUser(user); searchTerm = ''">
-                {{ user.name }}
+
+                <img class="avatar" [src]="getAvatarSrc(user)" alt="avatar" />
+                <div class="online-status-dot">
+                    <img [src]="userService.getOnlineStatusIcon(user)" />
+                </div>
+                <span class="fs-18">{{ user.displayName }}</span>
+
             </div>
             }
 
