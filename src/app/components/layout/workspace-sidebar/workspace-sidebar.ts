@@ -30,7 +30,8 @@ import { ConversationService } from '../../../services/conversation.service';
 import { SearchService } from '../../../services/search.topbar.service';
 import { NewMessageService } from '../../../services/new-message.service';
 import { getAvatarById } from '../../../../shared/data/avatars';
-import { AddPeopleDialog } from '../../add-people-dialog/add-people-dialog';
+import { AddPeopleDialogComponent } from '../../add-people-dialog/add-people-dialog';
+
 
 @Component({
   selector: 'app-workspace-sidebar',
@@ -40,8 +41,9 @@ import { AddPeopleDialog } from '../../add-people-dialog/add-people-dialog';
     MatSidenavModule,
     MatButtonModule,
     MatExpansionModule,
-    MatIconModule
-  ],
+    MatIconModule,
+    AddPeopleDialogComponent
+],
   templateUrl: './workspace-sidebar.html',
   styleUrl: './workspace-sidebar.scss',
 })
@@ -64,8 +66,10 @@ export class WorkspaceSidebar implements OnInit, OnDestroy {
   filteredChannels = signal<Channel[]>([]);
   filteredUsers = signal<User[]>([]);
 
-  private destroy$ = new Subject<void>();
+  showAddPeopleDialog = false;
+  createdChannelId: string | null = null;
 
+  private destroy$ = new Subject<void>();
   constructor(
     private dialog: MatDialog,
     private firestore: FirestoreService,
@@ -162,17 +166,16 @@ export class WorkspaceSidebar implements OnInit, OnDestroy {
     dialogRef.afterClosed().subscribe(result => {
       if (result?.created && result.channelId) {
         this.openAddPeopleDialog(result.channelId);
+        this.showAddPeopleDialog = true;
       }
     });
 
   }
 
   openAddPeopleDialog(channelId: string) {
-  this.dialog.open(AddPeopleDialog, {
-    width: '600px',
-    data: { channelId }
-  });
-}
+    this.createdChannelId = channelId;
+    this.showAddPeopleDialog = true;
+  }
 
   selectChannel(ch: Channel) {
     if (!ch.id) return;
@@ -245,5 +248,19 @@ export class WorkspaceSidebar implements OnInit, OnDestroy {
   isNormalView = computed(() =>
     this.newMessage$.mode() === null
   );
+
+onAddPeopleDone(event: { mode: 'all' | 'specific'; channelId: string; userIds: string[] }) {
+  this.showAddPeopleDialog = false;
+
+  if (event.mode === 'all') {
+    const allUserIds = this.firestore.userList().map(u => u.uid!).filter(Boolean);
+    this.channelService.addMembersToChannel(event.channelId, allUserIds);
+    return;
+  }
+
+  // specific
+  this.channelService.addMembersToChannel(event.channelId, event.userIds);
+}
+
 
 }
