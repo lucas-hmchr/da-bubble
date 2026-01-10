@@ -3,7 +3,8 @@ import { FormsModule } from '@angular/forms';
 import { FirestoreService } from '../../services/firestore';
 import { User } from '../../models/user.model';
 import { CommonModule } from '@angular/common';
-
+import { getAvatarById } from '../../../shared/data/avatars';
+import { UserService } from '../../services/user.service';
 @Component({
   selector: 'app-add-people-dialog',
   imports: [FormsModule, CommonModule],
@@ -26,7 +27,7 @@ export class AddPeopleDialogComponent {
   searchTerm = '';
   showDropdown = false;
 
-  constructor(private firestore: FirestoreService) { }
+  constructor(private firestore: FirestoreService, public userService: UserService) { }
 
   get users(): User[] {
     const list = this.firestore.userList();
@@ -95,4 +96,12 @@ export class AddPeopleDialogComponent {
       this.selectedUsers.filter(u => u.uid !== user.uid);
   }
 
+  getAvatarSrc(user: User): string {
+    
+  if (!user.avatarId) {
+    return '/images/avatars/avatar_default.svg';
+  }
+
+  return getAvatarById(user.avatarId).src;
+}
 }
