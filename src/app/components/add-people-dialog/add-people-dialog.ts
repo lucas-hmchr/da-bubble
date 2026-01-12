@@ -75,19 +75,20 @@ export class AddPeopleDialogComponent {
   }
 
   filteredUsers(): User[] {
-    console.log('searchTerm:', this.searchTerm);
-
     if (!this.searchTerm.trim()) return [];
 
     const term = this.searchTerm.toLowerCase();
 
-    return this.users.filter(u =>
-      u.uid && (
-        u.displayName?.toLowerCase().includes(term) ||
-        u.name?.toLowerCase().includes(term) ||
-        u.email?.toLowerCase().includes(term)
+    return this.users
+      .filter(u =>
+        u.uid &&
+        (
+          u.displayName?.toLowerCase().includes(term) ||
+          u.name?.toLowerCase().includes(term) ||
+          u.email?.toLowerCase().includes(term)
+        )
       )
-    );
+      .filter(u => !this.isAlreadySelected(u));;
   }
 
 
@@ -97,11 +98,16 @@ export class AddPeopleDialogComponent {
   }
 
   getAvatarSrc(user: User): string {
-    
-  if (!user.avatarId) {
-    return '/images/avatars/avatar_default.svg';
+
+    if (!user.avatarId) {
+      return '/images/avatars/avatar_default.svg';
+    }
+
+    return getAvatarById(user.avatarId).src;
   }
 
-  return getAvatarById(user.avatarId).src;
-}
+  isAlreadySelected(user: User): boolean {
+    return this.selectedUsers.some(u => u.uid === user.uid);
+  }
+
 }
