@@ -65,7 +65,6 @@ export class View {
     public userService: UserService,
     private profilePopupService: ProfilePopupService,
   ) {
-    console.log('Neu Nachricht: s', this.newMessage);
 
     effect(() => {
       const type = this.chatContext.contextType();

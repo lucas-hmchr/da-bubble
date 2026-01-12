@@ -9,9 +9,11 @@ import {
   EventEmitter,
   inject,
   HostListener,
+  AfterViewInit,
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Observable, tap, of } from 'rxjs';
+import { take } from 'rxjs/operators';
 import { FormsModule } from '@angular/forms';
 
 import { Channel } from '../../../models/channel.interface';
@@ -48,7 +50,7 @@ export class Message implements OnChanges {
   @Input() threadChannelId?: string | null;
   @Input() threadParentMessageId?: string | null;
   @Input() externalMessages?: MessageData[] | null;
-  @Input() isThreadContext?: boolean;
+  @Input() isThreadContext: boolean = false;
   @Input() showFullDate?: boolean = false;
   @Output() editRequested = new EventEmitter<MessageData>();
   @Output() threadRequested = new EventEmitter<MessageData>();
@@ -59,9 +61,13 @@ export class Message implements OnChanges {
   hoveredMessageId: string | null = null;
   lastMessageCount = 0;
 
+  private isFirstLoad = true;
+  private hasScrolledToBottom = false;
   @ViewChild('bottom') bottom!: ElementRef<HTMLDivElement>;
+
   private userMap = new Map<string, User>();
   private profilePopupService = inject(ProfilePopupService);
+  private previousMessageCount?: number;
 
   reactionPickerForMessageId: string | null = null;
   emojiReactions: ReactionDef[] = EMOJI_REACTIONS as ReactionDef[];
@@ -99,17 +105,81 @@ export class Message implements OnChanges {
 
 
   ngOnChanges(changes: SimpleChanges): void {
+    // console.log('🔄 ngOnChanges called:', changes);
 
     if (changes['externalMessages']) {
+      console.log('📦 externalMessages changed');
       if (this.externalMessages && this.externalMessages.length > 0) {
         this.messages$ = of(this.externalMessages);
+
+        // ⭐ HIER fehlt der Scroll!
+        setTimeout(() => {
+          this.scrollToBottom();
+        }, 200);
+
         return;
       }
     }
 
-    if (changes['channel'] || changes['conversationId'] || changes['contextType']) {
+    // Nur reagieren wenn Channel ID sich WIRKLICH ändert
+    if (changes['channel']) {
+      const oldId = changes['channel'].previousValue?.id;
+      const newId = changes['channel'].currentValue?.id;
 
-      // ⭐ NEU: Nur laden wenn KEINE externalMessages!
+      // console.log('📺 Channel change - Old ID:', oldId, 'New ID:', newId);
+
+      // Nur wenn ECHTE Channel-Änderung!
+      if (oldId !== newId) {
+        // console.log('✅ Channel ID changed! Loading messages');
+
+        if (!this.externalMessages || this.externalMessages.length === 0) {
+          // console.log('📞 Calling loadMessages()');
+          this.loadMessages();
+
+          // ⭐ Warte auf Messages, dann scrolle beim ersten Laden
+          setTimeout(() => {
+            if (this.messages$) {
+              this.messages$.pipe(take(1)).subscribe((messages) => {
+                // console.log('📨 First messages received:', messages?.length);
+                setTimeout(() => {
+                  // console.log('✅ Initial scroll to bottom!');
+                  this.scrollToBottom();
+                }, 200);
+              });
+            }
+          }, 100);
+        }
+
+        this.tryDiscardInlineEdit('context-change');
+        this.closeOptionsMenu();
+        this.reactionPickerForMessageId = null;
+      }
+      return;
+    }
+
+    if (changes['conversationId']) {
+      const oldId = changes['conversationId'].previousValue;
+      const newId = changes['conversationId'].currentValue;
+
+      if (oldId !== newId) {
+        this.isFirstLoad = true;
+        this.hasScrolledToBottom = false; // ← Reset!
+
+        if (!this.externalMessages || this.externalMessages.length === 0) {
+          this.loadMessages();
+        }
+
+        this.tryDiscardInlineEdit('context-change');
+        this.closeOptionsMenu();
+        this.reactionPickerForMessageId = null;
+      }
+      return;
+    }
+
+    if (changes['contextType']) {
+      this.isFirstLoad = true;
+      this.hasScrolledToBottom = false; // ← Reset!
+
       if (!this.externalMessages || this.externalMessages.length === 0) {
         this.loadMessages();
       }
@@ -122,7 +192,6 @@ export class Message implements OnChanges {
 
   onOpenThread(msg: MessageData) {
     if (!msg.id) {
-      console.warn('Message has no ID, cannot open thread');
       return;
     }
 
@@ -183,42 +252,123 @@ export class Message implements OnChanges {
   }
 
   private loadMessages() {
-    if (this.contextType === 'channel') {
-      if (!this.channel?.id) {
-        console.warn('MessageComponent: Channel hat keine ID → Channel-Nachrichten können nicht geladen werden.');
-        this.messages$ = undefined;
-        return;
-      }
+  if (this.contextType === 'channel') {
+    if (!this.channel?.id) {
+      this.messages$ = undefined;
+      return;
+    }
 
-      this.messages$ = this.channelService
-        .getChannelMessages(this.channel.id)
-        .pipe(tap((msgs) => this.handleScrollOnNewMessages(msgs.length)));
-    } else {
+    this.messages$ = this.channelService
+      .getChannelMessages(this.channel.id)
+      .pipe(
+        // ⭐ Speichere vorherige Message-Count
+        tap((messages) => {
+          const previousCount = this.previousMessageCount || 0;
+          this.previousMessageCount = messages.length;
+          
+          // ⭐ NUR scrollen wenn neue Messages hinzugekommen sind!
+          if (messages.length > previousCount) {
+            setTimeout(() => {
+              this.scrollToBottom();
+            }, 100);
+          }
+        })
+      );
+    
+  } else if (this.contextType === 'conversation') {
       if (!this.conversationId) {
-        console.warn('MessageComponent: Keine conversationId gesetzt → DM-Nachrichten können nicht geladen werden.');
         this.messages$ = undefined;
         return;
       }
 
       this.messages$ = this.conversationService
         .getConversationMessages(this.conversationId)
-        .pipe(tap((msgs) => this.handleScrollOnNewMessages(msgs.length)));
+        .pipe(
+          tap((messages) => {
+            // ⭐ Bei JEDER neuen Message nach unten scrollen!
+            setTimeout(() => {
+              this.scrollToBottom();
+            }, 100);
+          })
+        );
+
+    } else if (this.contextType === 'thread') {
+      // Thread verwendet externalMessages
+      return;
     }
   }
 
-  private handleScrollOnNewMessages(currentCount: number) {
-    if (currentCount > this.lastMessageCount) {
-      setTimeout(() => this.scrollToBottom(), 0);
-    }
-    this.lastMessageCount = currentCount;
-  }
 
   private scrollToBottom(retry: boolean = true) {
+    console.log('📜 scrollToBottom called, isThreadContext:', this.isThreadContext);
+
     if (!this.bottom) {
       if (retry) setTimeout(() => this.scrollToBottom(false), 50);
       return;
     }
-    this.bottom.nativeElement.scrollIntoView({ behavior: 'smooth' });
+
+    let container: HTMLElement | null = this.bottom.nativeElement.parentElement;
+
+    while (container) {
+      const hasScroll = container.scrollHeight > container.clientHeight;
+      console.log('🔍 Container:', container.className, 'hasScroll:', hasScroll);
+
+      if (hasScroll && container.classList.contains('messages-scroll')) {
+        const isInThread = this.isInThreadMenu(container);
+        console.log('📍 Found messages-scroll! isInThread:', isInThread, 'isThreadContext:', this.isThreadContext);
+
+        // Nur scrollen wenn Context passt!
+        if (isInThread === this.isThreadContext) {
+          console.log('✅ Context matches! Scrolling...');
+
+          const scrollContainer = container;
+          const targetScroll = scrollContainer.scrollHeight - scrollContainer.clientHeight;
+          const startScroll = scrollContainer.scrollTop;
+          const distance = targetScroll - startScroll;
+          const duration = 300;
+          const startTime = performance.now();
+
+          const animateScroll = (currentTime: number) => {
+            const elapsed = currentTime - startTime;
+            const progress = Math.min(elapsed / duration, 1);
+            const easeProgress = 1 - Math.pow(1 - progress, 3);
+
+            scrollContainer.scrollTop = startScroll + (distance * easeProgress);
+
+            if (progress < 1) {
+              requestAnimationFrame(animateScroll);
+            }
+          };
+
+          requestAnimationFrame(animateScroll);
+        } else {
+          console.log('❌ Context mismatch! NOT scrolling.');
+        }
+        return;
+      }
+
+      container = container.parentElement;
+    }
+
+    console.log('❌ No scrollable container found!');
+  }
+
+  private isInThreadMenu(element: HTMLElement): boolean {
+    // Suche nach parent mit app-thread-menu tag
+    let current: HTMLElement | null = element;
+    while (current) {
+      console.log('🔎 Checking element tag:', current.tagName, 'id:', current.id, 'class:', current.className);
+
+      // Prüfe ob wir in app-thread-menu sind
+      if (current.tagName === 'APP-THREAD-MENU') {
+        console.log('✅ Found app-thread-menu!');
+        return true;
+      }
+
+      current = current.parentElement;
+    }
+    console.log('❌ Not in app-thread-menu');
+    return false;
   }
 
   getSenderName(senderId: string): string {
@@ -336,7 +486,6 @@ export class Message implements OnChanges {
 
       this.cancelInlineEdit();
     } catch (e) {
-      console.error('Fehler beim Speichern der bearbeiteten Nachricht:', e);
     }
   }
 
@@ -646,29 +795,21 @@ export class Message implements OnChanges {
   parseMessageText(text: string): string {
     if (!text) return '';
 
-    console.log('🔍 parseMessageText called with:', text);
-    console.log('👥 Available users:', this.users.length);
-
     const mentionRegex = /@\[([^\]]+)\]|@([A-Za-zäöüÄÖÜß]+(?: [A-Za-zäöüÄÖÜß]+)*)/g;
 
     const result = text.replace(mentionRegex, (match, bracketName, simpleName) => {
       const displayName = bracketName || simpleName;
-      console.log('📝 Found mention:', match, 'Display name:', displayName);
 
       const user = this.findUserByDisplayName(displayName);
-      console.log('👤 User found:', user?.displayName, 'UID:', user?.uid);
 
       if (user && user.uid) {
         const span = `<span class="mention" data-user-id="${user.uid}">${match}</span>`;
-        console.log('✅ Created span:', span);
         return span;
       }
 
-      console.log('❌ No user found, returning original:', match);
       return match;
     });
 
-    console.log('📤 Final result:', result);
     return result;
   }
 
@@ -705,26 +846,17 @@ export class Message implements OnChanges {
   /**
    * Handler für Klicks auf Message-Text
    */
-  /**
-   * Handler für Klicks auf Message-Text
-   */
   onMessageTextClick(event: MouseEvent) {
-    console.log('🖱️ Click event:', event);
 
     const target = event.target as HTMLElement;
-    console.log('🎯 Click target:', target);
-    console.log('🏷️ Target classes:', target.className);
 
     const userId = this.getUserIdFromElement(target);
-    console.log('🆔 User ID from element:', userId);
 
     if (userId) {
       event.preventDefault();
       event.stopPropagation();
-      console.log('✅ Opening profile for user:', userId);
       this.openUserProfile(userId, event);
-    } else {
-      console.log('❌ No user ID found');
     }
   }
+
 }

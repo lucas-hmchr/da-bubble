@@ -33,9 +33,7 @@ export class MessageService {
                 }
             }
 
-            console.log(`✅ ${threadMessages.length} Thread-Messages gelöscht`);
         } catch (error) {
-            console.log('ℹ️ Keine Thread-Messages zum Löschen (oder Fehler)');
         }
         // ========== CASCADE-DELETE END ==========
 

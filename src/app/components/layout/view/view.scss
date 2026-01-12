@@ -9,10 +9,11 @@ section {
 }
 
 header {
-  h2{
+  h2 {
     font-size: 24px;
   }
 }
+
 #chat-container-new {
   height: calc(100% - 96px);
   padding-bottom: 10px;
@@ -106,11 +107,14 @@ header {
   overflow-y: auto;
   padding: 16px 0px;
   scroll-behavior: smooth;
+  // scroll-behavior: none;
   position: relative;
   z-index: 1;
   display: flex;
   flex-direction: column;
-  justify-content: space-between;
+  // justify-content: space-between;
+  justify-content: flex-start;
+  gap: 0;
 }
 
 app-message-input {
@@ -187,6 +191,7 @@ app-message-input {
 
 .dm-intro {
   padding: 0 35px;
+
   >div {
     display: flex;
     align-items: end;
@@ -298,6 +303,6 @@ app-message-input {
   }
 }
 
-.channel-name{
+.channel-name {
   color: var(--clr-purple-2);
 }
