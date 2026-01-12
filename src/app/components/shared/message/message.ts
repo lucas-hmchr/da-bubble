@@ -9,9 +9,11 @@ import {
   EventEmitter,
   inject,
   HostListener,
+  AfterViewInit,
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Observable, tap, of } from 'rxjs';
+import { take } from 'rxjs/operators';
 import { FormsModule } from '@angular/forms';
 
 import { Channel } from '../../../models/channel.interface';
@@ -48,7 +50,7 @@ export class Message implements OnChanges {
   @Input() threadChannelId?: string | null;
   @Input() threadParentMessageId?: string | null;
   @Input() externalMessages?: MessageData[] | null;
-  @Input() isThreadContext?: boolean;
+  @Input() isThreadContext: boolean = false;
   @Input() showFullDate?: boolean = false;
   @Output() editRequested = new EventEmitter<MessageData>();
   @Output() threadRequested = new EventEmitter<MessageData>();
@@ -59,9 +61,13 @@ export class Message implements OnChanges {
   hoveredMessageId: string | null = null;
   lastMessageCount = 0;
 
+  private isFirstLoad = true;
+  private hasScrolledToBottom = false;
   @ViewChild('bottom') bottom!: ElementRef<HTMLDivElement>;
+
   private userMap = new Map<string, User>();
   private profilePopupService = inject(ProfilePopupService);
+  private previousMessageCount?: number;
 
   reactionPickerForMessageId: string | null = null;
   emojiReactions: ReactionDef[] = EMOJI_REACTIONS as ReactionDef[];
@@ -103,13 +109,67 @@ export class Message implements OnChanges {
     if (changes['externalMessages']) {
       if (this.externalMessages && this.externalMessages.length > 0) {
         this.messages$ = of(this.externalMessages);
+
+        // ⭐ HIER fehlt der Scroll!
+        setTimeout(() => {
+          this.scrollToBottom();
+        }, 200);
+
         return;
       }
     }
 
-    if (changes['channel'] || changes['conversationId'] || changes['contextType']) {
+    if (changes['channel']) {
+      const oldId = changes['channel'].previousValue?.id;
+      const newId = changes['channel'].currentValue?.id;
 
-      // ⭐ NEU: Nur laden wenn KEINE externalMessages!
+
+      if (oldId !== newId) {
+
+        if (!this.externalMessages || this.externalMessages.length === 0) {
+          this.loadMessages();
+
+          setTimeout(() => {
+            if (this.messages$) {
+              this.messages$.pipe(take(1)).subscribe((messages) => {
+                setTimeout(() => {
+                  this.scrollToBottom();
+                }, 200);
+              });
+            }
+          }, 100);
+        }
+
+        this.tryDiscardInlineEdit('context-change');
+        this.closeOptionsMenu();
+        this.reactionPickerForMessageId = null;
+      }
+      return;
+    }
+
+    if (changes['conversationId']) {
+      const oldId = changes['conversationId'].previousValue;
+      const newId = changes['conversationId'].currentValue;
+
+      if (oldId !== newId) {
+        this.isFirstLoad = true;
+        this.hasScrolledToBottom = false; // ← Reset!
+
+        if (!this.externalMessages || this.externalMessages.length === 0) {
+          this.loadMessages();
+        }
+
+        this.tryDiscardInlineEdit('context-change');
+        this.closeOptionsMenu();
+        this.reactionPickerForMessageId = null;
+      }
+      return;
+    }
+
+    if (changes['contextType']) {
+      this.isFirstLoad = true;
+      this.hasScrolledToBottom = false; // ← Reset!
+
       if (!this.externalMessages || this.externalMessages.length === 0) {
         this.loadMessages();
       }
@@ -122,7 +182,6 @@ export class Message implements OnChanges {
 
   onOpenThread(msg: MessageData) {
     if (!msg.id) {
-      console.warn('Message has no ID, cannot open thread');
       return;
     }
 
@@ -131,32 +190,24 @@ export class Message implements OnChanges {
 
   @HostListener('document:click', ['$event'])
   onDocumentClick(ev: MouseEvent) {
-    // wenn kein Inline-Edit aktiv ist, kein Aufwand
     if (!this.editingMessageId) return;
 
     const target = ev.target as HTMLElement | null;
     if (!target) return;
 
-    // nur reagieren, wenn Klick überhaupt "in" diesem Message-Component passiert oder außerhalb;
-    // relevant ist: wenn außerhalb der Inline-Edit-Box geklickt wird → abbrechen
     this.handleOutsideClick(target);
   }
 
   private handleOutsideClick(target: HTMLElement) {
-    // Klick innerhalb der Edit-UI? dann nichts tun
     const insideInlineEdit = !!target.closest('.inline-edit');
     if (insideInlineEdit) return;
 
-    // Klick im Options-Menü? dann auch nichts tun
     const insideOptionsMenu = !!target.closest('.message-options-menu');
     if (insideOptionsMenu) return;
 
-    // Klick auf Options-Button (3 Punkte) ebenfalls ignorieren
     const insideOptionsButton = !!target.closest('.option-btn');
     if (insideOptionsButton) return;
 
-    // Optional: Klick außerhalb dieses Components komplett ignorieren?
-    // Nein: Wir wollen ja genau "außerhalb" abbrechen.
 
     this.tryDiscardInlineEdit('outside-click');
   }
@@ -171,7 +222,6 @@ export class Message implements OnChanges {
       return;
     }
 
-    // Bestätigung nur bei Änderungen
     const ok = window.confirm('Änderungen verwerfen?');
     if (ok) this.cancelInlineEdit();
   }
@@ -183,42 +233,105 @@ export class Message implements OnChanges {
   }
 
   private loadMessages() {
-    if (this.contextType === 'channel') {
-      if (!this.channel?.id) {
-        console.warn('MessageComponent: Channel hat keine ID → Channel-Nachrichten können nicht geladen werden.');
-        this.messages$ = undefined;
-        return;
-      }
+  if (this.contextType === 'channel') {
+    if (!this.channel?.id) {
+      this.messages$ = undefined;
+      return;
+    }
 
-      this.messages$ = this.channelService
-        .getChannelMessages(this.channel.id)
-        .pipe(tap((msgs) => this.handleScrollOnNewMessages(msgs.length)));
-    } else {
+    this.messages$ = this.channelService
+      .getChannelMessages(this.channel.id)
+      .pipe(
+        tap((messages) => {
+          const previousCount = this.previousMessageCount || 0;
+          this.previousMessageCount = messages.length;
+          
+          if (messages.length > previousCount) {
+            setTimeout(() => {
+              this.scrollToBottom();
+            }, 100);
+          }
+        })
+      );
+    
+  } else if (this.contextType === 'conversation') {
       if (!this.conversationId) {
-        console.warn('MessageComponent: Keine conversationId gesetzt → DM-Nachrichten können nicht geladen werden.');
         this.messages$ = undefined;
         return;
       }
 
       this.messages$ = this.conversationService
         .getConversationMessages(this.conversationId)
-        .pipe(tap((msgs) => this.handleScrollOnNewMessages(msgs.length)));
+        .pipe(
+          tap((messages) => {
+            setTimeout(() => {
+              this.scrollToBottom();
+            }, 100);
+          })
+        );
+
+    } else if (this.contextType === 'thread') {
+      return;
     }
   }
 
-  private handleScrollOnNewMessages(currentCount: number) {
-    if (currentCount > this.lastMessageCount) {
-      setTimeout(() => this.scrollToBottom(), 0);
-    }
-    this.lastMessageCount = currentCount;
-  }
 
   private scrollToBottom(retry: boolean = true) {
+
     if (!this.bottom) {
       if (retry) setTimeout(() => this.scrollToBottom(false), 50);
       return;
     }
-    this.bottom.nativeElement.scrollIntoView({ behavior: 'smooth' });
+
+    let container: HTMLElement | null = this.bottom.nativeElement.parentElement;
+
+    while (container) {
+      const hasScroll = container.scrollHeight > container.clientHeight;
+
+      if (hasScroll && container.classList.contains('messages-scroll')) {
+        const isInThread = this.isInThreadMenu(container);
+
+        if (isInThread === this.isThreadContext) {
+
+          const scrollContainer = container;
+          const targetScroll = scrollContainer.scrollHeight - scrollContainer.clientHeight;
+          const startScroll = scrollContainer.scrollTop;
+          const distance = targetScroll - startScroll;
+          const duration = 300;
+          const startTime = performance.now();
+
+          const animateScroll = (currentTime: number) => {
+            const elapsed = currentTime - startTime;
+            const progress = Math.min(elapsed / duration, 1);
+            const easeProgress = 1 - Math.pow(1 - progress, 3);
+
+            scrollContainer.scrollTop = startScroll + (distance * easeProgress);
+
+            if (progress < 1) {
+              requestAnimationFrame(animateScroll);
+            }
+          };
+
+          requestAnimationFrame(animateScroll);
+        }
+        return;
+      }
+
+      container = container.parentElement;
+    }
+
+  }
+
+  private isInThreadMenu(element: HTMLElement): boolean {
+    let current: HTMLElement | null = element;
+    while (current) {
+      if (current.tagName === 'APP-THREAD-MENU') {
+        return true;
+      }
+
+      current = current.parentElement;
+    }
+    return false;
   }
 
   getSenderName(senderId: string): string {
@@ -295,13 +408,11 @@ export class Message implements OnChanges {
     if (!newText) return;
 
     try {
-      // ========== NEU: Thread-Message Edit ==========
       if (this.isThreadContext && this.threadParentMessageId) {
         if (this.contextType === 'channel') {
           const channelId = this.channel?.id;
           if (!channelId) return;
 
-          // Thread-Message in Channel
           await this.messageInputService.updateThreadMessage(
             'channel',
             channelId,
@@ -313,7 +424,6 @@ export class Message implements OnChanges {
           const convId = this.conversationId;
           if (!convId) return;
 
-          // Thread-Message in Conversation
           await this.messageInputService.updateThreadMessage(
             'conversation',
             convId,
@@ -323,7 +433,6 @@ export class Message implements OnChanges {
           );
         }
       }
-      // ========== BESTEHEND: Normal Message Edit ==========
       else if (this.contextType === 'channel') {
         const channelId = this.channel?.id;
         if (!channelId) return;
@@ -336,7 +445,6 @@ export class Message implements OnChanges {
 
       this.cancelInlineEdit();
     } catch (e) {
-      console.error('Fehler beim Speichern der bearbeiteten Nachricht:', e);
     }
   }
 
@@ -356,7 +464,6 @@ export class Message implements OnChanges {
   toggleReaction(msg: MessageData, reactionId: ReactionId) {
     if (!this.currentUserUid || !msg.id) return;
 
-    // ========== NEU: Thread-Message Reactions ==========
     if (this.isThreadContext && this.threadParentMessageId) {
       if (this.contextType === 'channel' && this.channel?.id) {
         this.messageService.toggleReactionOnThreadMessage(
@@ -383,7 +490,6 @@ export class Message implements OnChanges {
       }
     }
 
-    // ========== BESTEHEND: Normal Message Reactions ==========
     if (this.contextType === 'channel' && this.channel?.id) {
       this.messageService.toggleReactionOnChannelMessage(
         this.channel.id,
@@ -502,7 +608,6 @@ export class Message implements OnChanges {
     if (!msg?.id) return;
     if (!this.isOwnMessage(msg)) return;
 
-    // ========== THREAD-MESSAGE DELETE (mit threadCount Update) ==========
     if (this.isThreadContext && this.threadParentMessageId) {
       if (this.contextType === 'channel' && this.channel?.id) {
         await this.messageService.deleteThreadMessage(
@@ -525,9 +630,7 @@ export class Message implements OnChanges {
       }
     }
 
-    // ========== PARENT-MESSAGE DELETE (mit Cascade) ==========
 
-    // Confirm-Dialog wenn Thread-Messages vorhanden
     if (msg.threadCount > 0) {
       const confirmed = window.confirm(
         `Diese Nachricht hat ${msg.threadCount} Antwort(en).\n\n` +
@@ -536,13 +639,11 @@ export class Message implements OnChanges {
       if (!confirmed) return;
     }
 
-    // Channel-Message löschen
     if (this.contextType === 'channel' && this.channel?.id) {
       await this.messageService.deleteChannelMessage(this.channel.id, msg.id);
       return;
     }
 
-    // Conversation-Message löschen
     if (this.contextType === 'conversation' && this.conversationId) {
       await this.messageService.deleteConversationMessage(this.conversationId, msg.id);
       return;
@@ -605,20 +706,15 @@ export class Message implements OnChanges {
 
     const weekday = msgDate.toLocaleString('de-DE', { weekday: 'long' });
 
-    // Wenn aktuelles Jahr: Wochentag + Tag + Monat
     if (messageYear === currentYear) {
       const dayMonth = this.formatDate(msgDate, 'd. MMMM');
       return `${weekday}, ${dayMonth}`;
     }
 
-    // Wenn anderes Jahr: Wochentag + Tag + Monat + Jahr
     const dayMonthYear = this.formatDate(msgDate, 'd. MMMM yyyy');
     return `${weekday}, ${dayMonthYear}`;
   }
 
-  /**
-   * Helper für Date-Formatting
-   */
   private formatDate(date: Date, format: string): string {
     const day = date.getDate();
     const month = date.toLocaleString('de-DE', { month: 'long' });
@@ -635,6 +731,62 @@ export class Message implements OnChanges {
       event.stopPropagation();  // Verhindert andere Click-Events
     }
     this.profilePopupService.open(userId);
+  }
+
+  parseMessageText(text: string): string {
+    if (!text) return '';
+
+    const mentionRegex = /@\[([^\]]+)\]|@([A-Za-zäöüÄÖÜß]+(?: [A-Za-zäöüÄÖÜß]+)*)/g;
+
+    const result = text.replace(mentionRegex, (match, bracketName, simpleName) => {
+      const displayName = bracketName || simpleName;
+
+      const user = this.findUserByDisplayName(displayName);
+
+      if (user && user.uid) {
+        const span = `<span class="mention" data-user-id="${user.uid}">${match}</span>`;
+        return span;
+      }
+
+      return match;
+    });
+
+    return result;
+  }
+
+  private findUserByDisplayName(displayName: string): User | undefined {
+    const trimmedName = displayName.trim().toLowerCase();
+
+    return this.users.find(user => {
+      const userDisplayName = (user.displayName ?? user.name ?? '').toLowerCase();
+      return userDisplayName === trimmedName;
+    });
+  }
+
+  private getUserIdFromElement(element: HTMLElement): string | null {
+    if (element.classList.contains('mention')) {
+      return element.getAttribute('data-user-id');
+    }
+
+    const mentionParent = element.closest('.mention') as HTMLElement | null;
+    if (mentionParent) {
+      return mentionParent.getAttribute('data-user-id');
+    }
+
+    return null;
+  }
+
+  onMessageTextClick(event: MouseEvent) {
+
+    const target = event.target as HTMLElement;
+
+    const userId = this.getUserIdFromElement(target);
+
+    if (userId) {
+      event.preventDefault();
+      event.stopPropagation();
+      this.openUserProfile(userId, event);
+    }
   }
 
 }

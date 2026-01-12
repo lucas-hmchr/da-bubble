@@ -1,6 +1,5 @@
 <section>
 
-  <!-- HEADER -->
   <header class="dm-header dm-header-small">
     <div style="width: 100%;">
       <div id="header-left" style="display: flex; align-items: center; gap: 8px;">
@@ -9,19 +8,15 @@
       </div>
     </div>
 
-    <!-- Close-Button -->
     <button class="close-btn" (click)="closeThread()" type="button">
       <img src="/assets/icons/global/close.svg" alt="Schließen">
     </button>
   </header>
 
-  <!-- CHAT CONTAINER -->
   <div id="chat-container-new">
 
-    <!-- MESSAGES SCROLL -->
     <div class="messages-scroll">
 
-      <!-- PARENT MESSAGE - Mit showFullDate! -->
       <div class="parent-message-section" *ngIf="threadService.parentMessage() as parent">
         <app-message
           [contextType]="threadService.contextType()"
@@ -33,7 +28,6 @@
         </app-message>
       </div>
 
-      <!-- SEPARATOR -->
       <div class="thread-separator">
         <span>
           {{ threadService.threadMessages().length }} 
@@ -41,7 +35,6 @@
         </span>
       </div>
 
-      <!-- THREAD MESSAGES - Mit showFullDate! -->
       <div class="thread-messages-section">
         
         <div *ngIf="threadService.threadMessages().length === 0" class="thread-empty">
@@ -64,7 +57,6 @@
 
     </div>
 
-    <!-- MESSAGE INPUT -->
     <app-message-input
       [currentUserUid]="currentUserUid"
       [contextType]="'thread'"

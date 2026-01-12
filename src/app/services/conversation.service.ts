@@ -50,7 +50,6 @@ export class ConversationService {
 
             const count = msgs?.length ?? 0;
 
-            // ✅ Sobald Messages vorhanden sind: Timer stoppen + sofort "loaded"
             if (count > 0) {
                 if (this.dmLoadedTimer) {
                     clearTimeout(this.dmLoadedTimer);
@@ -63,21 +62,18 @@ export class ConversationService {
                 return;
             }
 
-            // Ab hier: count === 0
 
-            // Wenn wir bereits "loaded" sind, bleibt es loaded (wirklich leerer Chat)
             if (hasLoadedOnce) {
                 if (!this.dmLoaded()) this.dmLoaded.set(true);
                 return;
             }
 
-            // Erste(n) leere(n) Snapshots: Timer (nur einmal) starten
             if (!this.dmLoadedTimer) {
                 this.dmLoadedTimer = setTimeout(() => {
                     this.dmLoaded.set(true);
                     hasLoadedOnce = true;
                     this.dmLoadedTimer = null;
-                }, 300); // etwas großzügiger als 150ms
+                }, 300);
             }
         });
     }
@@ -156,5 +152,4 @@ export class ConversationService {
         });
     }
 
-    // readonly dmLoaded = computed(() => this._dmLoaded());
 }
