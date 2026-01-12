@@ -184,7 +184,7 @@ export class ThreadService {
   }
 
   ngOnDestroy() {
-    this.parentMessageSub?.unsubscribe();  // ← NEU
+    this.parentMessageSub?.unsubscribe();
     this.threadMessagesSub?.unsubscribe();
   }
 }
