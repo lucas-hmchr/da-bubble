@@ -25,14 +25,12 @@ export class ThreadMenu {
 
   async onThreadMessageSent(event: { text: string }) {
     if (!this.currentUserUid) {
-      console.warn('Thread: No current user');
       return;
     }
 
     try {
       await this.threadService.sendThreadMessage(event.text, this.currentUserUid);
     } catch (error) {
-      console.error('Thread: Failed to send message', error);
     }
   }
 
