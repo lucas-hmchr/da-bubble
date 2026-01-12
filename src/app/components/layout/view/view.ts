@@ -1,6 +1,5 @@
 import { Component, EventEmitter, Input, Output, effect, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
-
 import { FirestoreService } from '../../../services/firestore';
 import { MessageInput } from '../../shared/message-input/message-input';
 import { Message } from '../../shared/message/message';
@@ -195,25 +194,9 @@ export class View {
     this.showAddChannelMemberPopup.set(true);
   }
 
-  // openThread(ev: { channelId: string; message: MessageData }) {
-  //   this.threadChannelId = ev.channelId;
-  //   this.threadParentMessage = ev.message;
-  //   this.threadOpen = true;
-  // }
-
-  // closeThread() {
-  //   this.threadOpen = false;
-  //   this.threadParentMessage = null;
-  //   this.threadChannelId = null;
-  // }
 
   onThreadRequested(msg: MessageData) {
     const contextType = this.contextType;
-
-    // ========== FIX: Type Mapping ==========
-    // ChatContextType ('channel' | 'dm' | 'new')
-    // muss zu ThreadService Type ('channel' | 'conversation') gemappt werden
-
     let threadContextType: 'channel' | 'conversation';
     let contextId: string | null = null;
 
@@ -221,23 +204,18 @@ export class View {
       threadContextType = 'channel';
       contextId = this.channel?.id ?? null;
     } else if (contextType === 'dm') {
-      threadContextType = 'conversation';  // ← 'dm' wird zu 'conversation'
+      threadContextType = 'conversation';
       contextId = this.dmConversationId;
     } else {
-      // contextType === 'new' → kein Thread möglich
-      console.warn('View: Cannot open thread in new message mode');
       return;
     }
 
     if (!contextId) {
-      console.warn('View: Cannot open thread - no context ID');
       return;
     }
 
-    // Thread-Service öffnen mit korrektem Type
     this.threadService.open(threadContextType, contextId, msg);
 
-    // ✅ Alte Properties nullen (optional, für Sauberkeit):
     this.threadOpen = false;
     this.threadChannelId = null;
     this.threadParentMessage = null;
@@ -247,7 +225,6 @@ export class View {
   closeThread() {
     this.threadService.close();
 
-    // ✅ ALTE Properties nullen (falls du sie noch hast):
     this.threadOpen = false;
     this.threadChannelId = null;
     this.threadParentMessage = null;

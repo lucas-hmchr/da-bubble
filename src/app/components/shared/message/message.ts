@@ -105,10 +105,8 @@ export class Message implements OnChanges {
 
 
   ngOnChanges(changes: SimpleChanges): void {
-    // console.log('🔄 ngOnChanges called:', changes);
 
     if (changes['externalMessages']) {
-      console.log('📦 externalMessages changed');
       if (this.externalMessages && this.externalMessages.length > 0) {
         this.messages$ = of(this.externalMessages);
 
@@ -121,28 +119,20 @@ export class Message implements OnChanges {
       }
     }
 
-    // Nur reagieren wenn Channel ID sich WIRKLICH ändert
     if (changes['channel']) {
       const oldId = changes['channel'].previousValue?.id;
       const newId = changes['channel'].currentValue?.id;
 
-      // console.log('📺 Channel change - Old ID:', oldId, 'New ID:', newId);
 
-      // Nur wenn ECHTE Channel-Änderung!
       if (oldId !== newId) {
-        // console.log('✅ Channel ID changed! Loading messages');
 
         if (!this.externalMessages || this.externalMessages.length === 0) {
-          // console.log('📞 Calling loadMessages()');
           this.loadMessages();
 
-          // ⭐ Warte auf Messages, dann scrolle beim ersten Laden
           setTimeout(() => {
             if (this.messages$) {
               this.messages$.pipe(take(1)).subscribe((messages) => {
-                // console.log('📨 First messages received:', messages?.length);
                 setTimeout(() => {
-                  // console.log('✅ Initial scroll to bottom!');
                   this.scrollToBottom();
                 }, 200);
               });
@@ -200,32 +190,24 @@ export class Message implements OnChanges {
 
   @HostListener('document:click', ['$event'])
   onDocumentClick(ev: MouseEvent) {
-    // wenn kein Inline-Edit aktiv ist, kein Aufwand
     if (!this.editingMessageId) return;
 
     const target = ev.target as HTMLElement | null;
     if (!target) return;
 
-    // nur reagieren, wenn Klick überhaupt "in" diesem Message-Component passiert oder außerhalb;
-    // relevant ist: wenn außerhalb der Inline-Edit-Box geklickt wird → abbrechen
     this.handleOutsideClick(target);
   }
 
   private handleOutsideClick(target: HTMLElement) {
-    // Klick innerhalb der Edit-UI? dann nichts tun
     const insideInlineEdit = !!target.closest('.inline-edit');
     if (insideInlineEdit) return;
 
-    // Klick im Options-Menü? dann auch nichts tun
     const insideOptionsMenu = !!target.closest('.message-options-menu');
     if (insideOptionsMenu) return;
 
-    // Klick auf Options-Button (3 Punkte) ebenfalls ignorieren
     const insideOptionsButton = !!target.closest('.option-btn');
     if (insideOptionsButton) return;
 
-    // Optional: Klick außerhalb dieses Components komplett ignorieren?
-    // Nein: Wir wollen ja genau "außerhalb" abbrechen.
 
     this.tryDiscardInlineEdit('outside-click');
   }
@@ -240,7 +222,6 @@ export class Message implements OnChanges {
       return;
     }
 
-    // Bestätigung nur bei Änderungen
     const ok = window.confirm('Änderungen verwerfen?');
     if (ok) this.cancelInlineEdit();
   }
@@ -261,12 +242,10 @@ export class Message implements OnChanges {
     this.messages$ = this.channelService
       .getChannelMessages(this.channel.id)
       .pipe(
-        // ⭐ Speichere vorherige Message-Count
         tap((messages) => {
           const previousCount = this.previousMessageCount || 0;
           this.previousMessageCount = messages.length;
           
-          // ⭐ NUR scrollen wenn neue Messages hinzugekommen sind!
           if (messages.length > previousCount) {
             setTimeout(() => {
               this.scrollToBottom();
@@ -285,7 +264,6 @@ export class Message implements OnChanges {
         .getConversationMessages(this.conversationId)
         .pipe(
           tap((messages) => {
-            // ⭐ Bei JEDER neuen Message nach unten scrollen!
             setTimeout(() => {
               this.scrollToBottom();
             }, 100);
@@ -293,14 +271,12 @@ export class Message implements OnChanges {
         );
 
     } else if (this.contextType === 'thread') {
-      // Thread verwendet externalMessages
       return;
     }
   }
 
 
   private scrollToBottom(retry: boolean = true) {
-    console.log('📜 scrollToBottom called, isThreadContext:', this.isThreadContext);
 
     if (!this.bottom) {
       if (retry) setTimeout(() => this.scrollToBottom(false), 50);
@@ -311,15 +287,11 @@ export class Message implements OnChanges {
 
     while (container) {
       const hasScroll = container.scrollHeight > container.clientHeight;
-      console.log('🔍 Container:', container.className, 'hasScroll:', hasScroll);
 
       if (hasScroll && container.classList.contains('messages-scroll')) {
         const isInThread = this.isInThreadMenu(container);
-        console.log('📍 Found messages-scroll! isInThread:', isInThread, 'isThreadContext:', this.isThreadContext);
 
-        // Nur scrollen wenn Context passt!
         if (isInThread === this.isThreadContext) {
-          console.log('✅ Context matches! Scrolling...');
 
           const scrollContainer = container;
           const targetScroll = scrollContainer.scrollHeight - scrollContainer.clientHeight;
@@ -341,8 +313,6 @@ export class Message implements OnChanges {
           };
 
           requestAnimationFrame(animateScroll);
-        } else {
-          console.log('❌ Context mismatch! NOT scrolling.');
         }
         return;
       }
@@ -350,24 +320,17 @@ export class Message implements OnChanges {
       container = container.parentElement;
     }
 
-    console.log('❌ No scrollable container found!');
   }
 
   private isInThreadMenu(element: HTMLElement): boolean {
-    // Suche nach parent mit app-thread-menu tag
     let current: HTMLElement | null = element;
     while (current) {
-      console.log('🔎 Checking element tag:', current.tagName, 'id:', current.id, 'class:', current.className);
-
-      // Prüfe ob wir in app-thread-menu sind
       if (current.tagName === 'APP-THREAD-MENU') {
-        console.log('✅ Found app-thread-menu!');
         return true;
       }
 
       current = current.parentElement;
     }
-    console.log('❌ Not in app-thread-menu');
     return false;
   }
 
@@ -445,13 +408,11 @@ export class Message implements OnChanges {
     if (!newText) return;
 
     try {
-      // ========== NEU: Thread-Message Edit ==========
       if (this.isThreadContext && this.threadParentMessageId) {
         if (this.contextType === 'channel') {
           const channelId = this.channel?.id;
           if (!channelId) return;
 
-          // Thread-Message in Channel
           await this.messageInputService.updateThreadMessage(
             'channel',
             channelId,
@@ -463,7 +424,6 @@ export class Message implements OnChanges {
           const convId = this.conversationId;
           if (!convId) return;
 
-          // Thread-Message in Conversation
           await this.messageInputService.updateThreadMessage(
             'conversation',
             convId,
@@ -473,7 +433,6 @@ export class Message implements OnChanges {
           );
         }
       }
-      // ========== BESTEHEND: Normal Message Edit ==========
       else if (this.contextType === 'channel') {
         const channelId = this.channel?.id;
         if (!channelId) return;
@@ -505,7 +464,6 @@ export class Message implements OnChanges {
   toggleReaction(msg: MessageData, reactionId: ReactionId) {
     if (!this.currentUserUid || !msg.id) return;
 
-    // ========== NEU: Thread-Message Reactions ==========
     if (this.isThreadContext && this.threadParentMessageId) {
       if (this.contextType === 'channel' && this.channel?.id) {
         this.messageService.toggleReactionOnThreadMessage(
@@ -532,7 +490,6 @@ export class Message implements OnChanges {
       }
     }
 
-    // ========== BESTEHEND: Normal Message Reactions ==========
     if (this.contextType === 'channel' && this.channel?.id) {
       this.messageService.toggleReactionOnChannelMessage(
         this.channel.id,
@@ -651,7 +608,6 @@ export class Message implements OnChanges {
     if (!msg?.id) return;
     if (!this.isOwnMessage(msg)) return;
 
-    // ========== THREAD-MESSAGE DELETE (mit threadCount Update) ==========
     if (this.isThreadContext && this.threadParentMessageId) {
       if (this.contextType === 'channel' && this.channel?.id) {
         await this.messageService.deleteThreadMessage(
@@ -674,9 +630,7 @@ export class Message implements OnChanges {
       }
     }
 
-    // ========== PARENT-MESSAGE DELETE (mit Cascade) ==========
 
-    // Confirm-Dialog wenn Thread-Messages vorhanden
     if (msg.threadCount > 0) {
       const confirmed = window.confirm(
         `Diese Nachricht hat ${msg.threadCount} Antwort(en).\n\n` +
@@ -685,13 +639,11 @@ export class Message implements OnChanges {
       if (!confirmed) return;
     }
 
-    // Channel-Message löschen
     if (this.contextType === 'channel' && this.channel?.id) {
       await this.messageService.deleteChannelMessage(this.channel.id, msg.id);
       return;
     }
 
-    // Conversation-Message löschen
     if (this.contextType === 'conversation' && this.conversationId) {
       await this.messageService.deleteConversationMessage(this.conversationId, msg.id);
       return;
@@ -754,20 +706,15 @@ export class Message implements OnChanges {
 
     const weekday = msgDate.toLocaleString('de-DE', { weekday: 'long' });
 
-    // Wenn aktuelles Jahr: Wochentag + Tag + Monat
     if (messageYear === currentYear) {
       const dayMonth = this.formatDate(msgDate, 'd. MMMM');
       return `${weekday}, ${dayMonth}`;
     }
 
-    // Wenn anderes Jahr: Wochentag + Tag + Monat + Jahr
     const dayMonthYear = this.formatDate(msgDate, 'd. MMMM yyyy');
     return `${weekday}, ${dayMonthYear}`;
   }
 
-  /**
-   * Helper für Date-Formatting
-   */
   private formatDate(date: Date, format: string): string {
     const day = date.getDate();
     const month = date.toLocaleString('de-DE', { month: 'long' });
@@ -786,12 +733,6 @@ export class Message implements OnChanges {
     this.profilePopupService.open(userId);
   }
 
-  /**
- * Parsed einen Message-Text und wandelt @Mentions in klickbare Spans um
- */
-  /**
-   * Parsed einen Message-Text und wandelt @Mentions in klickbare Spans um
-   */
   parseMessageText(text: string): string {
     if (!text) return '';
 
@@ -813,9 +754,6 @@ export class Message implements OnChanges {
     return result;
   }
 
-  /**
-   * Findet einen User anhand des Display-Namens
-   */
   private findUserByDisplayName(displayName: string): User | undefined {
     const trimmedName = displayName.trim().toLowerCase();
 
@@ -825,16 +763,11 @@ export class Message implements OnChanges {
     });
   }
 
-  /**
-   * Findet User-ID aus dem geklickten Element
-   */
   private getUserIdFromElement(element: HTMLElement): string | null {
-    // Prüfe ob Element selbst ein Mention ist
     if (element.classList.contains('mention')) {
       return element.getAttribute('data-user-id');
     }
 
-    // Prüfe ob Parent ein Mention ist
     const mentionParent = element.closest('.mention') as HTMLElement | null;
     if (mentionParent) {
       return mentionParent.getAttribute('data-user-id');
@@ -843,9 +776,6 @@ export class Message implements OnChanges {
     return null;
   }
 
-  /**
-   * Handler für Klicks auf Message-Text
-   */
   onMessageTextClick(event: MouseEvent) {
 
     const target = event.target as HTMLElement;

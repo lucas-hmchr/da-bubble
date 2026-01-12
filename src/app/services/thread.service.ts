@@ -16,25 +16,21 @@ export class ThreadService {
   private firestore = inject(FirestoreService);
   private channelStore = inject(ChannelStoreService);
 
-  // State
   private _isOpen = signal(false);
   private _parentMessage = signal<MessageData | null>(null);
   private _contextType = signal<'channel' | 'conversation'>('channel');
   private _contextId = signal<string | null>(null);
   private _threadMessages = signal<MessageData[]>([]);
 
-  // Subscription für Thread-Messages
   private threadMessagesSub?: Subscription;
   private parentMessageSub?: Subscription;
 
-  // Public readonly signals
   readonly isOpen = this._isOpen.asReadonly();
   readonly parentMessage = this._parentMessage.asReadonly();
   readonly contextType = this._contextType.asReadonly();
   readonly contextId = this._contextId.asReadonly();
   readonly threadMessages = this._threadMessages.asReadonly();
 
-  // Computed: Channel-Name für Header
   readonly channelName = computed(() => {
     const type = this._contextType();
     const id = this._contextId();
@@ -47,9 +43,6 @@ export class ThreadService {
     return 'Direktnachricht';
   });
 
-  /**
-   * Thread öffnen
-   */
   open(
     contextType: 'channel' | 'conversation',
     contextId: string,
@@ -60,20 +53,14 @@ export class ThreadService {
       return;
     }
 
-    // State setzen
     this._isOpen.set(true);
     this._contextType.set(contextType);
     this._contextId.set(contextId);
-    // this._parentMessage.set(parentMessage);
     this.subscribeToParentMessage(contextType, contextId, parentMessage.id);
 
-    // Thread-Messages laden
     this.subscribeToThreadMessages(contextType, contextId, parentMessage.id);
   }
 
-  /**
-   * Thread schließen
-   */
   close() {
     this._isOpen.set(false);
     this._parentMessage.set(null);
@@ -87,18 +74,13 @@ export class ThreadService {
     this.parentMessageSub = undefined;
   }
 
-  /**
-   * Thread-Messages subscriben
-   */
   private subscribeToThreadMessages(
     contextType: 'channel' | 'conversation',
     contextId: string,
     parentMessageId: string
   ) {
-    // Alte Subscription aufräumen
     this.threadMessagesSub?.unsubscribe();
 
-    // Neue Subscription
     const messages$ = this.getThreadMessages(contextType, contextId, parentMessageId);
 
     this.threadMessagesSub = messages$.subscribe((msgs) => {
@@ -131,9 +113,6 @@ export class ThreadService {
     });
   }
 
-  /**
-   * Thread-Messages Observable
-   */
   private getThreadMessages(
     contextType: 'channel' | 'conversation',
     contextId: string,
@@ -143,14 +122,6 @@ export class ThreadService {
     const parentPath = contextType === 'channel' ? 'channels' : 'conversations';
     const subcollectionPath = `messages/${parentMessageId}/threadMessages`;
 
-    // ========== DEBUG ==========
-    console.log('🔍 Thread: Loading messages from:');
-    console.log('Parent Path:', parentPath);
-    console.log('Parent ID:', contextId);
-    console.log('Subcollection:', subcollectionPath);
-    console.log('Full Path:', `${parentPath}/${contextId}/${subcollectionPath}`);
-    // ===========================
-
     return this.firestore.getSubcollection<MessageData>(
       parentPath,
       contextId,
@@ -159,9 +130,6 @@ export class ThreadService {
     );
   }
 
-  /**
-   * Thread-Message senden
-   */
   async sendThreadMessage(text: string, senderId: string): Promise<void> {
     const contextType = this._contextType();
     const contextId = this._contextId();
@@ -187,10 +155,8 @@ export class ThreadService {
       : `conversations/${contextId}/messages/${parentMsg.id}/threadMessages`;
 
     try {
-      // Message hinzufügen
       await this.firestore.addDocument(path, message);
 
-      // Parent-Message threadCount & lastReplyAt aktualisieren
       await this.updateParentMessage(contextType, contextId, parentMsg.id);
     } catch (error) {
       console.error('Thread: Error sending message', error);
@@ -198,9 +164,6 @@ export class ThreadService {
     }
   }
 
-  /**
-   * Parent-Message aktualisieren (threadCount + lastReplyAt)
-   */
   private async updateParentMessage(
     contextType: 'channel' | 'conversation',
     contextId: string,

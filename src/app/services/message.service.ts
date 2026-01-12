@@ -17,16 +17,13 @@ export class MessageService {
         private firestore: FirestoreService
     ) { }
 
-    // new 14.12.:
     async deleteChannelMessage(channelId: string, messageId: string): Promise<void> {
-        // ========== CASCADE-DELETE: Lösche erst alle Thread-Messages ==========
         try {
             const threadMessagesPath = `channels/${channelId}/messages/${messageId}/threadMessages`;
             const threadMessages = await firstValueFrom(
                 this.firestore.getCollection<MessageData>(threadMessagesPath)
             );
 
-            // Lösche alle Thread-Messages
             for (const threadMsg of threadMessages) {
                 if (threadMsg.id) {
                     await this.firestore.deleteDocument(threadMessagesPath, threadMsg.id);
@@ -35,22 +32,17 @@ export class MessageService {
 
         } catch (error) {
         }
-        // ========== CASCADE-DELETE END ==========
 
-        // Dann lösche die Parent-Message
         return this.firestore.deleteDocument(`channels/${channelId}/messages`, messageId);
     }
 
-    // new 14.12.:
     async deleteConversationMessage(conversationId: string, messageId: string): Promise<void> {
-        // ========== CASCADE-DELETE: Lösche erst alle Thread-Messages ==========
         try {
             const threadMessagesPath = `conversations/${conversationId}/messages/${messageId}/threadMessages`;
             const threadMessages = await firstValueFrom(
                 this.firestore.getCollection<MessageData>(threadMessagesPath)
             );
 
-            // Lösche alle Thread-Messages
             for (const threadMsg of threadMessages) {
                 if (threadMsg.id) {
                     await this.firestore.deleteDocument(threadMessagesPath, threadMsg.id);
@@ -61,9 +53,7 @@ export class MessageService {
         } catch (error) {
             console.log('ℹ️ Keine Thread-Messages zum Löschen (oder Fehler)');
         }
-        // ========== CASCADE-DELETE END ==========
 
-        // Dann lösche die Parent-Message
         return this.firestore.deleteDocument(`conversations/${conversationId}/messages`, messageId);
     }
 
@@ -120,8 +110,6 @@ export class MessageService {
         );
     }
 
-    //Reactions
-
     private async toggleReactionForCollection(collectionPath: string, messageId: string, reactionId: ReactionId, userId: string): Promise<void> {
         const docPath = `${collectionPath}/${messageId}`;
         const message = await firstValueFrom(this.firestore.getDocument<MessageData>(docPath));
@@ -169,20 +157,16 @@ export class MessageService {
 
         const threadPath = `${basePath}/${parentMessageId}/threadMessages`;
 
-        // 1. Lösche Thread-Message
         await this.firestore.deleteDocument(threadPath, threadMessageId);
 
-        // 2. Hole Parent-Message
         const parentDoc = await firstValueFrom(
             this.firestore.getDocument<MessageData>(`${basePath}/${parentMessageId}`)
         );
 
         if (!parentDoc) {
-            console.warn('Parent-Message nicht gefunden');
             return;
         }
 
-        // 3. Dekrementiere threadCount
         const currentCount = parentDoc.threadCount ?? 0;
         const newCount = Math.max(0, currentCount - 1);  // Nie negativ!
 
@@ -190,7 +174,6 @@ export class MessageService {
             threadCount: newCount,
         });
 
-        console.log(`Thread-Message gelöscht. ThreadCount: ${currentCount} → ${newCount}`);
     }
 
     toggleReactionOnThreadMessage(
