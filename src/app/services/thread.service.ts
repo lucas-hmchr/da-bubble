@@ -67,7 +67,6 @@ export class ThreadService {
     this._contextId.set(null);
     this._threadMessages.set([]);
 
-    // Subscription cleanup
     this.threadMessagesSub?.unsubscribe();
     this.threadMessagesSub = undefined;
     this.parentMessageSub?.unsubscribe();
