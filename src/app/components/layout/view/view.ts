@@ -11,7 +11,7 @@ import { UserService } from '../../../services/user.service';
 import { ChatContextService, ChatContextType } from '../../../services/chat-context.service';
 import { ChannelService } from '../../../services/channel.service';
 import { ConversationService } from '../../../services/conversation.service';
-import { NewMessageService } from '../../../services/new-message.service';
+import { NewMessageService } from '../../../services/message/new-message.service';
 import { ViewStateService } from '../../../services/view-state.service';
 import { ProfilePopup } from "../../shared/profile-popup/profile-popup";
 import { ProfilePopupService } from '../../../services/profile-popup.service';

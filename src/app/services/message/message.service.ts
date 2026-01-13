@@ -1,12 +1,12 @@
 import { Injectable } from '@angular/core';
 import { firstValueFrom } from 'rxjs';
 
-import { ChannelService } from './channel.service';
-import { ConversationService } from './conversation.service';
-import { FirestoreService } from "./firestore";
+import { ChannelService } from './../channel.service';
+import { ConversationService } from './../conversation.service';
+import { FirestoreService } from "./../firestore";
 
-import { MessageData } from '../models/message.interface';
-import type { ReactionId } from '../../shared/data/reactions';
+import { MessageData } from '../../models/message.interface';
+import type { ReactionId } from '../../../shared/data/reactions';
 
 @Injectable({ providedIn: 'root' })
 

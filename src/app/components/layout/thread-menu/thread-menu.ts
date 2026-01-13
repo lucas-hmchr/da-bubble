@@ -3,8 +3,9 @@ import { CommonModule } from '@angular/common';
 import { ThreadService } from '../../../services/thread.service';
 import { ChannelService } from '../../../services/channel.service';
 import { MessageInput } from '../../shared/message-input/message-input';
-import { Message } from '../../shared/message/message';
+
 import { Channel } from '../../../models/channel.interface';
+import { Message } from '../../shared/message/message';
 
 @Component({
   selector: 'app-thread-menu',

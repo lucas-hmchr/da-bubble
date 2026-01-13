@@ -1,0 +1,94 @@
+import { Injectable } from '@angular/core';
+import { User } from '../../models/user.model';
+
+@Injectable({ providedIn: 'root' })
+export class MessageFormatterService {
+  
+  toDate(value: any): Date | null {
+    if (!value) return null;
+    if (value instanceof Date) return value;
+    if (value?.toDate) return value.toDate();
+    if (typeof value === 'number') return new Date(value);
+    if (typeof value === 'string') return new Date(value);
+    return null;
+  }
+
+  isSameDay(dateA: any, dateB: any): boolean {
+    const a = this.toDate(dateA);
+    const b = this.toDate(dateB);
+    if (!a || !b) return false;
+    return (
+      a.getFullYear() === b.getFullYear() &&
+      a.getMonth() === b.getMonth() &&
+      a.getDate() === b.getDate()
+    );
+  }
+
+  getFormattedDate(date: Date | any): string {
+    const msgDate = this.toDate(date);
+    if (!msgDate) return '';
+    const currentYear = new Date().getFullYear();
+    const messageYear = msgDate.getFullYear();
+    if (messageYear === currentYear) {
+      return this.formatDate(msgDate, 'd. MMMM');
+    }
+    return this.formatDate(msgDate, 'd. MMMM yyyy');
+  }
+
+  getFormattedDateWithWeekday(date: Date | any): string {
+    const msgDate = this.toDate(date);
+    if (!msgDate) return '';
+    const currentYear = new Date().getFullYear();
+    const messageYear = msgDate.getFullYear();
+    const weekday = msgDate.toLocaleString('de-DE', { weekday: 'long' });
+    if (messageYear === currentYear) {
+      const dayMonth = this.formatDate(msgDate, 'd. MMMM');
+      return `${weekday}, ${dayMonth}`;
+    }
+    const dayMonthYear = this.formatDate(msgDate, 'd. MMMM yyyy');
+    return `${weekday}, ${dayMonthYear}`;
+  }
+
+  private formatDate(date: Date, format: string): string {
+    const day = date.getDate();
+    const month = date.toLocaleString('de-DE', { month: 'long' });
+    const year = date.getFullYear();
+    return format
+      .replace('d', day.toString())
+      .replace('MMMM', month)
+      .replace('yyyy', year.toString());
+  }
+
+  parseMessageText(text: string, users: User[]): string {
+    if (!text) return '';
+    const mentionRegex = /@\[([^\]]+)\]|@([A-Za-zäöüÄÖÜß]+(?: [A-Za-zäöüÄÖÜß]+)*)/g;
+    const result = text.replace(mentionRegex, (match, bracketName, simpleName) => {
+      const displayName = bracketName || simpleName;
+      const user = this.findUserByDisplayName(displayName, users);
+      if (user && user.uid) {
+        return `<span class="mention" data-user-id="${user.uid}">${match}</span>`;
+      }
+      return match;
+    });
+    return result;
+  }
+
+  private findUserByDisplayName(displayName: string, users: User[]): User | undefined {
+    const trimmedName = displayName.trim().toLowerCase();
+    return users.find(user => {
+      const userDisplayName = (user.displayName ?? user.name ?? '').toLowerCase();
+      return userDisplayName === trimmedName;
+    });
+  }
+
+  getUserIdFromElement(element: HTMLElement): string | null {
+    if (element.classList.contains('mention')) {
+      return element.getAttribute('data-user-id');
+    }
+    const mentionParent = element.closest('.mention') as HTMLElement | null;
+    if (mentionParent) {
+      return mentionParent.getAttribute('data-user-id');
+    }
+    return null;
+  }
+}
