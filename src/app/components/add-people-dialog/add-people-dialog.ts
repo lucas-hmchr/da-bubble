@@ -72,7 +72,8 @@ export class AddPeopleDialogComponent {
         .filter((id): id is string => !!id),
       channelId: this.channelId,
     });
-    this.close.emit();
+    this.close.emit(
+    );
   }
 
   filteredUsers(): User[] {
