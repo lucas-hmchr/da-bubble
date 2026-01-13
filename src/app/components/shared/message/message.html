@@ -86,8 +86,12 @@
 
 
           <ng-template #normalBubble>
-            <p class="text bubble" [ngClass]="isOwnMessage(msg) ? 'me-person' : 'other-person'"
+            <!-- <p class="text bubble" [ngClass]="isOwnMessage(msg) ? 'me-person' : 'other-person'"
               [innerHTML]="parseMessageText(msg.text)" (click)="onMessageTextClick($event)">
+            </p> -->
+            <p class="text bubble" [ngClass]="isOwnMessage(msg) ? 'me-person' : 'other-person'"
+              [innerHTML]="users.length > 0 ? parseMessageText(msg.text) : msg.text"
+              (click)="onMessageTextClick($event)">
             </p>
           </ng-template>
 
