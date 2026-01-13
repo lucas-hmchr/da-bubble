@@ -80,7 +80,6 @@ export class ChannelInfoPopup {
     const ch = this.channel();
     
     if (!newName || !ch?.id) {
-      console.error('❌ Invalid name or channel');
       return;
     }
 
@@ -90,19 +89,14 @@ export class ChannelInfoPopup {
     }
 
     try {
-      console.log('💾 Updating channel name in Firebase...');
       
       await this.channelService.updateChannelName(ch.id, newName);
       
-      console.log('✅ Channel name updated successfully!');
-      
       const updatedChannel = { ...ch, name: newName };
       this.channelInfoService.channel.set(updatedChannel);
-      
       this.isEditingName.set(false);
       
     } catch (error) {
-      console.error('❌ Error updating channel name:', error);
       alert('Fehler beim Umbenennen des Channels');
     }
   }
@@ -125,7 +119,6 @@ export class ChannelInfoPopup {
     const ch = this.channel();
     
     if (!ch?.id) {
-      console.error('❌ No channel ID');
       return;
     }
 
@@ -135,19 +128,14 @@ export class ChannelInfoPopup {
     }
 
     try {
-      console.log('💾 Updating channel description in Firebase...');
       
       await this.channelService.updateChannelDescription(ch.id, newDescription);
       
-      console.log('✅ Channel description updated successfully!');
-      
       const updatedChannel = { ...ch, description: newDescription };
       this.channelInfoService.channel.set(updatedChannel);
-      
       this.isEditingDescription.set(false);
       
     } catch (error) {
-      console.error('❌ Error updating channel description:', error);
       alert('Fehler beim Aktualisieren der Beschreibung');
     }
   }
@@ -166,11 +154,9 @@ export class ChannelInfoPopup {
     const creatorId = this.creatorId();
     
     if (!creatorId) {
-      console.warn('⚠️ No creator ID available');
       return;
     }
 
-    console.log('👤 Opening creator profile:', creatorId);
     
     this.profilePopupService.open(creatorId);
   }
@@ -185,7 +171,6 @@ export class ChannelInfoPopup {
     const currentUserId = this.authService.uid();
     
     if (!ch?.id || !currentUserId) {
-      console.error('❌ Missing channel ID or user ID');
       return;
     }
 
@@ -196,17 +181,11 @@ export class ChannelInfoPopup {
     if (!confirmed) return;
 
     try {
-      console.log('🚪 Leaving channel:', ch.name);
-      
       await this.channelService.leaveChannel(ch.id, currentUserId);
-      
-      console.log('✅ Channel left successfully');
-      
       this.close();
       this.router.navigate(['/']);
       
     } catch (error) {
-      console.error('❌ Error leaving channel:', error);
       alert('Fehler beim Verlassen des Channels');
     }
   }

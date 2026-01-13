@@ -1,0 +1,211 @@
+.message-container {
+  width: 100%;
+}
+
+.message-wrapper {
+  position: relative;
+  overflow: visible;
+  z-index: 1;
+
+  &:has(.reaction-picker) {
+    z-index: 100;
+  }
+
+  &.menu-open {
+    z-index: 50;
+  }
+}
+
+.date-separator {
+  position: relative;
+  z-index: -1;
+  display: flex;
+  align-items: center;
+  width: 100%;
+  margin: 0px 0;
+  padding: 0 24px;
+
+  &::before,
+  &::after {
+    content: "";
+    flex: 1;
+    border-bottom: 1px solid #ccc;
+    z-index: -1;
+  }
+
+  span {
+    position: relative;
+    z-index: 0;
+    padding: 6px 14px;
+    border: 1px solid #d0d0e0;
+    border-radius: 20px;
+    background: #fff;
+    font-size: 18px;
+  }
+}
+
+.message-content {
+  position: relative;
+  display: flex;
+  gap: 16px;
+  padding: 10px 35px;
+  margin: 0 0px;
+  overflow: visible;
+
+  >div {
+    min-width: 0;
+    flex: 1 1 auto;
+  }
+
+  &:hover {
+    cursor: pointer;
+    background-color: var(--bg-clr);
+
+    .other-person {
+      background-color: var(--clr-white);
+    }
+
+    .message-actions {
+      opacity: 1;
+      pointer-events: auto;
+      transform: translateY(calc(-100% + 25px));
+    }
+  }
+}
+
+.fdrr {
+  flex-direction: row-reverse;
+}
+
+.message-content.fdrr>div {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+}
+
+.message-header-reverse {
+  display: flex;
+  gap: 5px;
+  flex-direction: row-reverse;
+  justify-content: center;
+}
+
+.profile-pic {
+  height: 70px;
+  width: 70px;
+  border-radius: 100%;
+  cursor: pointer;
+  transition: transform 0.2s ease, opacity 0.2s ease;
+
+  &:hover {
+    transform: scale(1.05);
+    opacity: 0.8;
+  }
+}
+
+.send-name {
+  font-weight: bold;
+  font-size: 18px;
+  cursor: pointer;
+  transition: color 0.2s ease;
+
+  &:hover {
+    color: var(--clr-purple-2);
+    text-decoration: none;
+  }
+}
+
+.clickable {
+  cursor: pointer;
+  transition: color 0.2s ease;
+
+  &:hover {
+    color: var(--clr-purple-2);
+    text-decoration: underline;
+  }
+}
+
+.send-info {
+  font-size: 14px;
+  color: #686868;
+}
+
+.green {
+  background-color: green;
+}
+
+a {
+  text-decoration: none;
+  color: #535af1;
+  font-size: 18px;
+}
+
+p {
+  font-size: 18px;
+}
+
+.text {
+  margin: 10px 0;
+}
+
+.text,
+.bubble,
+.inline-edit-textarea {
+  overflow-wrap: anywhere;
+  word-break: break-word;
+  white-space: pre-wrap;
+}
+
+.bubble {
+  max-width: min(680px, 90%);
+  width: fit-content;
+  overflow-wrap: break-word;
+  word-break: normal;
+  padding: 15px;
+  border-radius: 30px;
+
+  ::ng-deep .mention {
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    padding: 0 2px;
+    border-radius: 3px;
+    text-decoration: none;
+  }
+}
+
+.other-person {
+  background-color: var(--bg-clr);
+  color: black;
+  border-top-left-radius: 0;
+}
+
+.me-person {
+  background-color: var(--clr-purple-2);
+  color: white;
+  border-top-right-radius: 0;
+
+  ::ng-deep .mention {
+    color: #ffffff;
+    font-weight: 700;
+    text-decoration: underline;
+    text-decoration-thickness: 1px;
+    text-underline-offset: 2px;
+
+    &:hover {
+      background-color: rgba(255, 255, 255, 0.2);
+      text-decoration-thickness: 2px;
+    }
+
+    &:active {
+      background-color: rgba(255, 255, 255, 0.3);
+    }
+  }
+}
+
+.empty-channel-info {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding: 0 35px;
+}

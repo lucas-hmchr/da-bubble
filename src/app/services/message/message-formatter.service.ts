@@ -61,7 +61,8 @@ export class MessageFormatterService {
 
   parseMessageText(text: string, users: User[]): string {
     if (!text) return '';
-    const mentionRegex = /@\[([^\]]+)\]|@([A-Za-zäöüÄÖÜß]+(?: [A-Za-zäöüÄÖÜß]+)*)/g;
+    // Fixed: Lookahead (?=...) stoppt Match bei Leerzeichen + Nicht-Buchstabe oder Ende
+    const mentionRegex = /@\[([^\]]+)\]|@([A-Za-zäöüÄÖÜß]+(?:\s+[A-Za-zäöüÄÖÜß]+)*?)(?=\s+[^A-Za-zäöüÄÖÜß]|$)/g;
     const result = text.replace(mentionRegex, (match, bracketName, simpleName) => {
       const displayName = bracketName || simpleName;
       const user = this.findUserByDisplayName(displayName, users);
