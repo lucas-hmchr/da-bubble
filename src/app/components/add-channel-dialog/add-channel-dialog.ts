@@ -41,7 +41,8 @@ export class AddChannelDialog {
 
       this.dialogRef.close({
         created: true,
-        channelId: channelId
+        channelId: channelId,
+        channelName: newChannel.name
       });
     });
 

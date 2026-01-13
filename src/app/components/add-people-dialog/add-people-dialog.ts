@@ -14,6 +14,7 @@ import { UserService } from '../../services/user.service';
 export class AddPeopleDialogComponent {
 
   @Input() channelId!: string;
+  @Input() channelName!: string;
   @Output() close = new EventEmitter<void>();
   @Output() done = new EventEmitter<{
     mode: 'all' | 'specific';
