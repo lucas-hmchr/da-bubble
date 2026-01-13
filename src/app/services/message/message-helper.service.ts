@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
-import { User } from '../models/user.model';
-import { getAvatarById } from '../../shared/data/avatars';
+import { User } from '../../models/user.model';
+import { getAvatarById } from '../../../shared/data/avatars';
 
 @Injectable({ providedIn: 'root' })
 export class MessageHelperService {

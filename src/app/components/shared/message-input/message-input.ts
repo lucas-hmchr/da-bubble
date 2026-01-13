@@ -17,8 +17,8 @@ import { MessageInputService } from '../../../services/message/message-intput.se
 import { UserService } from '../../../services/user.service';
 import { NewMessageService } from '../../../services/message/new-message.service';
 import { ThreadService } from '../../../services/thread.service';
-import { MessageInputMentionService } from '../../../services/message-input-mention.service';
-import { MessageInputEmojiService } from '../../../services/message-input-emoji.service';
+import { MessageInputMentionService } from '../../../services/message/message-input-mention.service';
+import { MessageInputEmojiService } from '../../../services/message/message-input-emoji.service';
 import { FormsModule } from '@angular/forms';
 import { emojiReactions } from '../../../../shared/data/reactions';
 

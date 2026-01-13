@@ -1,10 +1,10 @@
 import { Injectable, signal, inject } from '@angular/core';
 import { MessageInputService } from './message-intput.service';
-import { User } from '../models/user.model';
-import { Channel } from '../models/channel.interface';
-import { ChatContextService } from './chat-context.service';
-import { AuthService } from '../auth/auth.service';
-import { ConversationService } from './conversation.service';
+import { User } from '../../models/user.model';
+import { Channel } from '../../models/channel.interface';
+import { ChatContextService } from './../chat-context.service';
+import { AuthService } from '../../auth/auth.service';
+import { ConversationService } from './../conversation.service';
 import { Router } from '@angular/router';
 
 type Mode = 'user' | 'channel' | null;

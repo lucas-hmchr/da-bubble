@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
-import { MessageData } from '../models/message.interface';
-import { ReactionId } from '../../shared/data/reactions';
+import { MessageData } from '../../models/message.interface';
+import { ReactionId } from '../../../shared/data/reactions';
 import { MessageService } from './message.service';
 
 @Injectable({ providedIn: 'root' })

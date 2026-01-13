@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
-import { User } from '../models/user.model';
-import { Channel } from '../models/channel.interface';
+import { User } from '../../models/user.model';
+import { Channel } from '../../models/channel.interface';
 
 export interface MentionPosition {
   top: number;

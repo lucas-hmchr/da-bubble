@@ -3,7 +3,7 @@ import { ChannelInfoService } from '../../../services/channel-info.service';
 import { ChannelService } from '../../../services/channel.service';
 import { AuthService } from '../../../auth/auth.service';
 import { ProfilePopupService } from '../../../services/profile-popup.service';
-import { UserStoreService } from '../../../services/user-store.service';  // ← NEU!
+import { UserStoreService } from '../../../services/user-store.service';
 import { Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';

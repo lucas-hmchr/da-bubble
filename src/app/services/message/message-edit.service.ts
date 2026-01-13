@@ -1,5 +1,5 @@
 import { Injectable, signal } from '@angular/core';
-import { MessageData } from '../models/message.interface';
+import { MessageData } from '../../models/message.interface';
 import { MessageInputService } from './message-intput.service';
 
 @Injectable({ providedIn: 'root' })

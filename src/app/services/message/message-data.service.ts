@@ -1,8 +1,8 @@
 import { Injectable } from '@angular/core';
 import { Observable, tap } from 'rxjs';
-import { ChannelService } from './channel.service';
-import { ConversationService } from './conversation.service';
-import { MessageData } from '../models/message.interface';
+import { ChannelService } from './../channel.service';
+import { ConversationService } from './../conversation.service';
+import { MessageData } from '../../models/message.interface';
 import { MessageScrollService } from './message-scroll.service';
 
 type GetBottomElementFn = () => any;

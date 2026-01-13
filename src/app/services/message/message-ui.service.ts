@@ -1,5 +1,5 @@
 import { Injectable, signal } from '@angular/core';
-import { ReactionId } from '../../shared/data/reactions';
+import { ReactionId } from '../../../shared/data/reactions';
 
 @Injectable({ providedIn: 'root' })
 export class MessageUiService {

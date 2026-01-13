@@ -28,7 +28,7 @@ import { UserService } from '../../../services/user.service';
 import { ChatContextService } from '../../../services/chat-context.service';
 import { ConversationService } from '../../../services/conversation.service';
 import { SearchService } from '../../../services/search.topbar.service';
-import { NewMessageService } from '../../../services/new-message.service';
+import { NewMessageService } from '../../../services/message/new-message.service';
 import { getAvatarById } from '../../../../shared/data/avatars';
 import { AddPeopleDialogComponent } from '../../add-people-dialog/add-people-dialog';
 
