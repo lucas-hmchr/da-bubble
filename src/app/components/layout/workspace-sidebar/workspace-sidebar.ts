@@ -68,6 +68,7 @@ export class WorkspaceSidebar implements OnInit, OnDestroy {
 
   showAddPeopleDialog = false;
   createdChannelId: string | null = null;
+  createdChannelName: string | null = null;
 
   private destroy$ = new Subject<void>();
   constructor(
@@ -164,16 +165,17 @@ export class WorkspaceSidebar implements OnInit, OnDestroy {
     });
 
     dialogRef.afterClosed().subscribe(result => {
-      if (result?.created && result.channelId) {
-        this.openAddPeopleDialog(result.channelId);
+      if (result?.created && result.channelId && result.channelName) {
+        this.openAddPeopleDialog(result.channelId, result.channelName);
         this.showAddPeopleDialog = true;
       }
     });
 
   }
 
-  openAddPeopleDialog(channelId: string) {
+  openAddPeopleDialog(channelId: string, channelName: string) {
     this.createdChannelId = channelId;
+    this.createdChannelName = channelName;
     this.showAddPeopleDialog = true;
   }
 

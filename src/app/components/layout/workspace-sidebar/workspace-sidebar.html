@@ -183,6 +183,7 @@
 @if (showAddPeopleDialog) {
   <app-add-people-dialog
   [channelId]="createdChannelId!"
+  [channelName]="createdChannelName!"
   (close)="showAddPeopleDialog = false"
   (done)="onAddPeopleDone($event)">
 </app-add-people-dialog>
