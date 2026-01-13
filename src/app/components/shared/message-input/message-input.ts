@@ -1,4 +1,3 @@
-
 import {
   Component,
   Input,
@@ -18,9 +17,10 @@ import { MessageInputService } from '../../../services/message-intput.service';
 import { UserService } from '../../../services/user.service';
 import { NewMessageService } from '../../../services/new-message.service';
 import { ThreadService } from '../../../services/thread.service';
+import { MessageInputMentionService } from '../../../services/message-input-mention.service';
+import { MessageInputEmojiService } from '../../../services/message-input-emoji.service';
 import { FormsModule } from '@angular/forms';
 import { emojiReactions } from '../../../../shared/data/reactions';
-// import { getAvatarSrc } from '../../../../shared/data/avatars';
 
 @Component({
   selector: 'app-message-input',
@@ -33,7 +33,6 @@ export class MessageInput implements OnInit {
 
   @Input() channel?: Channel;
   @Input() currentUserUid: string | null = null;
-  // @Input() contextType: 'channel' | 'conversation' = 'channel';
   @Input() contextType: 'channel' | 'conversation' | 'thread' = 'channel';
   @Input() conversationId?: string | null;
   @Input() forceEditable = false;
@@ -63,17 +62,18 @@ export class MessageInput implements OnInit {
 
   showEmojiPicker = false;
   emojiReactions = emojiReactions;
-
-
   private _editingMessage?: { id: string; text: string };
   private newMessage = inject(NewMessageService);
   private threadService = inject(ThreadService);
+  private mentionService = inject(MessageInputMentionService);
+  private emojiService = inject(MessageInputEmojiService);
 
-  // @ViewChild('messageInput') messageInput!: ElementRef<HTMLTextAreaElement>;
   @ViewChild('messageInput') messageInput?: ElementRef<HTMLTextAreaElement>;
   @ViewChild('container') container!: ElementRef<HTMLDivElement>;
 
   public userService = inject(UserService);
+
+  constructor(private messageService: MessageInputService) { }
 
   users: User[] = [];
   filteredUsers: User[] = [];
@@ -83,8 +83,6 @@ export class MessageInput implements OnInit {
   activeMentionType: 'user' | 'channel' | null = null;
   showMentions = false;
   mentionPosition = { top: 0, left: 0, bottom: 0 };
-
-  constructor(private messageService: MessageInputService) { }
 
   ngOnInit(): void {
     this.messageService.loadUsers().subscribe((users) => {
@@ -101,9 +99,6 @@ export class MessageInput implements OnInit {
   getAvatarSrc(id: AvatarId) {
     return getAvatarById(id).src;
   }
-
-  // ---------- Mentions ----------
-
   onKeyup(event: KeyboardEvent | Event) {
     const textarea = event.target as HTMLTextAreaElement;
     const value = textarea.value;
@@ -135,29 +130,29 @@ export class MessageInput implements OnInit {
 
   private filterMentions(value: string) {
     if (this.activeMentionType === 'user') {
-      const result = this.messageService.filterUsersByQuery(this.users, value);
+      this.filterUserMentions(value);
+    } else {
+      this.filterChannelMentions(value);
+    }
+  }
 
-      if (result === null) {
-        this.resetMentions();
-        this.filteredUsers = [];
-        return;
-      }
-
-      this.filteredUsers = result;
+  private filterUserMentions(value: string) {
+    const result = this.messageService.filterUsersByQuery(this.users, value);
+    if (result === null) {
+      this.resetMentions();
+      this.filteredUsers = [];
       return;
     }
+    this.filteredUsers = result;
+  }
 
-    const result = this.messageService.filterChannelsByQuery(
-      this.channelsList,
-      value
-    );
-
+  private filterChannelMentions(value: string) {
+    const result = this.messageService.filterChannelsByQuery(this.channelsList, value);
     if (result === null) {
       this.resetMentions();
       this.filteredChannels = [];
       return;
     }
-
     this.filteredChannels = result;
   }
 
@@ -165,15 +160,9 @@ export class MessageInput implements OnInit {
     this.showMentions = false;
     this.activeMentionType = null;
   }
-
-
   onEnter(event: KeyboardEvent | Event) {
     if ((event as KeyboardEvent).shiftKey) return;
 
-    // if (this.contextType === 'channel' && !this.isChannelMember) {
-    //   event.preventDefault();
-    //   return;
-    // }
     if (this.isReadOnly) {
       event.preventDefault();
       return;
@@ -186,31 +175,35 @@ export class MessageInput implements OnInit {
   async onSend() {
     const text = this.getTrimmedText();
     if (!text) return;
-
-    // ========== NEU: THREAD HANDLING ==========
     if (this.contextType === 'thread') {
-      // Event emiten für Thread-Component
-      this.threadMessageSent.emit({ text });
-      this.afterSend();
+      this.handleThreadSend(text);
       return;
     }
-
-    // NEW MESSAGE FLOW:
-    // forceEditable = true, wir sind im conversation-mode (weil app-message-input nur 1x gerendert wird),
-    // aber ohne conversationId und ohne channel -> Ziel kommt aus NewMessageService (Header-Input)
-    const isNewMessageFlow =
-      this.forceEditable &&
-      this.contextType === 'conversation' &&
-      !this.conversationId &&
-      !this.channel;
-
-    if (isNewMessageFlow) {
-      const ok = await this.newMessage.sendAndNavigate(text);
-      if (ok) this.afterSend(); // nur leeren wenn wirklich gesendet wurde
+    if (this.isNewMessageFlow()) {
+      await this.handleNewMessageFlow(text);
       return;
     }
+    await this.handleNormalSend(text);
+  }
 
-    // NORMALER FLOW (Channel oder bestehende Conversation)
+  private handleThreadSend(text: string) {
+    this.threadMessageSent.emit({ text });
+    this.afterSend();
+  }
+
+  private isNewMessageFlow(): boolean {
+    return this.forceEditable &&
+           this.contextType === 'conversation' &&
+           !this.conversationId &&
+           !this.channel;
+  }
+
+  private async handleNewMessageFlow(text: string) {
+    const ok = await this.newMessage.sendAndNavigate(text);
+    if (ok) this.afterSend();
+  }
+
+  private async handleNormalSend(text: string) {
     if (!this.currentUserUid) {
       console.warn('Kein aktueller Benutzer (UID).');
       return;
@@ -218,16 +211,12 @@ export class MessageInput implements OnInit {
 
     try {
       const ctx = await this.sendByContext(text, this.currentUserUid);
-
       this.afterSend();
-
       this.messageSent.emit(ctx);
     } catch (error) {
       console.error('Fehler beim Senden der Nachricht:', error);
     }
   }
-
-
   private getTrimmedText(): string {
     const textarea = this.messageInput?.nativeElement;
     if (!textarea) return '';  // ← NULL-CHECK!
@@ -246,52 +235,32 @@ export class MessageInput implements OnInit {
       return { contextType: 'conversation', conversationId };
     }
   }
-
-
   private async handleChannelSend(text: string, senderId: string): Promise<string> {
     if (!this.channel?.id) {
       console.warn('Kein Channel gesetzt.');
       return '';
     }
-
     const channelId = this.channel.id as string;
-
     if (this.isEditing && this.editingMessage?.id) {
-      await this.messageService.updateChannelMessage(
-        channelId,
-        this.editingMessage.id,
-        text
-      );
+      await this.messageService.updateChannelMessage(channelId, this.editingMessage.id, text);
     } else {
       await this.messageService.sendChannelMessage(channelId, text, senderId);
     }
-
     return channelId;
   }
-
-
   private async handleConversationSend(text: string, senderId: string): Promise<string> {
     if (!this.conversationId) {
       console.warn('Keine Conversation-ID gesetzt.');
       return '';
     }
-
     const convId = this.conversationId;
-
     if (this.isEditing && this.editingMessage?.id) {
-      await this.messageService.updateConversationMessage(
-        convId,
-        this.editingMessage.id,
-        text
-      );
+      await this.messageService.updateConversationMessage(convId, this.editingMessage.id, text);
     } else {
       await this.messageService.sendConversationMessage(convId, text, senderId);
     }
-
     return convId;
   }
-
-
   private afterSend() {
     const textarea = this.messageInput?.nativeElement;
     if (textarea) {  // ← NULL-CHECK!
@@ -302,103 +271,40 @@ export class MessageInput implements OnInit {
     this._editingMessage = undefined;
     this.editFinished.emit();
   }
-
-
   private updateMentionPosition() {
     const textarea = this.messageInput?.nativeElement;
-    if (!textarea) return;  // ← NULL-CHECK!
-
+    if (!textarea) return;
     const containerEl = this.container.nativeElement;
     const caretIndex = textarea.selectionStart ?? textarea.value.length;
-
-    const mirror = this.createMirror(textarea, caretIndex);
-    containerEl.appendChild(mirror);
-
-    const marker = mirror.lastElementChild as HTMLElement;
-    const markerRect = marker.getBoundingClientRect();
-    const containerRect = containerEl.getBoundingClientRect();
-
-    this.mentionPosition = {
-      top: markerRect.bottom - containerRect.top + 8,
-      left: markerRect.left - containerRect.left,
-      bottom: containerRect.bottom - markerRect.top + 8,
-    };
-
-    containerEl.removeChild(mirror);
-  }
-
-  private createMirror(
-    textarea: HTMLTextAreaElement,
-    caretIndex: number
-  ): HTMLDivElement {
-    const mirror = document.createElement('div');
-    const style = window.getComputedStyle(textarea);
-
-    Array.from(style).forEach((name) => {
-      mirror.style.setProperty(name, style.getPropertyValue(name));
-    });
-
-    mirror.style.position = 'absolute';
-    mirror.style.visibility = 'hidden';
-    mirror.style.whiteSpace = 'pre-wrap';
-    mirror.style.wordWrap = 'break-word';
-    mirror.style.overflow = 'hidden';
-    mirror.style.top = textarea.offsetTop + 'px';
-    mirror.style.left = textarea.offsetLeft + 'px';
-    mirror.style.width = textarea.clientWidth + 'px';
-
-    mirror.textContent = textarea.value.substring(0, caretIndex);
-
-    const marker = document.createElement('span');
-    marker.textContent = '\u200b';
-    mirror.appendChild(marker);
-
-    return mirror;
+    const mirror = this.mentionService.createMirror(textarea, caretIndex);
+    this.mentionPosition = this.mentionService.calculateMentionPosition(containerEl, mirror);
   }
 
   getListLabel(user: User): string {
-    const baseName = user.displayName ?? user.name ?? '';
-
-    if (this.currentUserUid && user.uid === this.currentUserUid) {
-      return `${baseName} (Du)`;
-    }
-
-    return baseName;
+    return this.mentionService.getListLabel(user, this.currentUserUid);
   }
 
   getMentionLabel(user: User): string {
-    return user.displayName ?? user.name ?? '';
+    return this.mentionService.getMentionLabel(user);
   }
 
   onSelectUser(user: User) {
-    this.replaceTriggerWithText('@', this.getMentionLabel(user));
+    const textarea = this.messageInput?.nativeElement;
+    if (!textarea) return;
+    this.mentionService.replaceTriggerWithText(textarea, '@', this.getMentionLabel(user));
     this.resetMentions();
   }
 
   onSelectChannel(channel: Channel) {
-    this.replaceTriggerWithText('#', channel.name ?? '');
+    const textarea = this.messageInput?.nativeElement;
+    if (!textarea) return;
+    this.mentionService.replaceTriggerWithText(textarea, '#', channel.name ?? '');
     this.resetMentions();
   }
-
-  private replaceTriggerWithText(trigger: string, text: string) {
-    const textarea = this.messageInput?.nativeElement;
-    if (!textarea) return;  // ← NULL-CHECK!
-
-    const value = textarea.value;
-    const lastIndex = value.lastIndexOf(trigger);
-
-    if (lastIndex === -1) return;
-
-    const before = value.slice(0, lastIndex);
-    textarea.value = `${before}${trigger}${text} `;
-    textarea.focus();
-  }
-
 
   get isChannelMember(): boolean {
     if (this.contextType !== 'channel') return true;
 
-    // Public Default-Channel
     if (this.channel?.id === 'general') return true;
     if (!this.channel || !this.currentUserUid) return false;
 
@@ -406,15 +312,8 @@ export class MessageInput implements OnInit {
     return members.includes(this.currentUserUid);
   }
 
-
-  // get isReadOnly(): boolean {
-  //   return this.contextType === 'channel' && !this.isChannelMember;
-  // }
-
   get isReadOnly(): boolean {
-    // Thread-Context ist nie read-only
     if (this.contextType === 'thread') return false;
-    // NEW MESSAGE VIEW / freier Modus: niemals read-only
     if (this.forceEditable) return false;
     return this.contextType === 'channel' && !this.isChannelMember;
   }
@@ -425,27 +324,21 @@ export class MessageInput implements OnInit {
     const textarea = this.messageInput?.nativeElement;  // ← FIX 1
     if (!textarea) return;
 
-    // Focus auf Textarea setzen
     textarea.focus();
 
-    // Aktuelle Cursor-Position
     const cursorPos = textarea.selectionStart ?? 0;
     const currentValue = textarea.value;
 
-    // @ an Cursor-Position einfügen
     const newValue =
       currentValue.slice(0, cursorPos) +
       '@' +
       currentValue.slice(cursorPos);
 
-    // Neuen Wert setzen
     textarea.value = newValue;
 
-    // Cursor NACH dem @ positionieren
     const newCursorPos = cursorPos + 1;
     textarea.setSelectionRange(newCursorPos, newCursorPos);
 
-    // Mention-Dropdown triggern
     this.startMention('@');  // ← FIX 2
 
     console.log('@ eingefügt an Position', cursorPos);
@@ -463,38 +356,15 @@ export class MessageInput implements OnInit {
   onEmojiSelect(emoji: string) {
     const textarea = this.messageInput?.nativeElement;
     if (!textarea) return;
-
-    textarea.focus();
-
-    const cursorPos = textarea.selectionStart ?? 0;
-    const currentValue = textarea.value;
-
-    const newValue =
-      currentValue.slice(0, cursorPos) +
-      emoji +
-      currentValue.slice(cursorPos);
-
-    textarea.value = newValue;
-
-    const newCursorPos = cursorPos + emoji.length;
-    textarea.setSelectionRange(newCursorPos, newCursorPos);
-
+    this.emojiService.insertEmojiAtCursor(textarea, emoji);
     this.showEmojiPicker = false;
-
-    // console.log('Emoji eingefügt:', emoji);
   }
 
   @HostListener('document:click', ['$event'])
   onDocumentClick(event: MouseEvent) {
     if (!this.showEmojiPicker) return;
-
     const target = event.target as HTMLElement;
-
-    // Check ob Click innerhalb von emoji-picker oder emoji-button
-    const isInsidePicker = target.closest('.emoji-picker');
-    const isEmojiButton = target.closest('.icon-smile');
-
-    if (!isInsidePicker && !isEmojiButton) {
+    if (this.emojiService.shouldCloseEmojiPicker(target)) {
       this.showEmojiPicker = false;
     }
   }
