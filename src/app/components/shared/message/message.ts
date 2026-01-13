@@ -17,15 +17,15 @@ import { FormsModule } from '@angular/forms';
 
 import { Channel } from '../../../models/channel.interface';
 import { FirestoreService } from '../../../services/firestore';
-import { MessageService } from '../../../services/message.service';
+import { MessageService } from '../../../services/message/message.service';
 import { MessageFormatterService } from '../../../services/message-formatter.service';
 import { MessageScrollService } from '../../../services/message-scroll.service';
 import { MessageReactionService } from '../../../services/message-reaction.service';
 import { MessageEditService } from '../../../services/message-edit.service';
-import { MessageUiService } from '../../../services/message-ui.service';
-import { MessageHelperService } from '../../../services/message-helper.service';
-import { MessageDataService } from '../../../services/message-data.service';
-import { MessageDeleteService } from '../../../services/message-delete.service';
+import { MessageUiService } from '../../../services/message/message-ui.service';
+import { MessageHelperService } from '../../../services/message/message-helper.service';
+import { MessageDataService } from '../../../services/message/message-data.service';
+import { MessageDeleteService } from '../../../services/message/message-delete.service';
 
 import { MessageData } from '../../../models/message.interface';
 import { User } from '../../../models/user.model';
