@@ -266,10 +266,8 @@ export class WorkspaceSidebar implements OnInit, OnDestroy {
       this.channelService.addMembersToChannel(event.channelId, event.userIds);
 
     }
-    // ✅ H3: Channel direkt öffnen
     this.chatContext.openChannel(event.channelId);
 
-    // ✅ Mobile: in den Chat wechseln
     if (this.isMobile) {
       this.mobileViewChange.emit('chat');
     }
