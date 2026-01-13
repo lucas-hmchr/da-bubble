@@ -14,15 +14,18 @@ export class MessageReactionService {
     currentUserId: string,
     contextType: 'channel' | 'conversation' | 'thread',
     contextId: string,
+    isThreadContext: boolean,
     threadParentMessageId?: string
   ): Promise<void> {
     if (!msg.id || !currentUserId) return;
 
-    if (contextType === 'thread' && threadParentMessageId) {
+    if (isThreadContext && threadParentMessageId) {
+      const actualContextType = contextType === 'thread' ? 'channel' : contextType;
       await this.toggleThreadReaction(
         msg.id,
         reactionId,
         currentUserId,
+        actualContextType,
         contextId,
         threadParentMessageId
       );
@@ -53,11 +56,12 @@ export class MessageReactionService {
     threadMessageId: string,
     reactionId: ReactionId,
     userId: string,
+    contextType: 'channel' | 'conversation',
     contextId: string,
     parentMessageId: string
   ): Promise<void> {
     await this.messageService.toggleReactionOnThreadMessage(
-      'channel',
+      contextType,
       contextId,
       parentMessageId,
       threadMessageId,

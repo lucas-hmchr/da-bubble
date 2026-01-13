@@ -4,11 +4,12 @@ import { ChannelService } from './channel.service';
 import { ConversationService } from './conversation.service';
 import { MessageData } from '../models/message.interface';
 import { MessageScrollService } from './message-scroll.service';
-import { ElementRef } from '@angular/core';
+
+type GetBottomElementFn = () => any;
 
 @Injectable({ providedIn: 'root' })
 export class MessageDataService {
-  private previousMessageCount?: number;
+  private messageCounts = new Map<string, number>();
 
   constructor(
     private channelService: ChannelService,
@@ -18,42 +19,60 @@ export class MessageDataService {
 
   loadChannelMessages(
     channelId: string,
-    bottomElement?: ElementRef<HTMLDivElement>
+    getBottomElement: GetBottomElementFn,
+    isThreadContext: boolean
   ): Observable<MessageData[]> {
+    const contextKey = `channel-${channelId}`;
+    
     return this.channelService
       .getChannelMessages(channelId)
       .pipe(
         tap((messages) => {
-          this.handleNewMessages(messages, bottomElement);
+          this.handleNewMessages(messages, getBottomElement, isThreadContext, contextKey);
         })
       );
   }
 
   loadConversationMessages(
     conversationId: string,
-    bottomElement?: ElementRef<HTMLDivElement>
+    getBottomElement: GetBottomElementFn,
+    isThreadContext: boolean
   ): Observable<MessageData[]> {
+    const contextKey = `conversation-${conversationId}`;
+    
     return this.conversationService
       .getConversationMessages(conversationId)
       .pipe(
-        tap(() => {
-          setTimeout(() => this.scrollService.scrollToBottom(bottomElement), 100);
+        tap((messages) => {
+          this.handleNewMessages(messages, getBottomElement, isThreadContext, contextKey);
         })
       );
   }
 
   private handleNewMessages(
     messages: MessageData[],
-    bottomElement?: ElementRef<HTMLDivElement>
+    getBottomElement: GetBottomElementFn,
+    isThreadContext: boolean,
+    contextKey: string
   ): void {
-    const previousCount = this.previousMessageCount || 0;
-    this.previousMessageCount = messages.length;
-    if (messages.length > previousCount) {
-      setTimeout(() => this.scrollService.scrollToBottom(bottomElement), 100);
+    const currentCount = messages.length;
+    const previousCount = this.messageCounts.get(contextKey) || 0;
+    
+    if (currentCount > previousCount) {
+      setTimeout(() => {
+        const bottomElement = getBottomElement();
+        this.scrollService.scrollToBottom(bottomElement, isThreadContext);
+      }, 100);
     }
+    
+    this.messageCounts.set(contextKey, currentCount);
   }
 
-  resetMessageCount(): void {
-    this.previousMessageCount = undefined;
+  resetMessageCount(contextKey: string): void {
+    this.messageCounts.delete(contextKey);
+  }
+
+  clearAllCounts(): void {
+    this.messageCounts.clear();
   }
 }

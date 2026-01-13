@@ -66,14 +66,21 @@ export class MessageEditService {
     msg: MessageData,
     contextType: 'channel' | 'conversation' | 'thread',
     contextId: string,
+    isThreadContext: boolean,
     threadParentMessageId?: string
   ): Promise<boolean> {
     if (!this.canSave() || !msg.id) return false;
     const text = this.editText().trim();
 
     try {
-      if (contextType === 'thread' && threadParentMessageId) {
-        await this.saveThreadEdit(msg.id, text, contextId, threadParentMessageId);
+      if (isThreadContext && threadParentMessageId) {
+        await this.saveThreadEdit(
+          msg.id,
+          text,
+          contextType === 'thread' ? 'channel' : contextType,
+          contextId,
+          threadParentMessageId
+        );
       } else if (contextType === 'channel') {
         await this.messageInputService.updateChannelMessage(contextId, msg.id, text);
       } else if (contextType === 'conversation') {
@@ -90,11 +97,12 @@ export class MessageEditService {
   private async saveThreadEdit(
     threadMessageId: string,
     text: string,
+    contextType: 'channel' | 'conversation',
     contextId: string,
     parentMessageId: string
   ): Promise<void> {
     await this.messageInputService.updateThreadMessage(
-      'channel',
+      contextType,
       contextId,
       parentMessageId,
       threadMessageId,

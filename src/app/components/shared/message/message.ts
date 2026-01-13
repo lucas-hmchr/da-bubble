@@ -25,6 +25,7 @@ import { MessageEditService } from '../../../services/message-edit.service';
 import { MessageUiService } from '../../../services/message-ui.service';
 import { MessageHelperService } from '../../../services/message-helper.service';
 import { MessageDataService } from '../../../services/message-data.service';
+import { MessageDeleteService } from '../../../services/message-delete.service';
 
 import { MessageData } from '../../../models/message.interface';
 import { User } from '../../../models/user.model';
@@ -75,7 +76,8 @@ export class Message implements OnChanges {
     public editService: MessageEditService,
     public uiService: MessageUiService,
     public helper: MessageHelperService,
-    private dataService: MessageDataService
+    private dataService: MessageDataService,
+    private deleteService: MessageDeleteService
   ) {
     this.loadUsers();
   }
@@ -98,7 +100,9 @@ export class Message implements OnChanges {
     if (!changes['externalMessages']) return;
     if (this.externalMessages && this.externalMessages.length > 0) {
       this.messages$ = of(this.externalMessages);
-      setTimeout(() => this.scrollService.scrollToBottom(this.bottom), 200);
+      setTimeout(() => {
+        this.scrollService.scrollToBottom(this.bottom, this.isThreadContext);
+      }, 200);
     }
   }
 
@@ -117,8 +121,6 @@ export class Message implements OnChanges {
     const oldId = changes['conversationId'].previousValue;
     const newId = changes['conversationId'].currentValue;
     if (oldId !== newId) {
-      this.scrollService.resetScrollState();
-      this.dataService.resetMessageCount();
       this.loadMessagesIfNeeded();
       this.resetEditState();
     }
@@ -126,7 +128,6 @@ export class Message implements OnChanges {
 
   private handleContextTypeChange(changes: SimpleChanges): void {
     if (!changes['contextType']) return;
-    this.scrollService.resetScrollState();
     this.loadMessagesIfNeeded();
     this.resetEditState();
   }
@@ -142,7 +143,9 @@ export class Message implements OnChanges {
     setTimeout(() => {
       if (this.messages$) {
         this.messages$.pipe(take(1)).subscribe(() => {
-          setTimeout(() => this.scrollService.scrollToBottom(this.bottom), 200);
+          setTimeout(() => {
+            this.scrollService.scrollToBottom(this.bottom, this.isThreadContext);
+          }, 200);
         });
       }
     }, 100);
@@ -155,13 +158,30 @@ export class Message implements OnChanges {
   }
 
   private loadMessages(): void {
+    const getBottom = () => this.bottom;
     if (this.contextType === 'channel' && this.channel?.id) {
-      this.messages$ = this.dataService.loadChannelMessages(this.channel.id, this.bottom);
+      this.loadChannelMessages(this.channel.id, getBottom);
     } else if (this.contextType === 'conversation' && this.conversationId) {
-      this.messages$ = this.dataService.loadConversationMessages(this.conversationId, this.bottom);
+      this.loadConversationMessages(this.conversationId, getBottom);
     } else {
       this.messages$ = undefined;
     }
+  }
+
+  private loadChannelMessages(channelId: string, getBottom: () => any): void {
+    this.messages$ = this.dataService.loadChannelMessages(
+      channelId,
+      getBottom,
+      this.isThreadContext
+    );
+  }
+
+  private loadConversationMessages(conversationId: string, getBottom: () => any): void {
+    this.messages$ = this.dataService.loadConversationMessages(
+      conversationId,
+      getBottom,
+      this.isThreadContext
+    );
   }
 
   isOwnMessage(msg: MessageData): boolean {
@@ -185,17 +205,14 @@ export class Message implements OnChanges {
   onDocumentClick(ev: MouseEvent): void {
     if (!this.editService.getEditingMessageId()) return;
     const target = ev.target as HTMLElement | null;
-    if (!target) return;
-    this.handleOutsideClick(target);
+    if (target) this.handleOutsideClick(target);
   }
 
   private handleOutsideClick(target: HTMLElement): void {
     const isInside = target.closest('.inline-edit') ||
                      target.closest('.message-options-menu') ||
                      target.closest('.option-btn');
-    if (!isInside) {
-      this.editService.tryDiscardEdit('outside-click');
-    }
+    if (!isInside) this.editService.tryDiscardEdit('outside-click');
   }
 
   get editingMessageId(): string | null {
@@ -261,14 +278,14 @@ export class Message implements OnChanges {
       msg,
       this.contextType,
       contextId,
+      this.isThreadContext,
       this.threadParentMessageId ?? undefined
     );
   }
 
   onInlineEditKeydown(ev: KeyboardEvent, msg: MessageData): void {
-    if (ev.key === 'Escape') {
-      this.cancelInlineEdit();
-    } else if (ev.key === 'Enter' && !ev.shiftKey) {
+    if (ev.key === 'Escape') this.cancelInlineEdit();
+    else if (ev.key === 'Enter' && !ev.shiftKey) {
       ev.preventDefault();
       this.saveInlineEdit(msg);
     }
@@ -279,12 +296,8 @@ export class Message implements OnChanges {
     const contextId = this.getContextId();
     if (!contextId) return;
     await this.reactionService.toggleReaction(
-      msg,
-      reactionId,
-      this.currentUserUid,
-      this.contextType,
-      contextId,
-      this.threadParentMessageId ?? undefined
+      msg, reactionId, this.currentUserUid, this.contextType,
+      contextId, this.isThreadContext, this.threadParentMessageId ?? undefined
     );
   }
 
@@ -341,12 +354,11 @@ export class Message implements OnChanges {
       const scroll = btn.closest('.messages-scroll') as HTMLElement | null;
       const menu = scroll?.querySelector('.message-options-menu') as HTMLElement | null;
       const menuHeight = menu?.getBoundingClientRect().height ?? 160;
-      const margin = 12;
       const btnRect = btn.getBoundingClientRect();
       const scrollRect = (scroll ?? document.documentElement).getBoundingClientRect();
       const spaceBelow = scrollRect.bottom - btnRect.bottom;
       const spaceAbove = btnRect.top - scrollRect.top;
-      const openUp = spaceBelow < (menuHeight + margin) && spaceAbove > (menuHeight + margin);
+      const openUp = spaceBelow < (menuHeight + 12) && spaceAbove > (menuHeight + 12);
       this.uiService.setOptionsMenuOpenUp(openUp);
     });
   }
@@ -374,46 +386,15 @@ export class Message implements OnChanges {
 
   async onDeleteMessage(msg: any): Promise<void> {
     if (!msg?.id || !this.isOwnMessage(msg)) return;
-    if (await this.confirmThreadDeletion(msg)) {
-      await this.deleteMessage(msg);
-    }
-  }
-
-  private async confirmThreadDeletion(msg: any): Promise<boolean> {
-    if (this.isThreadContext) return true;
-    if (msg.threadCount > 0) {
-      return window.confirm(
-        `Diese Nachricht hat ${msg.threadCount} Antwort(en).\n\n` +
-        `Soll die Nachricht samt allen Antworten gelöscht werden?`
-      );
-    }
-    return true;
-  }
-
-  private async deleteMessage(msg: any): Promise<void> {
-    if (this.isThreadContext && this.threadParentMessageId) {
-      await this.deleteThreadMessage(msg);
-    } else if (this.contextType === 'channel' && this.channel?.id) {
-      await this.messageService.deleteChannelMessage(this.channel.id, msg.id);
-    } else if (this.contextType === 'conversation' && this.conversationId) {
-      await this.messageService.deleteConversationMessage(this.conversationId, msg.id);
-    }
-  }
-
-  private async deleteThreadMessage(msg: any): Promise<void> {
-    if (this.contextType === 'channel' && this.channel?.id) {
-      await this.messageService.deleteThreadMessage(
-        'channel',
-        this.channel.id,
-        this.threadParentMessageId!,
-        msg.id
-      );
-    } else if (this.contextType === 'conversation' && this.conversationId) {
-      await this.messageService.deleteThreadMessage(
-        'conversation',
-        this.conversationId,
-        this.threadParentMessageId!,
-        msg.id
+    const contextId = this.getContextId();
+    if (!contextId) return;
+    if (this.deleteService.confirmThreadDeletion(msg, this.isThreadContext)) {
+      await this.deleteService.deleteMessage(
+        msg,
+        this.contextType,
+        contextId,
+        this.isThreadContext,
+        this.threadParentMessageId ?? undefined
       );
     }
   }
@@ -431,11 +412,9 @@ export class Message implements OnChanges {
     if (!uids.length) return '';
     if (uids.length === 1) return this.helper.getUserDisplayName(uids[0]);
     if (uids.length === 2) {
-      return this.helper.getUserDisplayName(uids[0]) + ' und ' + 
-             this.helper.getUserDisplayName(uids[1]);
+      return `${this.helper.getUserDisplayName(uids[0])} und ${this.helper.getUserDisplayName(uids[1])}`;
     }
-    const others = uids.length - 1;
-    return `${this.helper.getUserDisplayName(uids[0])} und ${others} weitere`;
+    return `${this.helper.getUserDisplayName(uids[0])} und ${uids.length - 1} weitere`;
   }
 
   toDate(date: Date | any): Date | null {
@@ -454,15 +433,13 @@ export class Message implements OnChanges {
     return this.formatter.getFormattedDateWithWeekday(date);
   }
 
-  openUserProfile(userId: string, event?: Event): void {
-    if (event) {
-      event.stopPropagation();
-    }
-    this.profilePopupService.open(userId);
-  }
-
   parseMessageText(text: string): string {
     return this.formatter.parseMessageText(text, this.users);
+  }
+
+  openUserProfile(userId: string, event?: Event): void {
+    if (event) event.stopPropagation();
+    this.profilePopupService.open(userId);
   }
 
   onMessageTextClick(event: MouseEvent): void {
