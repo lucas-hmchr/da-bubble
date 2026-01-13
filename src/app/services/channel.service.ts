@@ -81,9 +81,7 @@ export class ChannelService {
                 name: newName,
                 updatedAt: Timestamp.now()
             });
-            console.log('✅ Channel name updated in Firebase');
         } catch (error) {
-            console.error('❌ Error updating channel name:', error);
             throw error;
         }
     }
@@ -94,18 +92,13 @@ export class ChannelService {
                 description: newDescription,
                 updatedAt: Timestamp.now()
             });
-            console.log('✅ Channel description updated in Firebase');
         } catch (error) {
-            console.error('❌ Error updating channel description:', error);
             throw error;
         }
     }
 
     async leaveChannel(channelId: string, userId: string): Promise<void> {
         try {
-            console.log('🚪 Leaving channel...');
-            console.log('Channel ID:', channelId);
-            console.log('User ID:', userId);
 
             // Hole aktuelles Channel-Dokument
             const channel = await this.getChannelById(channelId);
@@ -120,8 +113,6 @@ export class ChannelService {
             // User aus Members entfernen
             const updatedMembers = currentMembers.filter(id => id !== userId);
 
-            console.log('Current members:', currentMembers);
-            console.log('Updated members:', updatedMembers);
 
             // Firebase updaten
             await this.firestore.updateDocument('channels', channelId, {
@@ -129,10 +120,8 @@ export class ChannelService {
                 updatedAt: Timestamp.now()
             });
 
-            console.log('✅ Successfully left channel');
 
         } catch (error) {
-            console.error('❌ Error leaving channel:', error);
             throw error;
         }
     }
@@ -166,9 +155,7 @@ export class ChannelService {
       updatedAt: Timestamp.now()
     });
 
-    console.log('✅ Members added to channel:', updatedMembers);
   } catch (error) {
-    console.error('❌ Error adding members to channel:', error);
     throw error;
   }
 }

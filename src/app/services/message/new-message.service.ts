@@ -29,7 +29,6 @@ export class NewMessageService {
     private router = inject(Router);
 
     constructor(private mi: MessageInputService) {
-        // Daten laden (einmal)
         this.mi.loadUsers().subscribe((u) => {
             this.users.set(u);
             this.filteredUsers.set(u);
@@ -48,7 +47,6 @@ export class NewMessageService {
         const firstChar = trimmed.slice(0, 1);
         const lastChar = value.slice(-1);
 
-        // Trigger startet Modus
         if (lastChar === '@' || lastChar === '#') {
             const nextMode: Mode = lastChar === '@' ? 'user' : 'channel';
             this.mode.set(nextMode);
@@ -59,13 +57,11 @@ export class NewMessageService {
             return;
         }
 
-        // Ohne gültigen Prefix -> Dropdown zu
         if (firstChar !== '@' && firstChar !== '#') {
             this.resetDropdown();
             return;
         }
 
-        // Modus setzen anhand Prefix (falls Nutzer direkt tippt ohne letzten Trigger)
         this.mode.set(firstChar === '@' ? 'user' : 'channel');
 
         if (this.mode() === 'user') {
@@ -84,7 +80,6 @@ export class NewMessageService {
 
     selectUser(u: User) {
         if (!u.uid) {
-            console.warn('User ohne uid kann nicht ausgewählt werden.');
             return;
         }
 
@@ -96,7 +91,6 @@ export class NewMessageService {
 
     selectChannel(ch: Channel) {
         if (!ch.id) {
-            console.warn('Channel ohne id kann nicht ausgewählt werden.');
             return;
         }
 
@@ -119,56 +113,37 @@ export class NewMessageService {
         this.filteredChannels.set(this.channels());
     }
 
-    // ------------------------------------------------------------------
-    // NEW: Send + Navigate
-    // ------------------------------------------------------------------
 
-    /** true, wenn ein Adressat gewählt wurde */
     hasTarget(): boolean {
         return this.target() !== null;
     }
 
-    /** Senden im "Neue Nachricht"-Flow: sendet an Target und navigiert danach in den Chat */
     async sendAndNavigate(messageText: string): Promise<boolean> {
         const text = messageText.trim();
         if (!text) return false;
-
         const t = this.target();
-        if (!t) {
-            console.warn('NewMessage: Kein Adressat ausgewählt.');
-            return false;
-        }
-
+        if (!t) return false;
         const senderId = this.auth.activeUser()?.uid;
-        if (!senderId) {
-            console.warn('NewMessage: Kein aktiver Benutzer (UID).');
-            return false;
-        }
-
-        // ✅ CHANNEL – funktioniert bereits
+        if (!senderId) return false;
         if (t.type === 'channel') {
-            await this.mi.sendChannelMessage(t.id, text, senderId);
-            this.chatContext.openChannel(t.id);
-            this.resetAll();
-            return true;
+            return await this.sendToChannel(t.id, text, senderId);
         }
+        return await this.sendToConversation(t.id, text, senderId);
+    }
 
-        // ✅ DM – KORREKT
-        const otherUserId = t.id;
-
-        // Conversation sicherstellen (für DB)
-        const convId = await this.conversations.getOrCreateConversationId(senderId, otherUserId);
-
-        await this.mi.sendConversationMessage(convId, text, senderId);
-
-        // ✅ statt openConversation(otherUserId):
-        await this.chatContext.openConversationByConvId(convId);
-
+    private async sendToChannel(channelId: string, text: string, senderId: string): Promise<boolean> {
+        await this.mi.sendChannelMessage(channelId, text, senderId);
+        this.chatContext.openChannel(channelId);
         this.resetAll();
         return true;
     }
 
-
-
+    private async sendToConversation(userId: string, text: string, senderId: string): Promise<boolean> {
+        const convId = await this.conversations.getOrCreateConversationId(senderId, userId);
+        await this.mi.sendConversationMessage(convId, text, senderId);
+        await this.chatContext.openConversationByConvId(convId);
+        this.resetAll();
+        return true;
+    }
 
 }

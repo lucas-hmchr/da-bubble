@@ -99,7 +99,6 @@ export class ChatContextService {
   async openConversation(userId: string) {
     const activeUser = this.authService.activeUser();
     if (!activeUser?.uid) {
-      console.warn('No active user – cannot open DM');
       return;
     }
 
