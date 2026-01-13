@@ -1,0 +1,79 @@
+import { Injectable, signal } from '@angular/core';
+import { ReactionId } from '../../shared/data/reactions';
+
+@Injectable({ providedIn: 'root' })
+export class MessageUiService {
+  private reactionPickerForMessageId = signal<string | null>(null);
+  private optionsMenuForMessageId = signal<string | null>(null);
+  private optionsMenuOpenUp = signal(false);
+  private isOptionsMenuHovered = signal(false);
+  private hoveredReaction = signal<ReactionId | null>(null);
+  private hoveredMessageId = signal<string | null>(null);
+
+  getReactionPickerMessageId(): string | null {
+    return this.reactionPickerForMessageId();
+  }
+
+  toggleReactionPicker(messageId: string): void {
+    const current = this.reactionPickerForMessageId();
+    this.reactionPickerForMessageId.set(current === messageId ? null : messageId);
+  }
+
+  closeReactionPicker(): void {
+    this.reactionPickerForMessageId.set(null);
+  }
+
+  getOptionsMenuMessageId(): string | null {
+    return this.optionsMenuForMessageId();
+  }
+
+  isOptionsMenuOpenUp(): boolean {
+    return this.optionsMenuOpenUp();
+  }
+
+  setOptionsMenuOpenUp(value: boolean): void {
+    this.optionsMenuOpenUp.set(value);
+  }
+
+  toggleOptionsMenu(messageId: string): void {
+    const current = this.optionsMenuForMessageId();
+    if (current === messageId) {
+      this.closeOptionsMenu();
+    } else {
+      this.optionsMenuForMessageId.set(messageId);
+    }
+  }
+
+  closeOptionsMenu(): void {
+    this.optionsMenuForMessageId.set(null);
+    this.optionsMenuOpenUp.set(false);
+    this.isOptionsMenuHovered.set(false);
+  }
+
+  setOptionsMenuHovered(hovered: boolean): void {
+    this.isOptionsMenuHovered.set(hovered);
+  }
+
+  getIsOptionsMenuHovered(): boolean {
+    return this.isOptionsMenuHovered();
+  }
+
+  setHoveredReaction(messageId: string | null, reactionId: ReactionId | null): void {
+    this.hoveredMessageId.set(messageId);
+    this.hoveredReaction.set(reactionId);
+  }
+
+  getHoveredReaction(): { messageId: string | null; reactionId: ReactionId | null } {
+    return {
+      messageId: this.hoveredMessageId(),
+      reactionId: this.hoveredReaction()
+    };
+  }
+
+  closeAllOverlays(): void {
+    this.reactionPickerForMessageId.set(null);
+    this.optionsMenuForMessageId.set(null);
+    this.hoveredReaction.set(null);
+    this.hoveredMessageId.set(null);
+  }
+}
