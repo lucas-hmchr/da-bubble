@@ -169,3 +169,31 @@
   font-weight: 600;
   color: #4f5dff; // euer Blau
 }
+
+@media (max-width: 1024px) {
+  .dialog {
+    width: 100vw;
+    min-height: 500px;
+    transform: none;
+    max-width: none;
+    bottom: 0;
+    left: auto;
+    top: auto;
+    border-radius: 30px 30px 0 0;
+    animation: slideUp 280ms ease-out forwards;
+  }
+
+  .overlay {
+    background: rgba(0, 0, 0, 0.2);
+  }
+
+  @keyframes slideUp {
+    from {
+      transform: translateY(100%);
+    }
+
+    to {
+      transform: translateY(0);
+    }
+  }
+}
