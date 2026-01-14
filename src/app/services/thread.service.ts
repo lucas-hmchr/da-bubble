@@ -49,7 +49,6 @@ export class ThreadService {
     parentMessage: MessageData
   ) {
     if (!parentMessage.id) {
-      console.warn('Thread: Parent message has no ID');
       return;
     }
 
@@ -133,14 +132,22 @@ export class ThreadService {
     const contextType = this._contextType();
     const contextId = this._contextId();
     const parentMsg = this._parentMessage();
+    if (!contextId || !parentMsg?.id) return;
 
-    if (!contextId || !parentMsg?.id) {
-      console.warn('Thread: Cannot send message - thread not open');
-      return;
+    const message = this.createThreadMessage(text, senderId);
+    const path = this.getThreadMessagePath(contextType, contextId, parentMsg.id);
+
+    try {
+      await this.firestore.addDocument(path, message);
+      await this.updateParentMessage(contextType, contextId, parentMsg.id);
+    } catch (error) {
+      throw error;
     }
+  }
 
+  private createThreadMessage(text: string, senderId: string): MessageData {
     const now = new Date();
-    const message: MessageData = {
+    return {
       text,
       senderId,
       createdAt: now,
@@ -148,19 +155,12 @@ export class ThreadService {
       threadCount: 0,
       reactions: {},
     };
+  }
 
-    const path = contextType === 'channel'
-      ? `channels/${contextId}/messages/${parentMsg.id}/threadMessages`
-      : `conversations/${contextId}/messages/${parentMsg.id}/threadMessages`;
-
-    try {
-      await this.firestore.addDocument(path, message);
-
-      await this.updateParentMessage(contextType, contextId, parentMsg.id);
-    } catch (error) {
-      console.error('Thread: Error sending message', error);
-      throw error;
-    }
+  private getThreadMessagePath(contextType: 'channel' | 'conversation', contextId: string, parentMessageId: string): string {
+    return contextType === 'channel'
+      ? `channels/${contextId}/messages/${parentMessageId}/threadMessages`
+      : `conversations/${contextId}/messages/${parentMessageId}/threadMessages`;
   }
 
   private async updateParentMessage(

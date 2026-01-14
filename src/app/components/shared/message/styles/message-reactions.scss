@@ -1,0 +1,146 @@
+.reaction-picker {
+  position: absolute;
+  right: 24px;
+  top: 0;
+  transform: translateY(40px);
+  display: flex;
+  flex-wrap: wrap;
+  width: 255px;
+  gap: 6px;
+  max-height: 150px;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding: 8px 10px;
+  background: #fff;
+  border-radius: 16px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.12);
+  z-index: 9999;
+
+  &::-webkit-scrollbar {
+    width: 6px;
+  }
+}
+
+
+.message-content.fdrr .reaction-picker {
+  display: flex;
+  right: auto;
+  left: 24px;
+  width: 255px !important;
+  flex-wrap: wrap;
+  gap: 6px;
+  overflow-y: auto;
+  overflow-x: hidden;
+  flex-direction: row !important;
+}
+
+.reaction-emoji-btn {
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  font-size: 20px;
+  height: 40px;
+
+  &:hover {
+    background-color: var(--bg-clr);
+    border-radius: 100%;
+    cursor: pointer;
+  }
+}
+
+.reactions-summary {
+  display: flex;
+  gap: 6px;
+  margin-top: 4px;
+  flex-wrap: wrap;
+}
+
+.reaction-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 2px 8px;
+  border-radius: 999px;
+  border: 1px solid var(--clr-purple-light);
+  background-color: #fff;
+  font-size: 14px;
+  position: relative;
+  cursor: pointer;
+
+  &:hover {
+    background-color: var(--bg-clr);
+
+    .reaction-tooltip {
+      opacity: 1;
+    }
+  }
+
+  &.mine {
+    border-color: var(--clr-purple-2);
+    background-color: rgba(121, 126, 243, 0.12);
+  }
+
+  &.own-message {
+    border-color: var(--clr-purple-1);
+  }
+}
+
+.reaction-icon {
+  width: 18px;
+  height: 18px;
+}
+
+.reaction-emoji {
+  font-size: 16px;
+}
+
+.reaction-count {
+  font-size: 13px;
+}
+
+.reaction-tooltip {
+  position: absolute;
+  bottom: 130%;
+  left: 50%;
+  transform: translateX(-50%);
+  background: var(--clr-purple-1);
+  color: #fff;
+  border-radius: 18px;
+  padding: 10px 16px;
+  font-size: 14px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+  white-space: nowrap;
+  z-index: 9999;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.12s ease-in-out;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  min-width: 160px;
+  text-align: center;
+
+  .tooltip-icon {
+    margin-bottom: 2px;
+
+    img,
+    span {
+      width: 24px;
+      height: 24px;
+      font-size: 24px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+    }
+  }
+
+  .tooltip-name {
+    font-weight: 700;
+  }
+
+  .tooltip-text {
+    font-size: 13px;
+    opacity: 0.9;
+  }
+}

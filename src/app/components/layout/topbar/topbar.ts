@@ -1,4 +1,12 @@
-import { Component, EventEmitter, HostListener, inject, Input, Output, signal } from '@angular/core';
+import {
+  Component,
+  EventEmitter,
+  HostListener,
+  inject,
+  Input,
+  Output,
+  signal,
+} from '@angular/core';
 import { BreakpointObserver } from '@angular/cdk/layout';
 import { AuthService } from '../../../auth/auth.service';
 import { SearchService } from '../../../services/search.topbar.service';
@@ -28,6 +36,54 @@ export class Topbar {
   searchQuery = '';
   isSearchFocused = false;
 
+  showUserSuggestions = false;
+  filteredUsers: any[] = [];
+
+  allUsers = [
+    {
+      id: 1,
+      name: 'Frederik Beck',
+      avatar: '/assets/icons/global/Avatar.svg',
+      online: true,
+      isYou: true,
+    },
+    {
+      id: 2,
+      name: 'Sofia Müller',
+      avatar: '/assets/icons/global/Avatar.svg',
+      online: true,
+      isYou: false,
+    },
+    {
+      id: 3,
+      name: 'Noah Braun',
+      avatar: '/assets/icons/global/Avatar.svg',
+      online: true,
+      isYou: false,
+    },
+    {
+      id: 4,
+      name: 'Elise Roth',
+      avatar: '/assets/icons/global/Avatar.svg',
+      online: false,
+      isYou: false,
+    },
+    {
+      id: 5,
+      name: 'Elias Neumann',
+      avatar: '/assets/icons/global/Avatar.svg',
+      online: true,
+      isYou: false,
+    },
+    {
+      id: 6,
+      name: 'Steffen Hoffmann',
+      avatar: '/assets/icons/global/Avatar.svg',
+      online: false,
+      isYou: false,
+    },
+  ];
+
   constructor(private auth: AuthService, private searchService: SearchService) {
     this.breakpointObserver.observe(['(max-width: 375px)']).subscribe((result) => {
       this.MobileProfil = result.matches;
@@ -38,21 +94,55 @@ export class Topbar {
   }
 
   onSearchInput() {
-    this.searchService.updateSearchQuery(this.searchQuery);
+    if (this.searchQuery.startsWith('@')) {
+      this.showUserSuggestions = true;
+      const searchTerm = this.searchQuery.substring(1).toLowerCase();
+
+      if (searchTerm.length === 0) {
+        this.filteredUsers = this.allUsers;
+      } else {
+        this.filteredUsers = this.allUsers.filter((user) =>
+          user.name.toLowerCase().includes(searchTerm)
+        );
+      }
+    } else {
+      this.showUserSuggestions = false;
+      this.filteredUsers = [];
+      this.searchService.updateSearchQuery(this.searchQuery);
+    }
+  }
+
+  selectUser(user: any) {
+    console.log('User selected:', user);
+    this.searchQuery = '@' + user.name;
+    this.showUserSuggestions = false;
+    this.filteredUsers = [];
   }
 
   onSearchFocus() {
     this.isSearchFocused = true;
+
+    if (this.searchQuery.startsWith('@')) {
+      this.showUserSuggestions = true;
+      const searchTerm = this.searchQuery.substring(1).toLowerCase();
+      this.filteredUsers =
+        searchTerm.length === 0
+          ? this.allUsers
+          : this.allUsers.filter((user) => user.name.toLowerCase().includes(searchTerm));
+    }
   }
 
   onSearchBlur() {
     setTimeout(() => {
       this.isSearchFocused = false;
+      this.showUserSuggestions = false;
     }, 200);
   }
 
   clearSearch() {
     this.searchQuery = '';
+    this.showUserSuggestions = false;
+    this.filteredUsers = [];
     this.searchService.clearSearch();
   }
 
@@ -84,7 +174,9 @@ export class Topbar {
   }
 
   closeProfilModalOnly() {
+    this.activeProfilName = null;
     this.isProfilModalOpen = false;
+    this.isDropdownMenuOpen = false;
     document.body.style.overflow = '';
   }
 
@@ -96,6 +188,7 @@ export class Topbar {
   closeProfilModal() {
     this.activeProfilName = null;
     this.isProfilModalOpen = false;
+    this.isDropdownMenuOpen = false;
     document.body.style.overflow = '';
   }
 
