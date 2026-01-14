@@ -43,7 +43,7 @@ import { AddPeopleDialogComponent } from '../../add-people-dialog/add-people-dia
     MatExpansionModule,
     MatIconModule,
     AddPeopleDialogComponent
-],
+  ],
   templateUrl: './workspace-sidebar.html',
   styleUrl: './workspace-sidebar.scss',
 })
@@ -185,7 +185,7 @@ export class WorkspaceSidebar implements OnInit, OnDestroy {
     this.chatContext.openChannel(ch.id);
 
     if (this.isMobile) {
-      this.mobileViewChange.emit('chat'); // ⬅️ DAS ist der Fix
+      this.mobileViewChange.emit('chat');
     }
 
     this.clearSearchIfActive();
@@ -251,18 +251,26 @@ export class WorkspaceSidebar implements OnInit, OnDestroy {
     this.newMessage$.mode() === null
   );
 
-onAddPeopleDone(event: { mode: 'all' | 'specific'; channelId: string; userIds: string[] }) {
-  this.showAddPeopleDialog = false;
+  onAddPeopleDone(event: { mode: 'all' | 'specific'; channelId: string; userIds: string[] }) {
+    this.showAddPeopleDialog = false;
 
-  if (event.mode === 'all') {
-    const allUserIds = this.firestore.userList().map(u => u.uid!).filter(Boolean);
-    this.channelService.addMembersToChannel(event.channelId, allUserIds);
-    return;
+    if (event.mode === 'all') {
+      const allUserIds = this.firestore.userList()
+        .map(u => u.uid!)
+        .filter(Boolean);
+
+      this.channelService.addMembersToChannel(event.channelId, allUserIds);
+    } else {
+
+      // specific
+      this.channelService.addMembersToChannel(event.channelId, event.userIds);
+
+    }
+    this.chatContext.openChannel(event.channelId);
+
+    if (this.isMobile) {
+      this.mobileViewChange.emit('chat');
+    }
+
   }
-
-  // specific
-  this.channelService.addMembersToChannel(event.channelId, event.userIds);
-}
-
-
 }
