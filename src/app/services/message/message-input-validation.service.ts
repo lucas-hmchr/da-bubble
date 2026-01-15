@@ -27,7 +27,6 @@ export class MessageInputValidationService {
     }
 
     newHTML += escapeHtml(text.slice(lastIndex));
-    console.log(`  📊 Found ${foundMentions} mentions, updating HTML`);
     return newHTML;
   }
 

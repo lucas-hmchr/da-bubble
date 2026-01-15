@@ -2,22 +2,19 @@
     border: 1px solid var(--clr-purple-light);
     border-radius: 20px;
     padding: 10px 10px;
-    //   width: calc(100% - 2 * 35px);
     width: 100%;
     height: 200px;
     background-color: transparent;
-    //   margin: 0 35px 30px;
     position: relative;
 }
 
-/* Zustand für Nicht-Mitglieder */
 .message-container.readonly {
-    background-color: #f5f5f5; // grauer Hintergrund für den ganzen Block
+    background-color: #f5f5f5;
     border-color: #e0e0e0;
 }
 
 .message-container.readonly .message-textarea {
-    background-color: transparent; // gleiche Farbe wie Container
+    background-color: transparent;
     cursor: not-allowed;
 }
 
@@ -27,13 +24,10 @@
     cursor: not-allowed;
 }
 
-/* optional: auch Send-Icon generell disabled style */
 .icon-send.disabled {
     opacity: 0.4;
     cursor: not-allowed;
 }
-
-
 
 
 .mention-dropdown {
@@ -44,7 +38,7 @@
     border-radius: 20px;
     box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
     overflow-y: auto;
-    padding: 8px 4px; // etwas schmaler, damit Pills Luft haben
+    padding: 8px 4px;
     z-index: 10;
 }
 
@@ -57,7 +51,7 @@
     margin: 2px 4px;
     cursor: pointer;
     font-size: 16px;
-    border-radius: 9999px; // Pill-Form
+    border-radius: 9999px;
     transition: background 0.15s ease;
 
     &.selected {
@@ -73,23 +67,22 @@
     width: 32px;
     height: 32px;
     border-radius: 50%;
-    //   overflow: hidden;
     background: #e2e2ff;
     display: flex;
     align-items: center;
     justify-content: center;
-    position: relative; // wichtig für den Status-Punkt
+    position: relative;
 
     img {
         width: 100%;
         height: 100%;
-        border-radius: 50%; // Rundheit aufs Bild legen
+        border-radius: 50%;
         object-fit: cover;
     }
 
     .status-dot {
         position: absolute;
-        right: -1px; // leicht nach außen
+        right: -1px;
         bottom: -1px;
         width: 10px;
         height: 10px;
@@ -100,7 +93,7 @@
     font-weight: 600;
     font-size: 18px;
     line-height: 1;
-    color: inherit; // kräftiges Lila für das "#"
+    color: inherit;
 }
 
 .mention-name {
@@ -108,7 +101,6 @@
 }
 
 
-// ContentEditable DIV als Textarea-Ersatz
 .message-textarea {
     resize: none;
     width: 100%;
@@ -127,7 +119,6 @@
         border: none;
     }
 
-    // Placeholder für leeres contenteditable
     &:empty:before {
         content: attr(data-placeholder);
         color: #999;
@@ -135,21 +126,18 @@
     }
 }
 
-// Formatierung für valide Mentions - WICHTIG: Außerhalb!
 .message-textarea .mention-bold {
     font-weight: 700 !important;
-    color: #444DF2 !important; // Fallback falls var nicht definiert
+    color: #444DF2 !important;
     color: var(--clr-purple, #444DF2) !important;
 }
 
-// Alternative mit ::ng-deep (falls Angular View Encapsulation blockiert)
 ::ng-deep .message-textarea .mention-bold {
     font-weight: 700 !important;
     color: #444DF2 !important;
     color: var(--clr-purple, #444DF2) !important;
 }
 
-// Disabled state für ContentEditable
 .message-textarea[contenteditable="false"] {
     background-color: #f5f5f5;
     cursor: not-allowed;
@@ -158,7 +146,6 @@
 #message-actions {
     height: 50px;
     width: 100%;
-    // background-color: rgba(0, 255, 0, 0.1);
     display: flex;
     align-items: center;
     justify-content: space-between;
@@ -217,25 +204,16 @@
     bottom: 70px;
     left: 20px;
     z-index: 100;
-
     display: grid;
     grid-template-columns: repeat(5, 1fr);
     gap: 6px;
-
-    max-height: 150px; // feste maximale Höhe
-    overflow-y: auto; // vertikales Scrollen
+    max-height: 150px;
+    overflow-y: auto;
     overflow-x: hidden;
-
     background: #fff;
     border-radius: 16px;
     box-shadow: 0 2px 6px rgba(0, 0, 0, 0.12);
     padding: 10px;
-
-    // display: flex;
-    // flex-wrap: wrap;
-    // gap: 8px;
-    // max-width: 200px;
-    // overflow: visible;
 
     .emoji-btn {
         background: none;

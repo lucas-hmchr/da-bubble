@@ -306,7 +306,6 @@ export class MessageInput implements OnInit {
 
   private async handleNormalSend(text: string): Promise<void> {
     if (!this.currentUserUid) {
-      console.warn('Kein aktueller Benutzer (UID).');
       return;
     }
 
@@ -315,7 +314,6 @@ export class MessageInput implements OnInit {
       this.afterSend();
       this.messageSent.emit(ctx);
     } catch (error) {
-      console.error('Fehler beim Senden der Nachricht:', error);
     }
   }
 

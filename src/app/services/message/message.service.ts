@@ -49,9 +49,7 @@ export class MessageService {
                 }
             }
 
-            console.log(`✅ ${threadMessages.length} Thread-Messages gelöscht`);
         } catch (error) {
-            console.log('ℹ️ Keine Thread-Messages zum Löschen (oder Fehler)');
         }
 
         return this.firestore.deleteDocument(`conversations/${conversationId}/messages`, messageId);
@@ -114,12 +112,10 @@ export class MessageService {
         const docPath = `${collectionPath}/${messageId}`;
         const message = await firstValueFrom(this.firestore.getDocument<MessageData>(docPath));
         if (!message) {
-            console.warn('toggleReaction: Message not found', docPath);
             return;
         }
         const reactions = { ...(message.reactions ?? {}) };
         const currentUsers = new Set<string>(reactions[reactionId] ?? []);
-        console.log(currentUsers)
         currentUsers.has(userId) ? currentUsers.delete(userId) : currentUsers.add(userId);
         currentUsers.size === 0 ? delete reactions[reactionId] : reactions[reactionId] = Array.from(currentUsers)
         await this.firestore.updateDocument(collectionPath, messageId, {

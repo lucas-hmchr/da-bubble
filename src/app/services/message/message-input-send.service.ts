@@ -50,7 +50,6 @@ export class MessageInputSendService {
     editingMessageId?: string
   ): Promise<string> {
     if (!channelId) {
-      console.warn('Kein Channel gesetzt.');
       return '';
     }
 
@@ -78,7 +77,6 @@ export class MessageInputSendService {
     editingMessageId?: string
   ): Promise<string> {
     if (!conversationId) {
-      console.warn('Keine Conversation-ID gesetzt.');
       return '';
     }
 
