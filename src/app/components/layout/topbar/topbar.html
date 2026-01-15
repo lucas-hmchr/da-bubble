@@ -20,25 +20,17 @@
             <img *ngIf="searchQuery.length > 0" src="/assets/icons/global/close.svg" alt="clear"
                 class="search-icon-clear" (click)="clearSearch()">
             <img src="/assets/icons/global/search.svg" alt="search" class="search-icon-right">
+
             <div class="search-results" *ngIf="showUserSuggestions && filteredUsers.length > 0">
-                <div class="search-section-title">
-                    suchergebnisse für "@" ({{ filteredUsers.length }} Ergebnisse)
-                </div>
-                <div class="search-result-category">
-                    <div class="category-icon">
-                        <img src="/assets/icons/global/account_circle.svg" alt="users">
-                    </div>
-                    <span class="category-title">Direktnachrichten ({{ filteredUsers.length }})</span>
-                </div>
                 <div class="search-result-item" *ngFor="let user of filteredUsers" (click)="selectUser(user)">
                     <img [src]="user.avatar" [alt]="user.name" class="user-avatar">
                     <div class="user-info">
                         <span class="user-name">{{ user.name }}</span>
                         <span class="user-tag" *ngIf="user.isYou">(Du)</span>
                     </div>
-                    <span class="online-indicator" *ngIf="user.online"></span>
                 </div>
             </div>
+
         </div>
         <div class="profil" (click)="toggleDropdownMenu($event)">
             <h1>Frederik Beck</h1>
