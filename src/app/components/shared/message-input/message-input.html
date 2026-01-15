@@ -15,7 +15,7 @@
       </span>
     </div>
   </div>
- 
+
   <div class="mention-dropdown" *ngIf="showMentions && activeMentionType === 'channel'" [ngStyle]="{
       left: mentionPosition.left + 'px',
       bottom: mentionPosition.bottom + 'px'
@@ -28,22 +28,36 @@
 
   </div>
 
+  <!-- ========== EMOJI PICKER ========== -->
   <div class="emoji-picker" *ngIf="showEmojiPicker">
     <button class="emoji-btn" *ngFor="let emoji of emojiReactions" (click)="onEmojiSelect(emoji.icon)">
       {{ emoji.icon }}
     </button>
   </div>
+  <!-- ========== EMOJI PICKER END ========== -->
 
-
-  <textarea #messageInput
+  <!-- <textarea #messageInput
     [placeholder]="isReadOnly ? 'Du bist kein Mitglied dieses Channels' : (placeholderText ?? 'Antworten...')"
-    [disabled]="isReadOnly" (keyup)="onKeyup($event)" (keydown)="onKeydown($event)">
-</textarea>
+    [disabled]="isReadOnly" (keyup)="onKeyup($event)" (keydown.enter)="onEnter($event)">
+</textarea> -->
+
+  <!-- ContentEditable DIV statt Textarea für formatierte Mentions -->
+  <div #messageInput
+    class="message-textarea"
+    contenteditable="true"
+    [attr.data-placeholder]="isReadOnly ? 'Du bist kein Mitglied dieses Channels' : (placeholderText ?? 'Antworten...')"
+    [attr.contenteditable]="!isReadOnly"
+    (keyup)="onKeyup($event)"
+    (keydown)="onKeydown($event)"
+    (input)="onInput($event)">
+  </div>
 
   <div id="message-actions">
     <div>
+      <!-- ========== EMOJI BUTTON MIT CLICK HANDLER ========== -->
       <img src="/assets/icons/global/smile1.svg" alt="Emoji" class="form-input-icon icon-smile"
         (click)="onEmojiButtonClick()" />
+      <!-- ========== EMOJI BUTTON END ========== -->
 
       <img src="/assets/icons/global/at1.svg" alt="Mention" class="form-input-icon icon-at"
         (click)="onAtButtonClick()" />

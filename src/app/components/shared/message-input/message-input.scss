@@ -16,7 +16,7 @@
     border-color: #e0e0e0;
 }
 
-.message-container.readonly textarea {
+.message-container.readonly .message-textarea {
     background-color: transparent; // gleiche Farbe wie Container
     cursor: not-allowed;
 }
@@ -61,13 +61,11 @@
     transition: background 0.15s ease;
 
     &.selected {
-        // background-color: rgba(68, 77, 242, 0.1);
-        background-color: rgba(255, 0, 0, 0.1);
-        // border-left: 3px solid #444DF2;
+        background: rgba(89, 96, 255, 0.08);
     }
 
     &:hover {
-        background: rgba(89, 96, 255, 0.08); // dein heller Lila-Ton
+        background: rgba(89, 96, 255, 0.08);
     }
 }
 
@@ -110,21 +108,49 @@
 }
 
 
-textarea {
+// ContentEditable DIV als Textarea-Ersatz
+.message-textarea {
     resize: none;
-    // background-color: red;
     width: 100%;
     height: calc(100% - 50px);
     font-size: 18px;
     border: none;
+    overflow-y: auto;
+    white-space: pre-wrap;
+    word-wrap: break-word;
+    padding: 0;
+    margin: 0;
+    line-height: 1.5;
 
     &:focus {
         outline: none;
         border: none;
     }
+
+    // Placeholder für leeres contenteditable
+    &:empty:before {
+        content: attr(data-placeholder);
+        color: #999;
+        pointer-events: none;
+    }
 }
 
-textarea:disabled {
+// Formatierung für valide Mentions - WICHTIG: Außerhalb!
+.message-textarea .mention-bold {
+    font-weight: 700 !important;
+    color: #444DF2 !important; // Fallback falls var nicht definiert
+    color: var(--clr-purple, #444DF2) !important;
+}
+
+// Alternative mit ::ng-deep (falls Angular View Encapsulation blockiert)
+::ng-deep .message-textarea .mention-bold {
+    font-weight: 700 !important;
+    color: #444DF2 !important;
+    color: var(--clr-purple, #444DF2) !important;
+}
+
+// Disabled state für ContentEditable
+.message-textarea[contenteditable="false"] {
     background-color: #f5f5f5;
     cursor: not-allowed;
 }

@@ -43,7 +43,7 @@ export class MessageInput implements OnInit {
     this.isEditing = !!value;
 
     if (value && this.messageInput) {
-      this.messageInput.nativeElement.value = value.text;
+      this.messageInput.nativeElement.innerHTML = this.escapeHtml(value.text);
     }
   }
   get editingMessage() {
@@ -68,7 +68,7 @@ export class MessageInput implements OnInit {
   private mentionService = inject(MessageInputMentionService);
   private emojiService = inject(MessageInputEmojiService);
 
-  @ViewChild('messageInput') messageInput?: ElementRef<HTMLTextAreaElement>;
+  @ViewChild('messageInput') messageInput?: ElementRef<HTMLDivElement>;
   @ViewChild('container') container!: ElementRef<HTMLDivElement>;
 
   public userService = inject(UserService);
@@ -100,6 +100,170 @@ export class MessageInput implements OnInit {
   getAvatarSrc(id: AvatarId) {
     return getAvatarById(id).src;
   }
+
+  // ========== CONTENTEDITABLE HELPER METHODS ==========
+  
+  private getTextContent(): string {
+    const div = this.messageInput?.nativeElement;
+    if (!div) return '';
+    return div.innerText || '';
+  }
+
+  private setCaretPosition(offset: number): void {
+    const div = this.messageInput?.nativeElement;
+    if (!div) return;
+
+    const range = document.createRange();
+    const sel = window.getSelection();
+    if (!sel) return;
+
+    try {
+      const textNode = this.getTextNodeAtOffset(div, offset);
+      if (textNode.node) {
+        range.setStart(textNode.node, textNode.offset);
+        range.collapse(true);
+        sel.removeAllRanges();
+        sel.addRange(range);
+      }
+    } catch (e) {
+      // Fallback: Setze Caret ans Ende
+      range.selectNodeContents(div);
+      range.collapse(false);
+      sel.removeAllRanges();
+      sel.addRange(range);
+    }
+  }
+
+  private getTextNodeAtOffset(node: Node, offset: number): { node: Node; offset: number } {
+    let currentOffset = 0;
+    
+    const walk = (n: Node): { node: Node; offset: number } | null => {
+      if (n.nodeType === Node.TEXT_NODE) {
+        const length = n.textContent?.length || 0;
+        if (currentOffset + length >= offset) {
+          return { node: n, offset: offset - currentOffset };
+        }
+        currentOffset += length;
+      } else {
+        for (const child of Array.from(n.childNodes)) {
+          const result = walk(child);
+          if (result) return result;
+        }
+      }
+      return null;
+    };
+
+    return walk(node) || { node, offset: 0 };
+  }
+
+  private getCaretPosition(): number {
+    const div = this.messageInput?.nativeElement;
+    if (!div) return 0;
+
+    const sel = window.getSelection();
+    if (!sel || sel.rangeCount === 0) return 0;
+
+    const range = sel.getRangeAt(0);
+    const preCaretRange = range.cloneRange();
+    preCaretRange.selectNodeContents(div);
+    preCaretRange.setEnd(range.endContainer, range.endOffset);
+    
+    return preCaretRange.toString().length;
+  }
+
+  onInput(event: Event): void {
+    this.validateAndFormatMentions();
+  }
+
+  private validateAndFormatMentions(): void {
+    const div = this.messageInput?.nativeElement;
+    if (!div) return;
+
+    const currentPos = this.getCaretPosition();
+    const text = this.getTextContent();
+    
+    console.log('🔄 validateAndFormatMentions:', { text, currentPos });
+    
+    // Neuer Ansatz: Suche nach allen @-Mentions und prüfe jeden einzeln
+    let newHTML = '';
+    let lastIndex = 0;
+    let foundMentions = 0;
+    
+    // Finde alle @ Positionen
+    const atPositions: number[] = [];
+    for (let i = 0; i < text.length; i++) {
+      if (text[i] === '@') {
+        atPositions.push(i);
+      }
+    }
+    
+    for (const atPos of atPositions) {
+      // Extrahiere den Text nach @
+      const afterAt = text.slice(atPos + 1);
+      
+      // Finde das nächste Leerzeichen oder Ende
+      const endMatch = afterAt.match(/^([A-Za-zÄÖÜäöüß\s]+)/);
+      if (!endMatch) continue;
+      
+      const potentialName = endMatch[1].trim();
+      
+      // Prüfe alle möglichen Präfixe (längste zuerst!)
+      const words = potentialName.split(/\s+/);
+      let matchedName: string | null = null;
+      
+      // Versuche von längsten Namen zu kürzesten
+      for (let wordCount = words.length; wordCount > 0; wordCount--) {
+        const testName = words.slice(0, wordCount).join(' ');
+        
+        const isValid = this.users.some(u => {
+          const userName = (u.displayName ?? u.name ?? '').trim();
+          return userName.toLowerCase() === testName.toLowerCase();
+        });
+        
+        if (isValid) {
+          matchedName = testName;
+          break;
+        }
+      }
+      
+      if (matchedName) {
+        foundMentions++;
+        const fullMatch = `@${matchedName}`;
+        const matchEnd = atPos + fullMatch.length;
+        
+        console.log(`  📌 Match ${foundMentions}:`, { fullMatch, name: matchedName, index: atPos });
+        console.log(`    ✓ Valid user: true`);
+        
+        // Füge Text vor dem Match hinzu
+        newHTML += this.escapeHtml(text.slice(lastIndex, atPos));
+        
+        // Füge formatierte Mention hinzu
+        newHTML += `<span class="mention-bold">${this.escapeHtml(fullMatch)}</span>`;
+        
+        lastIndex = matchEnd;
+      }
+    }
+    
+    // Füge den Rest hinzu
+    newHTML += this.escapeHtml(text.slice(lastIndex));
+    
+    console.log(`  📊 Found ${foundMentions} mentions, updating HTML`);
+
+    // Aktualisiere nur wenn sich was geändert hat
+    if (div.innerHTML !== newHTML) {
+      div.innerHTML = newHTML;
+      this.setCaretPosition(currentPos);
+    }
+  }
+
+  private escapeHtml(text: string): string {
+    const div = document.createElement('div');
+    div.textContent = text;
+    return div.innerHTML;
+  }
+
+  // ========== END CONTENTEDITABLE HELPERS ==========
+
   onKeyup(event: KeyboardEvent | Event) {
     // Ignoriere Arrow Keys und Enter in keyup - die werden in keydown behandelt
     if (event instanceof KeyboardEvent) {
@@ -108,8 +272,8 @@ export class MessageInput implements OnInit {
       }
     }
 
-    const textarea = event.target as HTMLTextAreaElement;
-    const value = textarea.value;
+    const div = event.target as HTMLDivElement;
+    const value = this.getTextContent();
     const lastChar = value.slice(-1);
 
     if (lastChar === '@' || lastChar === '#') {
@@ -155,7 +319,8 @@ export class MessageInput implements OnInit {
       return true;
     }
     
-    if (event.key === 'Enter' && items.length > 0) {
+    // ENTER oder TAB zum Auswählen
+    if ((event.key === 'Enter' || event.key === 'Tab') && items.length > 0) {
       const selectedItem = items[this.selectedMentionIndex];
       if (this.activeMentionType === 'user') {
         this.onSelectUser(selectedItem as User);
@@ -292,9 +457,9 @@ export class MessageInput implements OnInit {
     }
   }
   private getTrimmedText(): string {
-    const textarea = this.messageInput?.nativeElement;
-    if (!textarea) return '';  // ← NULL-CHECK!
-    return textarea.value.trim();
+    const div = this.messageInput?.nativeElement;
+    if (!div) return '';  // ← NULL-CHECK!
+    return this.getTextContent().trim();
   }
 
   private async sendByContext(
@@ -336,9 +501,9 @@ export class MessageInput implements OnInit {
     return convId;
   }
   private afterSend() {
-    const textarea = this.messageInput?.nativeElement;
-    if (textarea) {  // ← NULL-CHECK!
-      textarea.value = '';
+    const div = this.messageInput?.nativeElement;
+    if (div) {  // ← NULL-CHECK!
+      div.innerHTML = '';
     }
     this.resetMentions();
     this.isEditing = false;
@@ -346,12 +511,25 @@ export class MessageInput implements OnInit {
     this.editFinished.emit();
   }
   private updateMentionPosition() {
-    const textarea = this.messageInput?.nativeElement;
-    if (!textarea) return;
+    const div = this.messageInput?.nativeElement;
+    if (!div) return;
+    
     const containerEl = this.container.nativeElement;
-    const caretIndex = textarea.selectionStart ?? textarea.value.length;
-    const mirror = this.mentionService.createMirror(textarea, caretIndex);
-    this.mentionPosition = this.mentionService.calculateMentionPosition(containerEl, mirror);
+    
+    // Hole die aktuelle Selection
+    const sel = window.getSelection();
+    if (!sel || sel.rangeCount === 0) return;
+    
+    const range = sel.getRangeAt(0);
+    const rect = range.getBoundingClientRect();
+    const containerRect = containerEl.getBoundingClientRect();
+    
+    // Berechne Position relativ zum Container
+    this.mentionPosition = {
+      left: rect.left - containerRect.left,
+      bottom: containerRect.bottom - rect.bottom + 8,
+      top: rect.bottom - containerRect.top + 8
+    };
   }
 
   getListLabel(user: User): string {
@@ -363,16 +541,81 @@ export class MessageInput implements OnInit {
   }
 
   onSelectUser(user: User) {
-    const textarea = this.messageInput?.nativeElement;
-    if (!textarea) return;
-    this.mentionService.replaceTriggerWithText(textarea, '@', this.getMentionLabel(user));
+    const div = this.messageInput?.nativeElement;
+    if (!div) return;
+    
+    const text = this.getTextContent();
+    const lastAtIndex = text.lastIndexOf('@');
+    
+    if (lastAtIndex === -1) return;
+    
+    // Finde das Ende der aktuellen Query (nächstes Leerzeichen oder Ende)
+    const afterAt = text.slice(lastAtIndex + 1);
+    const spaceIndex = afterAt.search(/\s/);
+    const queryEndIndex = spaceIndex === -1 
+      ? text.length 
+      : lastAtIndex + 1 + spaceIndex;
+    
+    const before = text.slice(0, lastAtIndex);
+    const after = text.slice(queryEndIndex);
+    const mentionText = `@${this.getMentionLabel(user)}`;
+    
+    console.log('🔍 onSelectUser Debug:', {
+      userName: this.getMentionLabel(user),
+      mentionText,
+      before,
+      after
+    });
+    
+    // Erstelle formatierten HTML
+    const beforeHtml = this.escapeHtml(before);
+    const mentionHtml = `<span class="mention-bold">${this.escapeHtml(mentionText)}</span>`;
+    const afterHtml = this.escapeHtml(after);
+    
+    const finalHtml = beforeHtml + mentionHtml + '&nbsp;' + afterHtml;
+    
+    console.log('📝 Setting HTML:', finalHtml);
+    
+    div.innerHTML = finalHtml;
+    
+    // Setze Cursor nach der Mention + Leerzeichen
+    const newCaretPos = before.length + mentionText.length + 1;
+    this.setCaretPosition(newCaretPos);
+    
     this.resetMentions();
   }
 
   onSelectChannel(channel: Channel) {
-    const textarea = this.messageInput?.nativeElement;
-    if (!textarea) return;
-    this.mentionService.replaceTriggerWithText(textarea, '#', channel.name ?? '');
+    const div = this.messageInput?.nativeElement;
+    if (!div) return;
+    
+    const text = this.getTextContent();
+    const lastHashIndex = text.lastIndexOf('#');
+    
+    if (lastHashIndex === -1) return;
+    
+    // Finde das Ende der aktuellen Query (nächstes Leerzeichen oder Ende)
+    const afterHash = text.slice(lastHashIndex + 1);
+    const spaceIndex = afterHash.search(/\s/);
+    const queryEndIndex = spaceIndex === -1 
+      ? text.length 
+      : lastHashIndex + 1 + spaceIndex;
+    
+    const before = text.slice(0, lastHashIndex);
+    const after = text.slice(queryEndIndex);
+    const channelText = `#${channel.name ?? ''}`;
+    
+    // Füge Channel-Text ein (ohne extra Formatierung)
+    const beforeHtml = this.escapeHtml(before);
+    const channelHtml = this.escapeHtml(channelText);
+    const afterHtml = this.escapeHtml(after);
+    
+    div.innerHTML = beforeHtml + channelHtml + '&nbsp;' + afterHtml;
+    
+    // Setze Cursor nach dem Channel + Leerzeichen
+    const newCaretPos = before.length + channelText.length + 1;
+    this.setCaretPosition(newCaretPos);
+    
     this.resetMentions();
   }
 
@@ -395,27 +638,24 @@ export class MessageInput implements OnInit {
   onAtButtonClick() {
     if (this.isReadOnly) return;
 
-    const textarea = this.messageInput?.nativeElement;  // ← FIX 1
-    if (!textarea) return;
+    const div = this.messageInput?.nativeElement;
+    if (!div) return;
 
-    textarea.focus();
+    div.focus();
 
-    const cursorPos = textarea.selectionStart ?? 0;
-    const currentValue = textarea.value;
+    const cursorPos = this.getCaretPosition();
+    const currentText = this.getTextContent();
 
-    const newValue =
-      currentValue.slice(0, cursorPos) +
-      '@' +
-      currentValue.slice(cursorPos);
-
-    textarea.value = newValue;
+    const before = currentText.slice(0, cursorPos);
+    const after = currentText.slice(cursorPos);
+    
+    const newText = before + '@' + after;
+    div.innerHTML = this.escapeHtml(newText);
 
     const newCursorPos = cursorPos + 1;
-    textarea.setSelectionRange(newCursorPos, newCursorPos);
+    this.setCaretPosition(newCursorPos);
 
-    this.startMention('@');  // ← FIX 2
-
-    console.log('@ eingefügt an Position', cursorPos);
+    this.startMention('@');
   }
 
   toggleEmojiPicker() {
@@ -428,9 +668,21 @@ export class MessageInput implements OnInit {
   }
 
   onEmojiSelect(emoji: string) {
-    const textarea = this.messageInput?.nativeElement;
-    if (!textarea) return;
-    this.emojiService.insertEmojiAtCursor(textarea, emoji);
+    const div = this.messageInput?.nativeElement;
+    if (!div) return;
+    
+    const cursorPos = this.getCaretPosition();
+    const currentText = this.getTextContent();
+    
+    const before = currentText.slice(0, cursorPos);
+    const after = currentText.slice(cursorPos);
+    
+    const newText = before + emoji + after;
+    div.innerHTML = this.escapeHtml(newText);
+    
+    const newCursorPos = cursorPos + emoji.length;
+    this.setCaretPosition(newCursorPos);
+    
     this.showEmojiPicker = false;
   }
 
