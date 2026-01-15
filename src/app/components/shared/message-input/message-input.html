@@ -1,10 +1,11 @@
 <div id="message-container" class="message-container" #container [class.readonly]="isReadOnly">
 
-  <div class="mention-dropdown" *ngIf="showMentions && activeMentionType === 'user'" [ngStyle]="{
-      left: mentionPosition.left + 'px',
-      bottom: mentionPosition.bottom + 'px'
+  <div class="mention-dropdown" *ngIf="state.showMentions()&& state.activeMentionType() === 'user'" [ngStyle]="{
+      left: state.mentionPosition().left + 'px',
+      bottom: state.mentionPosition().bottom + 'px'
     }">
-    <div class="mention-item" *ngFor="let user of filteredUsers" (click)="onSelectUser(user)">
+    <div class="mention-item" *ngFor="let user of state.filteredUsers(); let i = index"
+      [class.selected]="i === state.selectedMentionIndex()" (click)="onSelectUser(user)">
       <span class="mention-avatar">
         <img [src]="(getAvatarSrc(user.avatarId) || 'avatar_default')" [alt]="getListLabel(user)" />
         <img [src]="userService.getOnlineStatusIcon(user)" class="status-dot">
@@ -15,39 +16,44 @@
     </div>
   </div>
 
-  <div class="mention-dropdown" *ngIf="showMentions && activeMentionType === 'channel'" [ngStyle]="{
-      left: mentionPosition.left + 'px',
-      bottom: mentionPosition.bottom + 'px'
+  <div class="mention-dropdown" *ngIf="state.showMentions()&& state.activeMentionType() === 'channel'" [ngStyle]="{
+      left: state.mentionPosition().left + 'px',
+      bottom: state.mentionPosition().bottom + 'px'
     }">
-    <div class="mention-item" *ngFor="let ch of filteredChannels" (click)="onSelectChannel(ch)">
+    <div class="mention-item" *ngFor="let ch of state.filteredChannels(); let i = index"
+      [class.selected]="i === state.selectedMentionIndex()" (click)="onSelectChannel(ch)">
       <span class="mention-hash">#</span>
       <span class="mention-name">{{ ch.name }}</span>
     </div>
 
   </div>
 
-  <!-- ========== EMOJI PICKER ========== -->
-  <div class="emoji-picker" *ngIf="showEmojiPicker">
+  <div class="emoji-picker" *ngIf="state.showEmojiPicker()">
     <button class="emoji-btn" *ngFor="let emoji of emojiReactions" (click)="onEmojiSelect(emoji.icon)">
       {{ emoji.icon }}
     </button>
   </div>
-  <!-- ========== EMOJI PICKER END ========== -->
 
-  <textarea #messageInput
-    [placeholder]="isReadOnly ? 'Du bist kein Mitglied dieses Channels' : (placeholderText ?? 'Antworten...')"
-    [disabled]="isReadOnly" (keyup)="onKeyup($event)" (keydown.enter)="onEnter($event)">
-</textarea>
+  <div #messageInput
+    class="message-textarea"
+    contenteditable="true"
+    [attr.data-placeholder]="isReadOnly ? 'Du bist kein Mitglied dieses Channels' : (placeholderText ?? 'Antworten...')"
+    [attr.contenteditable]="!isReadOnly"
+    (keyup)="onKeyup($event)"
+    (keydown)="onKeydown($event)"
+    (input)="onInput($event)">
+  </div>
 
   <div id="message-actions">
     <div>
-      <!-- ========== EMOJI BUTTON MIT CLICK HANDLER ========== -->
-      <img src="/assets/icons/global/smile1.svg" alt="Emoji" class="form-input-icon icon-smile" (click)="onEmojiButtonClick()" />
-      <!-- ========== EMOJI BUTTON END ========== -->
-      
-      <img src="/assets/icons/global/at1.svg" alt="Mention" class="form-input-icon icon-at" (click)="onAtButtonClick()" />
+      <img src="/assets/icons/global/smile1.svg" alt="Emoji" class="form-input-icon icon-smile"
+        (click)="onEmojiButtonClick()" />
+
+      <img src="/assets/icons/global/at1.svg" alt="Mention" class="form-input-icon icon-at"
+        (click)="onAtButtonClick()" />
     </div>
 
-    <img src="/assets/icons/global/send1.svg" alt="Send" class="icon-send" [class.disabled]="isReadOnly" (click)="onSend()" />
+    <img src="/assets/icons/global/send1.svg" alt="Send" class="icon-send" [class.disabled]="isReadOnly"
+      (click)="onSend()" />
   </div>
 </div>

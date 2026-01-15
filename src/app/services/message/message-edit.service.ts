@@ -89,7 +89,6 @@ export class MessageEditService {
       this.cancelEdit();
       return true;
     } catch (err) {
-      console.error('Edit save failed:', err);
       return false;
     }
   }
