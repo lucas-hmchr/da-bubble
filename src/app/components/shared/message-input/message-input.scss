@@ -60,6 +60,12 @@
     border-radius: 9999px; // Pill-Form
     transition: background 0.15s ease;
 
+    &.selected {
+        // background-color: rgba(68, 77, 242, 0.1);
+        background-color: rgba(255, 0, 0, 0.1);
+        // border-left: 3px solid #444DF2;
+    }
+
     &:hover {
         background: rgba(89, 96, 255, 0.08); // dein heller Lila-Ton
     }
@@ -190,10 +196,10 @@ textarea:disabled {
     grid-template-columns: repeat(5, 1fr);
     gap: 6px;
 
-      max-height: 150px;        // feste maximale Höhe
-  overflow-y: auto;         // vertikales Scrollen
-  overflow-x: hidden; 
-  
+    max-height: 150px; // feste maximale Höhe
+    overflow-y: auto; // vertikales Scrollen
+    overflow-x: hidden;
+
     background: #fff;
     border-radius: 16px;
     box-shadow: 0 2px 6px rgba(0, 0, 0, 0.12);

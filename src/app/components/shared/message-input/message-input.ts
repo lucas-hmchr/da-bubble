@@ -83,6 +83,7 @@ export class MessageInput implements OnInit {
   activeMentionType: 'user' | 'channel' | null = null;
   showMentions = false;
   mentionPosition = { top: 0, left: 0, bottom: 0 };
+  selectedMentionIndex = 0; // Für Keyboard-Navigation
 
   ngOnInit(): void {
     this.messageService.loadUsers().subscribe((users) => {
@@ -100,6 +101,13 @@ export class MessageInput implements OnInit {
     return getAvatarById(id).src;
   }
   onKeyup(event: KeyboardEvent | Event) {
+    // Ignoriere Arrow Keys und Enter in keyup - die werden in keydown behandelt
+    if (event instanceof KeyboardEvent) {
+      if (['ArrowUp', 'ArrowDown', 'Enter', 'Escape'].includes(event.key)) {
+        return;
+      }
+    }
+
     const textarea = event.target as HTMLTextAreaElement;
     const value = textarea.value;
     const lastChar = value.slice(-1);
@@ -115,9 +123,74 @@ export class MessageInput implements OnInit {
     this.filterMentions(value);
   }
 
+  onKeydown(event: KeyboardEvent) {
+    // Wenn Mention-Dropdown offen ist, handle Navigation und Auswahl
+    if (this.showMentions && this.activeMentionType) {
+      if (this.handleMentionKeyboardNavigation(event)) {
+        event.preventDefault();
+        event.stopPropagation();
+        return; // ← WICHTIG: Verhindere weitere Verarbeitung!
+      }
+    }
+
+    // ENTER für normale Nachricht senden (nur wenn kein Mention-Dropdown offen)
+    if (event.key === 'Enter' && !event.shiftKey) {
+      event.preventDefault();
+      this.onEnter(event);
+    }
+  }
+
+  private handleMentionKeyboardNavigation(event: KeyboardEvent): boolean {
+    const items = this.activeMentionType === 'user' ? this.filteredUsers : this.filteredChannels;
+    
+    if (event.key === 'ArrowDown') {
+      this.selectedMentionIndex = Math.min(this.selectedMentionIndex + 1, items.length - 1);
+      this.scrollToSelectedMention();
+      return true;
+    }
+    
+    if (event.key === 'ArrowUp') {
+      this.selectedMentionIndex = Math.max(this.selectedMentionIndex - 1, 0);
+      this.scrollToSelectedMention();
+      return true;
+    }
+    
+    if (event.key === 'Enter' && items.length > 0) {
+      const selectedItem = items[this.selectedMentionIndex];
+      if (this.activeMentionType === 'user') {
+        this.onSelectUser(selectedItem as User);
+      } else {
+        this.onSelectChannel(selectedItem as Channel);
+      }
+      return true;
+    }
+    
+    if (event.key === 'Escape') {
+      this.resetMentions();
+      return true;
+    }
+    
+    return false;
+  }
+
+  private scrollToSelectedMention() {
+    // Warte kurz damit Angular das DOM aktualisiert hat
+    setTimeout(() => {
+      const dropdown = document.querySelector('.mention-dropdown');
+      if (!dropdown) return;
+      
+      const selectedItem = dropdown.querySelector('.mention-item.selected') as HTMLElement;
+      if (!selectedItem) return;
+      
+      // Scrolle selected Item in sichtbaren Bereich
+      selectedItem.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+    }, 0);
+  }
+
   private startMention(trigger: string) {
     this.showMentions = true;
     this.activeMentionType = trigger === '@' ? 'user' : 'channel';
+    this.selectedMentionIndex = 0; // Reset selection
 
     if (this.activeMentionType === 'user') {
       this.filteredUsers = this.users;
@@ -129,6 +202,7 @@ export class MessageInput implements OnInit {
   }
 
   private filterMentions(value: string) {
+    this.selectedMentionIndex = 0; // Reset bei neuem Filter
     if (this.activeMentionType === 'user') {
       this.filterUserMentions(value);
     } else {
@@ -138,7 +212,7 @@ export class MessageInput implements OnInit {
 
   private filterUserMentions(value: string) {
     const result = this.messageService.filterUsersByQuery(this.users, value);
-    if (result === null) {
+    if (result === null || result.length === 0) {
       this.resetMentions();
       this.filteredUsers = [];
       return;
@@ -148,7 +222,7 @@ export class MessageInput implements OnInit {
 
   private filterChannelMentions(value: string) {
     const result = this.messageService.filterChannelsByQuery(this.channelsList, value);
-    if (result === null) {
+    if (result === null || result.length === 0) {
       this.resetMentions();
       this.filteredChannels = [];
       return;
