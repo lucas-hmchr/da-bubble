@@ -104,6 +104,11 @@
 }
 
 .send-name {
+  display: inline-block;
+  max-width: 130px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
   font-weight: bold;
   font-size: 18px;
   cursor: pointer;
@@ -128,6 +133,12 @@
 .send-info {
   font-size: 14px;
   color: #686868;
+  display: inline-block;
+  max-width: 200px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  cursor: help;
 }
 
 .green {
@@ -208,4 +219,10 @@ p {
   flex-direction: column;
   gap: 16px;
   padding: 0 35px;
+}
+
+@media (max-width: 1400px) {
+  .send-name {
+    max-width: 100px;
+  }
 }

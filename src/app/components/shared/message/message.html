@@ -61,7 +61,7 @@
             <span class="send-name clickable" (click)="openUserProfile(msg.senderId, $event)">
               {{ getSenderName(msg.senderId) }}
             </span>
-            <span class="send-info">
+            <span class="send-info" [title]="getFullDateTimeString(msg.createdAt)">
               <ng-container *ngIf="showFullDate">
                 {{ getFormattedDate(msg.createdAt) }}
               </ng-container>

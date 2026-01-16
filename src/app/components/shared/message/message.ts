@@ -210,8 +210,8 @@ export class Message implements OnChanges {
 
   private handleOutsideClick(target: HTMLElement): void {
     const isInside = target.closest('.inline-edit') ||
-                     target.closest('.message-options-menu') ||
-                     target.closest('.option-btn');
+      target.closest('.message-options-menu') ||
+      target.closest('.option-btn');
     if (!isInside) this.editService.tryDiscardEdit('outside-click');
   }
 
@@ -450,5 +450,17 @@ export class Message implements OnChanges {
       event.stopPropagation();
       this.openUserProfile(userId, event);
     }
+  }
+
+  getFullDateTimeString(date: Date | any): string {
+    const formattedDate = this.getFormattedDate(date);
+    const msgDate = this.toDate(date);
+    if (!msgDate) return formattedDate;
+
+    const time = msgDate.toLocaleTimeString('de-DE', {
+      hour: '2-digit',
+      minute: '2-digit'
+    });
+    return `${formattedDate} ${time} Uhr`;
   }
 }
