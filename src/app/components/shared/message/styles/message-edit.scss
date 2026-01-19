@@ -80,5 +80,15 @@
   .last-reply-time {
     font-size: 12px;
     color: #888;
+
+    &::before {
+      content: 'Letzte Antwort: ';
+    }
+
+    @container (max-width: 500px) {
+      &::before {
+        content: 'Letzte: ';
+      }
+    }
   }
 }

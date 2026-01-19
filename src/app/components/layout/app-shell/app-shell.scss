@@ -66,3 +66,24 @@ app-view {
         display: block;
     }
 }
+
+@media (max-width: 1550px) {
+    app-thread-menu {
+    // width: 0;
+    // min-width: 0;
+    // opacity: 0;
+    // overflow: hidden;
+    // transition: width 0.3s ease, min-width 0.3s ease, opacity 0.3s ease, margin 0.3s ease;
+    
+    // Wenn Thread offen ist
+    &.thread-open {
+        width: 350px;
+        min-width: 350px;
+        // opacity: 1;
+        // margin-right: 10px;
+    }
+    // ========== DYNAMIC WIDTH END ==========
+    
+    // height: calc(100% - 10px);
+}
+}
