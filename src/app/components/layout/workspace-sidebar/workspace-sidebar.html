@@ -30,8 +30,8 @@
           <!-- CHANNELS -->
           @if (!isUserFilterActive()) {
 
-          <mat-expansion-panel hideToggle="true" class="channel-panel" [expanded]="channelOpen()" (opened)="channelOpen.set(true)"
-            (closed)="channelOpen.set(false)">
+          <mat-expansion-panel hideToggle="true" class="channel-panel" [expanded]="channelOpen()"
+            (opened)="channelOpen.set(true)" (closed)="channelOpen.set(false)">
             @if (isNormalView()) {
 
             <mat-expansion-panel-header class="arrow-channel-add-container">
@@ -172,7 +172,7 @@
     </mat-drawer>
   </mat-drawer-container>
 
-  <div class="left-menu-button-icon-container cp fs-20" (click)="drawer.toggle()">
+  <div class="left-menu-button-icon-container cp fs-20" (click)="onDrawerToggle()">
     <div class="left-menu-button">
       {{ drawer.opened ? 'Workspace-Menü schließen'
       : 'Workspace-Menü öffnen' }}
@@ -181,11 +181,7 @@
 </div>
 
 @if (showAddPeopleDialog) {
-  <app-add-people-dialog
-  [channelId]="createdChannelId!"
-  [channelName]="createdChannelName!"
-  (close)="showAddPeopleDialog = false"
-  (done)="onAddPeopleDone($event)">
+<app-add-people-dialog [channelId]="createdChannelId!" [channelName]="createdChannelName!"
+  (close)="showAddPeopleDialog = false" (done)="onAddPeopleDone($event)">
 </app-add-people-dialog>
 }
-

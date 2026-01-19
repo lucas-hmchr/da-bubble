@@ -8,7 +8,8 @@ import {
   Output,
   EventEmitter,
   computed,
-  effect
+  effect,
+  ViewChild
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { MatSidenavModule } from '@angular/material/sidenav';
@@ -31,6 +32,7 @@ import { SearchService } from '../../../services/search.topbar.service';
 import { NewMessageService } from '../../../services/message/new-message.service';
 import { getAvatarById } from '../../../../shared/data/avatars';
 import { AddPeopleDialogComponent } from '../../add-people-dialog/add-people-dialog';
+import { MatDrawer } from '@angular/material/sidenav';
 
 
 @Component({
@@ -53,7 +55,9 @@ export class WorkspaceSidebar implements OnInit, OnDestroy {
   @Input() isMobile = false;
   @Output() newMessage = new EventEmitter<void>();
   @Output() mobileViewChange = new EventEmitter<'sidebar' | 'chat' | 'thread'>();
+  @Output() workspaceToggle = new EventEmitter<boolean>();
 
+  @ViewChild('drawer') drawer!: MatDrawer;
   newMessage$ = inject(NewMessageService);
 
   readonly channelOpen = signal(false);
@@ -273,4 +277,14 @@ export class WorkspaceSidebar implements OnInit, OnDestroy {
     }
 
   }
+
+onDrawerToggle() {
+  // Toggle drawer HIER
+  this.drawer.toggle();
+  
+  // Emit Zustand nach Toggle
+  setTimeout(() => {
+    this.workspaceToggle.emit(this.drawer.opened);
+  }, 50);
+}
 }

@@ -1,5 +1,6 @@
 .message-container {
   width: 100%;
+  container-type: inline-size;
 }
 
 .message-wrapper {
@@ -104,6 +105,11 @@
 }
 
 .send-name {
+  display: inline-block;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100px;
   font-weight: bold;
   font-size: 18px;
   cursor: pointer;
@@ -112,6 +118,10 @@
   &:hover {
     color: var(--clr-purple-2);
     text-decoration: none;
+  }
+
+  @container (min-width: 500px) {
+    max-width: 300px;
   }
 }
 
@@ -128,10 +138,33 @@
 .send-info {
   font-size: 14px;
   color: #686868;
+  display: inline-block;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  
+  // Default für schmale Container (< 500px)
+  max-width: 120px;
+  
+  // Breitere Container (≥ 500px)
+  @container (min-width: 500px) {
+    max-width: 200px;
+  }
+  
+  // Sehr breite Container (≥ 700px)
+  @container (min-width: 700px) {
+    max-width: 250px;
+  }
 }
 
 .green {
   background-color: green;
+}
+
+.gap5 {
+  display: flex;
+  align-items: center;
+  gap: 5px;
 }
 
 a {
@@ -208,4 +241,10 @@ p {
   flex-direction: column;
   gap: 16px;
   padding: 0 35px;
+}
+
+@media (max-width: 1550px) {
+  .bubble {
+    max-width: 100%;
+  }
 }

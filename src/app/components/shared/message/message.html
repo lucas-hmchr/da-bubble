@@ -57,7 +57,7 @@
           (click)="openUserProfile(msg.senderId, $event)" style="cursor: pointer;" />
 
         <div>
-          <div [class.message-header-reverse]="isOwnMessage(msg)">
+          <div [class.message-header-reverse]="isOwnMessage(msg)" class="gap5">
             <span class="send-name clickable" (click)="openUserProfile(msg.senderId, $event)">
               {{ getSenderName(msg.senderId) }}
             </span>
@@ -133,7 +133,7 @@
               {{ msg.threadCount }} {{ msg.threadCount === 1 ? 'Antwort' : 'Antworten' }}
             </a>
             <span class="last-reply-time" *ngIf="msg.lastReplyAt">
-              Letzte Antwort: {{ toDate(msg.lastReplyAt) | date: 'HH:mm' }} Uhr
+              {{ toDate(msg.lastReplyAt) | date: 'HH:mm' }} Uhr
             </span>
           </div>
         </div>
