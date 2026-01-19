@@ -4,29 +4,30 @@ app-workspace-sidebar {
 }
 
 app-thread-menu {
-    // ========== DYNAMIC WIDTH ==========
     width: 0;
     min-width: 0;
     opacity: 0;
     overflow: hidden;
-    transition: width 0.3s ease, min-width 0.3s ease, opacity 0.3s ease, margin 0.3s ease;
+    transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1), 
+                min-width 0.3s cubic-bezier(0.4, 0, 0.2, 1), 
+                opacity 0.3s cubic-bezier(0.4, 0, 0.2, 1), 
+                margin 0.3s cubic-bezier(0.4, 0, 0.2, 1),
+                flex 0.3s cubic-bezier(0.4, 0, 0.2, 1); // ← NEU
     
-    // Wenn Thread offen ist (normale Breite)
     &.thread-open {
         width: 485px;
         min-width: 485px;
         opacity: 1;
         margin-right: 10px;
+        flex: 0 0 485px; // ← NEU: Explizite Flex-Basis
     }
     
-    // NEU: Wenn Thread volle Breite haben soll (View versteckt)
     &.thread-open.full-width {
         width: 100%;
         max-width: none;
         min-width: 0;
-        flex: 1;
+        flex: 1; // ← NEU: Nimmt verfügbaren Platz
     }
-    // ========== DYNAMIC WIDTH END ==========
     
     height: calc(100% - 10px);
     flex-shrink: 0;
@@ -37,6 +38,26 @@ app-view {
     height: calc(100% - 10px);
     flex: 1;
     min-width: 0;
+    
+    // ========== SMOOTH HIDE/SHOW ANIMATION ==========
+    transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1), 
+                opacity 0.3s cubic-bezier(0.4, 0, 0.2, 1), 
+                transform 0.3s cubic-bezier(0.4, 0, 0.2, 1),
+                flex 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    opacity: 1;
+    transform: translateX(0);
+    
+    &.hidden {
+        flex: 0 0 0; // ← WICHTIG: Nimmt keinen Flex-Space mehr ein
+        width: 0;
+        min-width: 0;
+        max-width: 0; // ← WICHTIG: Kann nicht wachsen
+        opacity: 0;
+        transform: translateX(-20px);
+        overflow: hidden;
+        pointer-events: none;
+    }
+    // ========== END ANIMATION ==========
 }
 
 .shell {
@@ -45,7 +66,15 @@ app-view {
     flex-direction: row;
     gap: 16px;
     height: calc(100vh - 76px - 30px);
-    overflow: hidden; // Verhindert X-Scrollbar
+    overflow: hidden;
+    
+    // ========== DYNAMIC GAP WHEN VIEW IS HIDDEN ==========
+    transition: gap 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    
+    &:has(app-view.hidden) {
+        gap: 8px;
+    }
+    // ========== END DYNAMIC GAP ==========
 }
 
 .resp-fab {
@@ -78,6 +107,15 @@ app-view {
     .shell {
         display: block;
     }
+    
+    // Mobile: Keine Smooth Animation nötig
+    app-view {
+        transition: none;
+        
+        &.hidden {
+            transform: none;
+        }
+    }
 }
 
 @media (max-width: 1550px) {
@@ -87,7 +125,6 @@ app-view {
             min-width: 350px;
         }
         
-        // Volle Breite auch bei kleinerem Viewport
         &.thread-open.full-width {
             width: 100%;
             max-width: none;

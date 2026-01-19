@@ -17,9 +17,20 @@
   }
   <!-- ========== END WORKSPACE SIDEBAR ========== -->
 
-  <!-- ========== VIEW COMPONENT ========== -->
-  @if (shouldShowView()) {
-  <app-view [currentUserUid]="currentUserUid" (openThread)="onOpenThread()"></app-view>
+  <!-- ========== VIEW COMPONENT - MIT SMOOTH ANIMATION ========== -->
+  @if (!isMobile()) {
+    <!-- Desktop: Immer im DOM, nur hidden class -->
+    <app-view 
+      [currentUserUid]="currentUserUid" 
+      (openThread)="onOpenThread()"
+      [class.hidden]="!shouldShowView()">
+    </app-view>
+  } @else if (activeMobileView() === 'chat' || activeMobileView() === 'new-message') {
+    <!-- Mobile: Nur rendern wenn aktiv -->
+    <app-view 
+      [currentUserUid]="currentUserUid" 
+      (openThread)="onOpenThread()">
+    </app-view>
   }
   <!-- ========== END VIEW COMPONENT ========== -->
 
