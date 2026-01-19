@@ -1,4 +1,6 @@
-import { Component, effect, HostListener, inject, signal } from '@angular/core';
+import { Component, effect, inject, signal, computed } from '@angular/core';
+import { fromEvent } from 'rxjs';
+import { debounceTime, throttleTime } from 'rxjs/operators';
 import { Topbar } from '../topbar/topbar';
 
 import { WorkspaceSidebar } from '../workspace-sidebar/workspace-sidebar';
@@ -29,16 +31,36 @@ export class AppShell {
   private authService = inject(AuthService);
   public threadService = inject(ThreadService);
   isMobile = signal(window.innerWidth < 1024);
+  windowWidth = signal(window.innerWidth);
 
-  constructor(private chatContext: ChatContextService,) {
+  // Track Workspace Sidebar Status (Drawer opened/closed)
+  isWorkspaceOpen = signal(true);
+
+  constructor(private chatContext: ChatContextService) {
     effect(() => {
       const active = this.authService.activeUser();
       console.log('activeUser in AppShell:', active);
       this.currentUserUid = active?.uid ?? null;
     });
-    window.addEventListener('resize', () => {
-      this.isMobile.set(window.innerWidth < 1024);
-    });
+
+    // Window Resize Listener
+    // fromEvent(window, 'resize')
+    //   .pipe(debounceTime(150))
+    //   .subscribe(() => {
+    //     const width = window.innerWidth;
+    //     this.windowWidth.set(width);
+    //     this.isMobile.set(width < 1024);
+    //   });
+    fromEvent(window, 'resize')
+      .pipe(
+        throttleTime(16, undefined, { leading: true, trailing: true })  // ~60fps
+      )
+      .subscribe(() => {
+        const width = window.innerWidth;
+        this.windowWidth.set(width);
+        this.isMobile.set(width < 1024);
+      });
+
     effect(() => {
       // Wenn sich der Chat-Context ändert, Thread schließen
       const channelId = this.chatContext.channelId();
@@ -47,6 +69,44 @@ export class AppShell {
       // Bei Navigation zu neuem Channel/DM → Thread schließen
       this.threadService.close();
     });
+  }
+
+  // ========== COMPUTED: VIEW SICHTBARKEIT ==========
+  shouldShowView = computed(() => {
+    const width = this.windowWidth();
+    const threadOpen = this.threadService.isOpen();
+    const mobile = this.isMobile();
+    const mobileView = this.activeMobileView();
+    const workspaceOpen = this.isWorkspaceOpen();
+
+    // Mobile: Bestehende Logik
+    if (mobile) {
+      return mobileView === 'chat' || mobileView === 'new-message';
+    }
+
+    // Tablet Range (1024-1300px)
+    if (width >= 1024 && width < 1300) {
+      // Wenn Workspace geschlossen: View immer zeigen
+      if (!workspaceOpen) {
+        return true;
+      }
+
+      // Wenn Workspace offen UND Thread offen: View verstecken
+      if (workspaceOpen && threadOpen) {
+        return false;
+      }
+
+      return true;
+    }
+
+    // Desktop (> 1300px): Immer anzeigen
+    return true;
+  });
+  // ========== END COMPUTED ==========
+
+  // Workspace Toggle Handler
+  onWorkspaceToggle(isOpen: boolean) {
+    this.isWorkspaceOpen.set(isOpen);
   }
 
   openNewMessage() {

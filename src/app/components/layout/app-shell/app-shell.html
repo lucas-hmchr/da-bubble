@@ -5,24 +5,34 @@
 
 <section class="shell">
 
+  <!-- ========== WORKSPACE SIDEBAR - IMMER SICHTBAR (außer Mobile) ========== -->
   @if (!isMobile() || activeMobileView() === 'sidebar') {
-  <app-workspace-sidebar [isMobile]="isMobile()" [currentUserUid]="currentUserUid" (newMessage)="openNewMessage()"
-    (mobileViewChange)="activeMobileView.set($event)"></app-workspace-sidebar>
+  <app-workspace-sidebar 
+    [isMobile]="isMobile()" 
+    [currentUserUid]="currentUserUid" 
+    (newMessage)="openNewMessage()"
+    (mobileViewChange)="activeMobileView.set($event)"
+    (workspaceToggle)="onWorkspaceToggle($event)">
+  </app-workspace-sidebar>
   }
+  <!-- ========== END WORKSPACE SIDEBAR ========== -->
 
-  @if (!isMobile() || activeMobileView() === 'chat' || activeMobileView() === 'new-message') {
+  <!-- ========== VIEW COMPONENT ========== -->
+  @if (shouldShowView()) {
   <app-view [currentUserUid]="currentUserUid" (openThread)="onOpenThread()"></app-view>
   }
+  <!-- ========== END VIEW COMPONENT ========== -->
 
 
+  <!-- ========== THREAD MENU ========== -->
   @if (!isMobile() || activeMobileView() === 'thread') {
-  <!-- ========== DYNAMIC CLASS BINDING ========== -->
   <app-thread-menu 
     [currentUserUid]="currentUserUid"
-    [class.thread-open]="threadService.isOpen()">
+    [class.thread-open]="threadService.isOpen()"
+    [class.full-width]="!shouldShowView()">
   </app-thread-menu>
-  <!-- ========== DYNAMIC CLASS BINDING END ========== -->
   }
+  <!-- ========== END THREAD MENU ========== -->
 
 </section>
 

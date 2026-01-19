@@ -139,10 +139,22 @@
   font-size: 14px;
   color: #686868;
   display: inline-block;
-  max-width: 200px;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+  
+  // Default für schmale Container (< 500px)
+  max-width: 120px;
+  
+  // Breitere Container (≥ 500px)
+  @container (min-width: 500px) {
+    max-width: 200px;
+  }
+  
+  // Sehr breite Container (≥ 700px)
+  @container (min-width: 700px) {
+    max-width: 250px;
+  }
 }
 
 .green {
