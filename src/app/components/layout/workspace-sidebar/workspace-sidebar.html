@@ -2,7 +2,6 @@
   <mat-drawer-container class="mat-drawer-container" autosize>
     <mat-drawer #drawer class="left-menu-sidenav" mode="side" opened="true">
 
-      <!-- HEADER -->
       @if (!isMobile) {
       <div class="channels-button-container">
         <div class="workspace-logo-text-container">
@@ -20,14 +19,12 @@
       </div>
       }
 
-      <!-- NORMAL VIEW -->
       <div *ngIf="!isSearching()" class="channel-message-add-container">
 
         <img class="add-icon cp" src="/assets/icons/global/add_default.svg" (click)="openAddChannelDialog()" />
 
         <mat-accordion class="mat-accordion-container">
 
-          <!-- CHANNELS -->
           @if (!isUserFilterActive()) {
 
           <mat-expansion-panel hideToggle="true" class="channel-panel" [expanded]="channelOpen()"
@@ -64,7 +61,6 @@
           </mat-expansion-panel>
           }
 
-          <!-- DIRECT MESSAGES -->
           @if (!isChannelFilterActive()) {
           <mat-expansion-panel hideToggle="true" class="channel-panel" [expanded]="dmOpen()" (opened)="dmOpen.set(true)"
             (closed)="dmOpen.set(false)">
@@ -108,7 +104,6 @@
         </mat-accordion>
       </div>
 
-      <!-- SEARCH RESULTS (TOPBAR SEARCH) -->
       <div *ngIf="isSearching()" class="search-results-container">
 
         <div class="search-header">

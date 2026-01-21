@@ -128,14 +128,12 @@
 
 .message-textarea .mention-bold {
     font-weight: 700 !important;
-    color: #444DF2 !important;
-    color: var(--clr-purple, #444DF2) !important;
+    color: var(--clr-purple, --clr-purple-1) !important;
 }
 
 ::ng-deep .message-textarea .mention-bold {
     font-weight: 700 !important;
-    color: #444DF2 !important;
-    color: var(--clr-purple, #444DF2) !important;
+    color: var(--clr-purple, --clr-purple-1) !important;
 }
 
 .message-textarea[contenteditable="false"] {
