@@ -18,7 +18,6 @@ import { ProfilePopupService } from '../../../services/profile-popup.service';
 import { AddMemberPopup } from "./add-member-popup/add-member-popup";
 import { ThreadService } from '../../../services/thread.service';
 import { ChannelInfoService } from '../../../services/channel-info.service';
-import { ChannelInfoPopup } from '../../shared/channel-info-popup/channel-info-popup';
 
 type RecipientType = 'channel' | 'user' | null;
 
@@ -32,7 +31,7 @@ interface RecipientSuggestion {
 @Component({
   selector: 'app-view',
   standalone: true,
-  imports: [CommonModule, MessageInput, Message, ProfilePopup, AddMemberPopup,ChannelInfoPopup],
+  imports: [CommonModule, MessageInput, Message, ProfilePopup, AddMemberPopup],
   templateUrl: './view.html',
   styleUrls: ['./view.scss'],
 })

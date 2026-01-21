@@ -5,7 +5,6 @@
 
 <section class="shell">
 
-  <!-- ========== WORKSPACE SIDEBAR - IMMER SICHTBAR (außer Mobile) ========== -->
   @if (!isMobile() || activeMobileView() === 'sidebar') {
   <app-workspace-sidebar 
     [isMobile]="isMobile()" 
@@ -15,27 +14,21 @@
     (workspaceToggle)="onWorkspaceToggle($event)">
   </app-workspace-sidebar>
   }
-  <!-- ========== END WORKSPACE SIDEBAR ========== -->
 
-  <!-- ========== VIEW COMPONENT - MIT SMOOTH ANIMATION ========== -->
   @if (!isMobile()) {
-    <!-- Desktop: Immer im DOM, nur hidden class -->
     <app-view 
       [currentUserUid]="currentUserUid" 
       (openThread)="onOpenThread()"
       [class.hidden]="!shouldShowView()">
     </app-view>
   } @else if (activeMobileView() === 'chat' || activeMobileView() === 'new-message') {
-    <!-- Mobile: Nur rendern wenn aktiv -->
     <app-view 
       [currentUserUid]="currentUserUid" 
       (openThread)="onOpenThread()">
     </app-view>
   }
-  <!-- ========== END VIEW COMPONENT ========== -->
 
 
-  <!-- ========== THREAD MENU ========== -->
   @if (!isMobile() || activeMobileView() === 'thread') {
   <app-thread-menu 
     [currentUserUid]="currentUserUid"
@@ -43,9 +36,10 @@
     [class.full-width]="!shouldShowView()">
   </app-thread-menu>
   }
-  <!-- ========== END THREAD MENU ========== -->
 
 </section>
+
+<app-channel-info-popup></app-channel-info-popup>
 
 @if (isMobile() && activeMobileView() === 'sidebar') {
 <button class="resp-fab" matFab (click)="openNewMessage()">

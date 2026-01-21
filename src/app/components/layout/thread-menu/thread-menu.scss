@@ -1,6 +1,6 @@
 section {
   font-family: 'Nunito';
-  background-color: white;
+  background-color: var(--clr-white);
   border-radius: 30px;
   display: flex;
   flex-direction: column;
@@ -111,7 +111,7 @@ app-message-input {
     position: relative;
     z-index: 0;
     font-size: 18px;
-    color: #ADB0D9;
+    color: var(--clr-purple-light);
   }
 }
 

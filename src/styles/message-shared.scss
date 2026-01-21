@@ -18,7 +18,7 @@
 
 // Eigene Message Bubble (rechts, blau)
 @mixin message-bubble-own {
-  background: #535af1;
+  background: var(--clr-purple-3);
   color: #ffffff;
   border-radius: 20px 20px 0 20px;
 }
@@ -82,12 +82,12 @@
 
   &:hover {
     background: #f5f5f5;
-    border-color: #535af1;
+    border-color: var(--clr-purple-3);
   }
 
   &.mine {
     background: #eceefe;
-    border-color: #535af1;
+    border-color: var(--clr-purple-3);
   }
 
   .reaction-emoji {
@@ -129,7 +129,7 @@
   span {
     padding: 0 16px;
     font-size: 18px;
-    color: #888888;
+    color: var(--clr-black);
     font-weight: 500;
     white-space: nowrap;
   }
@@ -143,8 +143,7 @@
   gap: 8px;
   
   .thread-link {
-    color: #535af1;
-    // color: red;
+    color: var(--clr-purple-3);
     font-size: 13px;
     font-weight: 600;
     text-decoration: none;
@@ -157,6 +156,6 @@
   
   .last-reply-time {
     font-size: 12px;
-    color: #888;
+    color: var(--clr-gray);
   }
 }

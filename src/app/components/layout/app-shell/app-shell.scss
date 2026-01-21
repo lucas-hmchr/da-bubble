@@ -12,21 +12,21 @@ app-thread-menu {
                 min-width 0.3s cubic-bezier(0.4, 0, 0.2, 1), 
                 opacity 0.3s cubic-bezier(0.4, 0, 0.2, 1), 
                 margin 0.3s cubic-bezier(0.4, 0, 0.2, 1),
-                flex 0.3s cubic-bezier(0.4, 0, 0.2, 1); // ← NEU
+                flex 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     
     &.thread-open {
         width: 485px;
         min-width: 485px;
         opacity: 1;
         margin-right: 10px;
-        flex: 0 0 485px; // ← NEU: Explizite Flex-Basis
+        flex: 0 0 485px;
     }
     
     &.thread-open.full-width {
         width: 100%;
         max-width: none;
         min-width: 0;
-        flex: 1; // ← NEU: Nimmt verfügbaren Platz
+        flex: 1;
     }
     
     height: calc(100% - 10px);
@@ -39,7 +39,6 @@ app-view {
     flex: 1;
     min-width: 0;
     
-    // ========== SMOOTH HIDE/SHOW ANIMATION ==========
     transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1), 
                 opacity 0.3s cubic-bezier(0.4, 0, 0.2, 1), 
                 transform 0.3s cubic-bezier(0.4, 0, 0.2, 1),
@@ -48,16 +47,15 @@ app-view {
     transform: translateX(0);
     
     &.hidden {
-        flex: 0 0 0; // ← WICHTIG: Nimmt keinen Flex-Space mehr ein
+        flex: 0 0 0;
         width: 0;
         min-width: 0;
-        max-width: 0; // ← WICHTIG: Kann nicht wachsen
+        max-width: 0;
         opacity: 0;
         transform: translateX(-20px);
         overflow: hidden;
         pointer-events: none;
     }
-    // ========== END ANIMATION ==========
 }
 
 .shell {
@@ -68,13 +66,11 @@ app-view {
     height: calc(100vh - 76px - 30px);
     overflow: hidden;
     
-    // ========== DYNAMIC GAP WHEN VIEW IS HIDDEN ==========
     transition: gap 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     
     &:has(app-view.hidden) {
         gap: 8px;
     }
-    // ========== END DYNAMIC GAP ==========
 }
 
 .resp-fab {
@@ -108,7 +104,6 @@ app-view {
         display: block;
     }
     
-    // Mobile: Keine Smooth Animation nötig
     app-view {
         transition: none;
         
