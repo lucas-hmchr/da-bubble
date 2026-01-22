@@ -6,12 +6,24 @@ import {
   Input,
   Output,
   signal,
+  computed,
+  OnInit,
+  OnDestroy,
 } from '@angular/core';
 import { BreakpointObserver } from '@angular/cdk/layout';
 import { AuthService } from '../../../auth/auth.service';
 import { SearchService } from '../../../services/search.topbar.service';
 import { FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
+import { FirestoreService } from '../../../services/firestore';
+import { ChannelService } from '../../../services/channel.service';
+import { UserService } from '../../../services/user.service';
+import { ChatContextService } from '../../../services/chat-context.service';
+import { User } from '../../../models/user.model';
+import { Channel } from '../../../models/channel.interface';
+import { getAvatarById } from '../../../../shared/data/avatars';
+import { Subject } from 'rxjs';
+import { takeUntil } from 'rxjs/operators';
 
 @Component({
   selector: 'app-topbar',
@@ -19,8 +31,14 @@ import { CommonModule } from '@angular/common';
   templateUrl: './topbar.html',
   styleUrl: './topbar.scss',
 })
-export class Topbar {
+export class Topbar implements OnInit, OnDestroy {
   private breakpointObserver = inject(BreakpointObserver);
+  private firestore = inject(FirestoreService);
+  private channelService = inject(ChannelService);
+  private chatContext = inject(ChatContextService);
+  public userService = inject(UserService);
+  private destroy$ = new Subject<void>();
+
   @Input() isNewMessageMode = false;
   @Input() showMobileBack = false;
 
@@ -36,55 +54,34 @@ export class Topbar {
   searchQuery = '';
   isSearchFocused = false;
 
-  showUserSuggestions = false;
-  filteredUsers: any[] = [];
+  // ========== NEUE SEARCH LOGIC ==========
+  showUserSuggestions = signal(false);
+  showChannelSuggestions = signal(false);
+  filteredUsers = signal<User[]>([]);
+  filteredChannels = signal<Channel[]>([]);
 
-  allUsers = [
-    {
-      id: 1,
-      name: 'Frederik Beck',
-      avatar: '/assets/icons/global/Avatar.svg',
-      online: true,
-      isYou: true,
-    },
-    {
-      id: 2,
-      name: 'Sofia Müller',
-      avatar: '/assets/icons/global/Avatar.svg',
-      online: true,
-      isYou: false,
-    },
-    {
-      id: 3,
-      name: 'Noah Braun',
-      avatar: '/assets/icons/global/Avatar.svg',
-      online: true,
-      isYou: false,
-    },
-    {
-      id: 4,
-      name: 'Elise Roth',
-      avatar: '/assets/icons/global/Avatar.svg',
-      online: false,
-      isYou: false,
-    },
-    {
-      id: 5,
-      name: 'Elias Neumann',
-      avatar: '/assets/icons/global/Avatar.svg',
-      online: true,
-      isYou: false,
-    },
-    {
-      id: 6,
-      name: 'Steffen Hoffmann',
-      avatar: '/assets/icons/global/Avatar.svg',
-      online: false,
-      isYou: false,
-    },
-  ];
+  // Computed: Alle User außer current user
+  allUsers = computed(() => {
+    const currentUid = this.auth.uid();
+    return this.firestore.userList().filter(u => u.uid !== currentUid);
+  });
 
-  constructor(private auth: AuthService, private searchService: SearchService) {
+  // Computed: Alle Channels
+  allChannels = computed(() => this.channelService.channels());
+
+  // ========== NEU: Current User Computed ==========
+  currentUser = computed(() => {
+    const uid = this.auth.uid();
+    if (!uid) return null;
+    console.log(this.firestore.userList().find(u => u.uid === uid))
+    return this.firestore.userList().find(u => u.uid === uid) || null;
+  });
+  // ========== END NEU ==========
+
+  constructor(
+    private auth: AuthService,
+    private searchService: SearchService,
+  ) {
     this.breakpointObserver.observe(['(max-width: 375px)']).subscribe((result) => {
       this.MobileProfil = result.matches;
     });
@@ -93,59 +90,175 @@ export class Topbar {
     });
   }
 
-  onSearchInput() {
-    if (this.searchQuery.startsWith('@')) {
-      this.showUserSuggestions = true;
-      const searchTerm = this.searchQuery.substring(1).toLowerCase();
+  ngOnInit() {
+    document.addEventListener('click', () => {
+      this.isDropdownMenuOpen = false;
+    });
+  }
 
+  ngOnDestroy() {
+    this.destroy$.next();
+    this.destroy$.complete();
+  }
+
+  // ========== SEARCH INPUT HANDLER ==========
+  onSearchInput() {
+    const query = this.searchQuery.trim();
+
+    // @ für User-Suche
+    if (query.startsWith('@')) {
+      this.showUserSuggestions.set(true);
+      this.showChannelSuggestions.set(false);
+      
+      const searchTerm = query.substring(1).toLowerCase();
+      
       if (searchTerm.length === 0) {
-        this.filteredUsers = this.allUsers;
+        // Zeige alle User
+        this.filteredUsers.set(this.allUsers());
       } else {
-        this.filteredUsers = this.allUsers.filter((user) =>
-          user.name.toLowerCase().includes(searchTerm)
+        // Filtere User
+        this.filteredUsers.set(
+          this.allUsers().filter(user =>
+            user.displayName?.toLowerCase().includes(searchTerm) ||
+            user.name?.toLowerCase().includes(searchTerm) ||
+            user.email?.toLowerCase().includes(searchTerm)
+          )
         );
       }
-    } else {
-      this.showUserSuggestions = false;
-      this.filteredUsers = [];
-      this.searchService.updateSearchQuery(this.searchQuery);
+      return;
     }
+
+    // # für Channel-Suche
+    if (query.startsWith('#')) {
+      this.showChannelSuggestions.set(true);
+      this.showUserSuggestions.set(false);
+      
+      const searchTerm = query.substring(1).toLowerCase();
+      
+      if (searchTerm.length === 0) {
+        // Zeige alle Channels
+        this.filteredChannels.set(this.allChannels());
+      } else {
+        // Filtere Channels
+        this.filteredChannels.set(
+          this.allChannels().filter(channel =>
+            channel.name?.toLowerCase().includes(searchTerm) ||
+            channel.description?.toLowerCase().includes(searchTerm)
+          )
+        );
+      }
+      return;
+    }
+
+    // Normale Suche (ohne @ oder #)
+    this.showUserSuggestions.set(false);
+    this.showChannelSuggestions.set(false);
+    this.searchService.updateSearchQuery(query);
   }
 
-  selectUser(user: any) {
-    console.log('User selected:', user);
-    this.searchQuery = '@' + user.name;
-    this.showUserSuggestions = false;
-    this.filteredUsers = [];
+  // ========== USER SELECTED ==========
+  selectUser(user: User) {
+    if (!user.uid) return;
+    
+    // Öffne DM mit User
+    this.chatContext.openConversation(user.uid);
+    
+    // Clear search
+    this.searchQuery = '';
+    this.showUserSuggestions.set(false);
+    this.filteredUsers.set([]);
   }
 
+  // ========== CHANNEL SELECTED ==========
+  selectChannel(channel: Channel) {
+    if (!channel.id) return;
+    
+    // Öffne Channel
+    this.chatContext.openChannel(channel.id);
+    
+    // Clear search
+    this.searchQuery = '';
+    this.showChannelSuggestions.set(false);
+    this.filteredChannels.set([]);
+  }
+
+  // ========== SEARCH FOCUS ==========
   onSearchFocus() {
     this.isSearchFocused = true;
 
     if (this.searchQuery.startsWith('@')) {
-      this.showUserSuggestions = true;
+      this.showUserSuggestions.set(true);
       const searchTerm = this.searchQuery.substring(1).toLowerCase();
-      this.filteredUsers =
-        searchTerm.length === 0
-          ? this.allUsers
-          : this.allUsers.filter((user) => user.name.toLowerCase().includes(searchTerm));
+      
+      if (searchTerm.length === 0) {
+        this.filteredUsers.set(this.allUsers());
+      } else {
+        this.filteredUsers.set(
+          this.allUsers().filter(user =>
+            user.displayName?.toLowerCase().includes(searchTerm) ||
+            user.name?.toLowerCase().includes(searchTerm)
+          )
+        );
+      }
+    } else if (this.searchQuery.startsWith('#')) {
+      this.showChannelSuggestions.set(true);
+      const searchTerm = this.searchQuery.substring(1).toLowerCase();
+      
+      if (searchTerm.length === 0) {
+        this.filteredChannels.set(this.allChannels());
+      } else {
+        this.filteredChannels.set(
+          this.allChannels().filter(channel =>
+            channel.name?.toLowerCase().includes(searchTerm)
+          )
+        );
+      }
     }
   }
 
+  // ========== SEARCH BLUR ==========
   onSearchBlur() {
     setTimeout(() => {
       this.isSearchFocused = false;
-      this.showUserSuggestions = false;
+      this.showUserSuggestions.set(false);
+      this.showChannelSuggestions.set(false);
     }, 200);
   }
 
+  // ========== CLEAR SEARCH ==========
   clearSearch() {
     this.searchQuery = '';
-    this.showUserSuggestions = false;
-    this.filteredUsers = [];
+    this.showUserSuggestions.set(false);
+    this.showChannelSuggestions.set(false);
+    this.filteredUsers.set([]);
+    this.filteredChannels.set([]);
     this.searchService.clearSearch();
   }
 
+  // ========== GET AVATAR SRC ==========
+  getAvatarSrc(user: User): string {
+    if (user.avatarId) {
+      return getAvatarById(user.avatarId).src;
+    }
+    return '/assets/images/avatars/avatar_default.svg';
+  }
+
+  // ========== NEU: Current User Avatar ==========
+  getCurrentUserAvatar(): string {
+    const user = this.currentUser();
+    if (!user) return '/assets/images/avatars/avatar_default.svg';
+    return this.getAvatarSrc(user);
+  }
+
+  // ========== NEU: Current User Online Status ==========
+  getCurrentUserOnlineStatus(): string {
+    const user = this.currentUser();
+    if (!user) return '/assets/icons/global/Offline.svg';
+    return this.userService.getOnlineStatusIcon(user);
+  }
+  // ========== END NEU ==========
+
+  // ========== PROFILE & DROPDOWN (unverändert) ==========
   toggleDropdownMenu(event: Event) {
     event.stopPropagation();
     this.isDropdownMenuOpen = !this.isDropdownMenuOpen;
@@ -202,11 +315,5 @@ export class Topbar {
     event.stopPropagation();
     this.isDropdownMenuOpen = false;
     await this.auth.logout();
-  }
-
-  ngOnInit() {
-    document.addEventListener('click', () => {
-      this.isDropdownMenuOpen = false;
-    });
   }
 }
