@@ -226,8 +226,11 @@ export class WorkspaceSidebar implements OnInit, OnDestroy {
     }
   }
 
-  getAvatarPath(user: User) {
-    const avatarId = user.avatarId || 'avatar_default';
+  getAvatarPath(user: User): string {
+    if (user.avatarId) {
+      return getAvatarById(user.avatarId).src;
+    }
+    return getAvatarById('avatar_default').src;
   }
 
   ngOnDestroy() {
