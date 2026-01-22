@@ -289,16 +289,15 @@
 
 .profil-image {
     position: relative;
-    width: 70px; // ← NEU: Feste Breite
-    height: 70px; // ← NEU: Feste Höhe
-    flex-shrink: 0; // ← NEU: Verhindert Schrumpfen
+    width: 70px;
+    height: 70px;
+    flex-shrink: 0;
 
     img[alt="avatar-profil"] {
-        // ← NEU: Nur das Avatar (nicht Online-Icon!)
         width: 100%;
         height: 100%;
-        border-radius: 50%; // ← NEU: Rund
-        object-fit: cover; // ← NEU: Bild-Skalierung
+        border-radius: 50%;
+        object-fit: cover;
 
         @media (max-width: 375px) {
             width: 50px;
@@ -308,10 +307,10 @@
 
     .online-icon {
         position: absolute;
-        bottom: 0; // ← GEÄNDERT: Von top zu bottom
+        bottom: 0;
         right: 0;
-        width: 20px; // ← NEU: Feste Größe
-        height: 20px; // ← NEU: Feste Größe
+        width: 20px;
+        height: 20px;
 
         @media (max-width: 1630px) {
             display: none;
@@ -787,11 +786,8 @@
     border-bottom-right-radius: 30px;
     box-shadow: 0px 6px 14px 0px rgba(0, 0, 0, 0.20);
     z-index: 2000;
-    // ========== WICHTIG: Kein Padding oder Overflow hier! ==========
-    overflow: hidden; // Wichtig für border-radius
-    // ========== END WICHTIG ==========
+    overflow: hidden;
 
-    // ========== NEU: Inner scrollable container ==========
     .search-results-inner {
         max-height: 413px;
         overflow-y: auto;
@@ -799,9 +795,8 @@
         padding: 0px 0;
         margin: 10px 10px 10px 0px;
 
-        // Scrollbar Styling
         &::-webkit-scrollbar {
-            width: 6px; // ← Schmaler
+            width: 6px;
         }
 
         &::-webkit-scrollbar-track {
@@ -819,7 +814,6 @@
         }
     }
 
-    // ========== END NEU ==========
 
     .no-results {
         padding: 20px;

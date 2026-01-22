@@ -21,7 +21,6 @@
                 class="search-icon-clear" (click)="clearSearch()">
             <img src="/assets/icons/global/search.svg" alt="search" class="search-icon-right">
 
-            <!-- ========== USER SUGGESTIONS (mit @) ========== -->
             <div class="search-results" *ngIf="showUserSuggestions() && filteredUsers().length > 0">
                 <div class="search-results-inner">
                     <div class="search-result-item" *ngFor="let user of filteredUsers()" (click)="selectUser(user)">
@@ -36,7 +35,6 @@
                 </div>
             </div>
 
-            <!-- ========== CHANNEL SUGGESTIONS (mit #) ========== -->
             <div class="search-results" *ngIf="showChannelSuggestions() && filteredChannels().length > 0">
                 <div class="search-results-inner">
                     <div class="search-result-item channel-item" *ngFor="let channel of filteredChannels()" (click)="selectChannel(channel)">
@@ -49,7 +47,6 @@
                 </div>
             </div>
 
-            <!-- ========== NO RESULTS ========== -->
             <div class="search-results" *ngIf="(showUserSuggestions() && filteredUsers().length === 0) || (showChannelSuggestions() && filteredChannels().length === 0)">
                 <div class="search-results-inner">
                     <div class="no-results">
@@ -61,14 +58,10 @@
 
         </div>
         <div class="profil" (click)="toggleDropdownMenu($event)">
-            <!-- ========== displayName hat Priorität (normalerweise Vor- und Nachname) ========== -->
-            <h1>{{ currentUser()?.name || currentUser()?.displayName || 'Gast' }}</h1>
-            <!-- ========== END ========== -->
+            <h1>{{ currentUser()?.displayName || currentUser()?.name || 'Gast' }}</h1>
             <div class="profil-image">
-                <!-- ========== GEÄNDERT: Echter Avatar ========== -->
                 <img [src]="getCurrentUserAvatar()" alt="avatar-profil">
                 <img [src]="getCurrentUserOnlineStatus()" alt="avatar-online-icon" class="online-icon">
-                <!-- ========== END GEÄNDERT ========== -->
             </div>
             <img src="/assets/icons/global/keyboard_arrow_down.svg" (click)="toggleDropdownMenu($event)"
                 alt="arrow-drop-down">
@@ -95,16 +88,12 @@
 
                 <div class="modal-content">
                     <div class="avatar-large">
-                        <!-- ========== GEÄNDERT: Echter Avatar ========== -->
                         <img [src]="getCurrentUserAvatar()" alt="avatar-profil">
-                        <!-- ========== END GEÄNDERT ========== -->
                     </div>
 
                     <div class="profil-info">
                         <div class="profil-info-details">
-                            <!-- ========== GEÄNDERT: Echter Name ========== -->
                             <h3>{{ currentUser()?.displayName || currentUser()?.name || 'Gast' }}</h3>
-                            <!-- ========== END GEÄNDERT ========== -->
                             <button class="edit-button" (click)="openProfilEditModal()">Bearbeiten</button>
                             <div class="testos activee" (click)="openProfilEditModal()">
                                 <img src="/assets/icons/global/edit-profil-mobil.svg" alt="open-edit-profil">
@@ -121,9 +110,7 @@
                         <img src="/assets/icons/login/mail_active.svg" alt="email" class="email-icon">
                         <div class="email-info">
                             <p class="email-label">E-Mail-Adresse</p>
-                            <!-- ========== GEÄNDERT: Echte Email ========== -->
                             <p class="email-address">{{ currentUser()?.email || 'Keine E-Mail' }}</p>
-                            <!-- ========== END GEÄNDERT ========== -->
                         </div>
                     </div>
                 </div>
@@ -139,9 +126,7 @@
 
                 <div class="modal-content">
                     <div class="avatar-large">
-                        <!-- ========== GEÄNDERT: Echter Avatar ========== -->
                         <img [src]="getCurrentUserAvatar()" alt="avatar-profil">
-                        <!-- ========== END GEÄNDERT ========== -->
                     </div>
 
                     <div class="form-section">
@@ -149,14 +134,12 @@
                             <img class="" src="/assets/icons/global/account_circle.svg" alt="">
                             <label>Vollständiger Name</label>
                         </div>
-                        <!-- ========== GEÄNDERT: Echter Name als Value ========== -->
-                        <input type="text" [value]="currentUser()?.displayName || currentUser()?.name || ''" class="input-field">
-                        <!-- ========== END GEÄNDERT ========== -->
+                        <input type="text" [(ngModel)]="editNameValue" class="input-field" placeholder="Dein vollständiger Name">
                     </div>
 
                     <div class="modal-actions">
                         <button class="cancel-btn" (click)="closeProfilEditModal()">Abbrechen</button>
-                        <button class="save-btn">Speichern</button>
+                        <button class="save-btn" (click)="saveProfileName()">Speichern</button>
                     </div>
                 </div>
             </div>
