@@ -113,7 +113,6 @@
                         <img src="/assets/icons/login/mail_active.svg" alt="email" class="email-icon">
                         <div class="email-info">
                             <p class="email-label">E-Mail-Adresse</p>
-                            <!-- <p class="email-address">{{ currentUser()?.email || 'Keine E-Mail' }}</p> -->
                             <a [href]="currentUser()?.email ? 'mailto:' + currentUser()?.email : null"
                                 class="email-address" [class.no-link]="!currentUser()?.email">
                                 {{ currentUser()?.email || 'Keine E-Mail' }}
