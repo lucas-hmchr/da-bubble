@@ -354,6 +354,7 @@
     transform: translateY(-10px);
     transition: all 0.3s ease;
     z-index: 2000;
+    cursor: default;
 
     &.show {
         opacity: 1;
@@ -578,6 +579,7 @@
                     font-size: 18px;
                     color: #1381FF;
                     font-weight: 500;
+                    text-decoration-line: none;
 
                     @media (max-width: 375px) {
                         font-size: 16px;
@@ -605,6 +607,7 @@
     visibility: hidden;
     transform: translateY(-10px);
     z-index: 2000;
+    cursor: default !important;
 
     &.show {
         opacity: 1;

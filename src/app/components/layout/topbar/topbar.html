@@ -37,17 +37,20 @@
 
             <div class="search-results" *ngIf="showChannelSuggestions() && filteredChannels().length > 0">
                 <div class="search-results-inner">
-                    <div class="search-result-item channel-item" *ngFor="let channel of filteredChannels()" (click)="selectChannel(channel)">
+                    <div class="search-result-item channel-item" *ngFor="let channel of filteredChannels()"
+                        (click)="selectChannel(channel)">
                         <img src="/assets/icons/global/tag.svg" alt="channel" class="channel-icon">
                         <div class="channel-info">
                             <span class="channel-name"># {{ channel.name }}</span>
-                            <span class="channel-description" *ngIf="channel.description">{{ channel.description }}</span>
+                            <span class="channel-description" *ngIf="channel.description">{{ channel.description
+                                }}</span>
                         </div>
                     </div>
                 </div>
             </div>
 
-            <div class="search-results" *ngIf="(showUserSuggestions() && filteredUsers().length === 0) || (showChannelSuggestions() && filteredChannels().length === 0)">
+            <div class="search-results"
+                *ngIf="(showUserSuggestions() && filteredUsers().length === 0) || (showChannelSuggestions() && filteredChannels().length === 0)">
                 <div class="search-results-inner">
                     <div class="no-results">
                         <span *ngIf="showUserSuggestions()">Keine Benutzer gefunden</span>
@@ -110,7 +113,11 @@
                         <img src="/assets/icons/login/mail_active.svg" alt="email" class="email-icon">
                         <div class="email-info">
                             <p class="email-label">E-Mail-Adresse</p>
-                            <p class="email-address">{{ currentUser()?.email || 'Keine E-Mail' }}</p>
+                            <!-- <p class="email-address">{{ currentUser()?.email || 'Keine E-Mail' }}</p> -->
+                            <a [href]="currentUser()?.email ? 'mailto:' + currentUser()?.email : null"
+                                class="email-address" [class.no-link]="!currentUser()?.email">
+                                {{ currentUser()?.email || 'Keine E-Mail' }}
+                            </a>
                         </div>
                     </div>
                 </div>
@@ -134,7 +141,8 @@
                             <img class="" src="/assets/icons/global/account_circle.svg" alt="">
                             <label>Vollständiger Name</label>
                         </div>
-                        <input type="text" [(ngModel)]="editNameValue" class="input-field" placeholder="Dein vollständiger Name">
+                        <input type="text" [(ngModel)]="editNameValue" class="input-field"
+                            placeholder="Dein vollständiger Name">
                     </div>
 
                     <div class="modal-actions">
