@@ -6,22 +6,34 @@ import { MessageInputStateService } from './message-input-state.service';
 
 @Injectable({ providedIn: 'root' })
 export class MessageInputMentionDropdownService {
-  
   constructor(
     private messageInputService: MessageInputService,
-    private state: MessageInputStateService
+    private state: MessageInputStateService,
   ) {}
 
   handleKeyup(value: string): void {
-    const lastChar = value.slice(-1);
+    const atMatch = value.match(/@(\w*)$/);
+    const hashMatch = value.match(/#(\w*)$/);
 
-    if (lastChar === '@' || lastChar === '#') {
-      this.state.startMention(lastChar === '@' ? 'user' : 'channel');
+    if (atMatch) {
+      if (!this.state.showMentions() || this.state.activeMentionType() !== 'user') {
+        this.state.startMention('user');
+      }
+      this.filterMentions(value);
       return;
     }
 
-    if (!this.state.showMentions() || !this.state.activeMentionType()) return;
-    this.filterMentions(value);
+    if (hashMatch) {
+      if (!this.state.showMentions() || this.state.activeMentionType() !== 'channel') {
+        this.state.startMention('channel');
+      }
+      this.filterMentions(value);
+      return;
+    }
+
+    if (this.state.showMentions()) {
+      this.state.resetMentions();
+    }
   }
 
   private filterMentions(value: string): void {
@@ -34,10 +46,7 @@ export class MessageInputMentionDropdownService {
   }
 
   private filterUserMentions(value: string): void {
-    const result = this.messageInputService.filterUsersByQuery(
-      this.state.users(),
-      value
-    );
+    const result = this.messageInputService.filterUsersByQuery(this.state.users(), value);
     if (result === null || result.length === 0) {
       this.state.resetMentions();
       this.state.setFilteredUsers([]);
@@ -47,10 +56,7 @@ export class MessageInputMentionDropdownService {
   }
 
   private filterChannelMentions(value: string): void {
-    const result = this.messageInputService.filterChannelsByQuery(
-      this.state.channelsList(),
-      value
-    );
+    const result = this.messageInputService.filterChannelsByQuery(this.state.channelsList(), value);
     if (result === null || result.length === 0) {
       this.state.resetMentions();
       this.state.setFilteredChannels([]);
@@ -98,9 +104,7 @@ export class MessageInputMentionDropdownService {
     setTimeout(() => {
       const dropdown = document.querySelector('.mention-dropdown');
       if (!dropdown) return;
-      const selectedItem = dropdown.querySelector(
-        '.mention-item.selected'
-      ) as HTMLElement;
+      const selectedItem = dropdown.querySelector('.mention-item.selected') as HTMLElement;
       if (!selectedItem) return;
       selectedItem.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
     }, 0);

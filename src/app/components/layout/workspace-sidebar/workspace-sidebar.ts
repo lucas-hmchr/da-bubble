@@ -9,7 +9,7 @@ import {
   EventEmitter,
   computed,
   effect,
-  ViewChild
+  ViewChild,
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { MatSidenavModule } from '@angular/material/sidenav';
@@ -34,7 +34,6 @@ import { getAvatarById } from '../../../../shared/data/avatars';
 import { AddPeopleDialogComponent } from '../../add-people-dialog/add-people-dialog';
 import { MatDrawer } from '@angular/material/sidenav';
 
-
 @Component({
   selector: 'app-workspace-sidebar',
   standalone: true,
@@ -44,13 +43,12 @@ import { MatDrawer } from '@angular/material/sidenav';
     MatButtonModule,
     MatExpansionModule,
     MatIconModule,
-    AddPeopleDialogComponent
+    AddPeopleDialogComponent,
   ],
   templateUrl: './workspace-sidebar.html',
   styleUrl: './workspace-sidebar.scss',
 })
 export class WorkspaceSidebar implements OnInit, OnDestroy {
-
   @Input() currentUserUid: string | null = null;
   @Input() isMobile = false;
   @Output() newMessage = new EventEmitter<void>();
@@ -66,6 +64,7 @@ export class WorkspaceSidebar implements OnInit, OnDestroy {
 
   isSearching = signal(false);
   searchQuery = signal('');
+  searchType = signal<'all' | 'channels' | 'users'>('all');
 
   filteredChannels = signal<Channel[]>([]);
   filteredUsers = signal<User[]>([]);
@@ -82,20 +81,22 @@ export class WorkspaceSidebar implements OnInit, OnDestroy {
     private chatContext: ChatContextService,
     public userService: UserService,
     public conversationService: ConversationService,
-    private searchService: SearchService
-  ) { }
+    private searchService: SearchService,
+  ) {}
 
   ngOnInit() {
     this.resetSearch();
 
     this.searchService.searchQuery$
       .pipe(takeUntil(this.destroy$), debounceTime(300))
-      .subscribe(query => {
+      .subscribe((query) => {
         this.searchQuery.set(query);
+        const type = this.searchService.getSearchType();
+        this.searchType.set(type);
 
         if (query.trim()) {
           this.isSearching.set(true);
-          this.performSearch(query);
+          this.performSearch(query, type);
         } else {
           this.isSearching.set(false);
           this.resetSearch();
@@ -129,32 +130,44 @@ export class WorkspaceSidebar implements OnInit, OnDestroy {
     return this.channelService.channels();
   });
 
-  performSearch(query: string) {
+  performSearch(query: string, type: 'all' | 'channels' | 'users' = 'all') {
     const term = query.toLowerCase().trim();
 
-    this.filteredChannels.set(
-      this.channelService.channels().filter(c =>
-        c.name?.toLowerCase().includes(term) ||
-        c.description?.toLowerCase().includes(term)
-      )
-    );
+    if (type === 'all' || type === 'channels') {
+      this.filteredChannels.set(
+        this.channelService
+          .channels()
+          .filter(
+            (c) =>
+              c.name?.toLowerCase().includes(term) || c.description?.toLowerCase().includes(term),
+          ),
+      );
+    } else {
+      this.filteredChannels.set([]);
+    }
 
-    this.filteredUsers.set(
-      this.firestore.userList().filter(u =>
-        u.uid !== this.currentUserUid &&
-        (
-          u.displayName?.toLowerCase().includes(term) ||
-          u.name?.toLowerCase().includes(term) ||
-          u.email?.toLowerCase().includes(term)
-        )
-      )
-    );
+    if (type === 'all' || type === 'users') {
+      this.filteredUsers.set(
+        this.firestore
+          .userList()
+          .filter(
+            (u) =>
+              u.uid !== this.currentUserUid &&
+              (u.displayName?.toLowerCase().includes(term) ||
+                u.name?.toLowerCase().includes(term) ||
+                u.email?.toLowerCase().includes(term)),
+          ),
+      );
+    } else {
+      this.filteredUsers.set([]);
+    }
   }
 
   resetSearch() {
     this.filteredChannels.set(this.channelService.channels());
     this.filteredUsers.set(this.firestore.userList());
     this.searchQuery.set('');
+    this.searchType.set('all');
   }
 
   openAddChannelDialog() {
@@ -168,13 +181,12 @@ export class WorkspaceSidebar implements OnInit, OnDestroy {
       data: { uid: this.currentUserUid },
     });
 
-    dialogRef.afterClosed().subscribe(result => {
+    dialogRef.afterClosed().subscribe((result) => {
       if (result?.created && result.channelId && result.channelName) {
         this.openAddPeopleDialog(result.channelId, result.channelName);
         this.showAddPeopleDialog = true;
       }
     });
-
   }
 
   openAddPeopleDialog(channelId: string, channelName: string) {
@@ -194,7 +206,6 @@ export class WorkspaceSidebar implements OnInit, OnDestroy {
 
     this.clearSearchIfActive();
   }
-
 
   openNewMessage() {
     this.chatContext.openNewMessage();
@@ -216,14 +227,13 @@ export class WorkspaceSidebar implements OnInit, OnDestroy {
   }
 
   getAvatarPath(user: User) {
-    return getAvatarById(user.avatarId).src;
+    const avatarId = user.avatarId || 'avatar_default';
   }
 
   ngOnDestroy() {
     this.destroy$.next();
     this.destroy$.complete();
   }
-
 
   private autoOpenPanels = effect(() => {
     const mode = this.newMessage$.mode();
@@ -243,48 +253,40 @@ export class WorkspaceSidebar implements OnInit, OnDestroy {
     // mode === null → nichts erzwingen
   });
 
-  isUserFilterActive = computed(() =>
-    this.newMessage$.mode() === 'user'
-  );
+  isUserFilterActive = computed(() => this.newMessage$.mode() === 'user');
 
-  isChannelFilterActive = computed(() =>
-    this.newMessage$.mode() === 'channel'
-  );
+  isChannelFilterActive = computed(() => this.newMessage$.mode() === 'channel');
 
-  isNormalView = computed(() =>
-    this.newMessage$.mode() === null
-  );
+  isNormalView = computed(() => this.newMessage$.mode() === null);
 
   onAddPeopleDone(event: { mode: 'all' | 'specific'; channelId: string; userIds: string[] }) {
     this.showAddPeopleDialog = false;
 
     if (event.mode === 'all') {
-      const allUserIds = this.firestore.userList()
-        .map(u => u.uid!)
+      const allUserIds = this.firestore
+        .userList()
+        .map((u) => u.uid!)
         .filter(Boolean);
 
       this.channelService.addMembersToChannel(event.channelId, allUserIds);
     } else {
-
       // specific
       this.channelService.addMembersToChannel(event.channelId, event.userIds);
-
     }
     this.chatContext.openChannel(event.channelId);
 
     if (this.isMobile) {
       this.mobileViewChange.emit('chat');
     }
-
   }
 
-onDrawerToggle() {
-  // Toggle drawer HIER
-  this.drawer.toggle();
-  
-  // Emit Zustand nach Toggle
-  setTimeout(() => {
-    this.workspaceToggle.emit(this.drawer.opened);
-  }, 50);
-}
+  onDrawerToggle() {
+    // Toggle drawer HIER
+    this.drawer.toggle();
+
+    // Emit Zustand nach Toggle
+    setTimeout(() => {
+      this.workspaceToggle.emit(this.drawer.opened);
+    }, 50);
+  }
 }

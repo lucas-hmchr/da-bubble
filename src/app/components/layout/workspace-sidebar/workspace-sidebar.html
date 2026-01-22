@@ -107,16 +107,25 @@
       <div *ngIf="isSearching()" class="search-results-container">
 
         <div class="search-header">
-          <h3>Suchergebnisse für "{{ searchQuery() }}"</h3>
+          <h3>
+            <span *ngIf="searchType() === 'channels'">Channels für</span>
+            <span *ngIf="searchType() === 'users'">Benutzer für</span>
+            <span *ngIf="searchType() === 'all'">Suchergebnisse für</span>
+            "{{ searchQuery() }}"
+          </h3>
           <span class="result-count">
-            ({{ visibleChannels().length + visibleUsers().length }} Ergebnisse)
+            ({{ filteredChannels().length + filteredUsers().length }} Ergebnisse)
           </span>
         </div>
 
-        <div *ngIf="!visibleChannels().length && !visibleUsers().length" class="no-results">
-          <img src="/assets/icons/global/search.svg" class="no-results-icon" />
+        <div *ngIf="filteredChannels().length === 0 && filteredUsers().length === 0" class="no-results">
+          <img src="/assets/icons/global/search.svg" alt="no results" class="no-results-icon">
           <p class="no-results-title">Keine Ergebnisse gefunden</p>
-          <p class="no-results-text">Versuche es mit anderen Suchbegriffen</p>
+          <p class="no-results-text">
+            <span *ngIf="searchType() === 'channels'">Versuche es mit einem anderen Channel-Namen</span>
+            <span *ngIf="searchType() === 'users'">Versuche es mit einem anderen Benutzernamen</span>
+            <span *ngIf="searchType() === 'all'">Versuche es mit anderen Suchbegriffen</span>
+          </p>
         </div>
 
         <div class="results-list">

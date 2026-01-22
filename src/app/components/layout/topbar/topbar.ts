@@ -84,7 +84,10 @@ export class Topbar {
     },
   ];
 
-  constructor(private auth: AuthService, private searchService: SearchService) {
+  constructor(
+    private auth: AuthService,
+    private searchService: SearchService,
+  ) {
     this.breakpointObserver.observe(['(max-width: 375px)']).subscribe((result) => {
       this.MobileProfil = result.matches;
     });
@@ -102,7 +105,7 @@ export class Topbar {
         this.filteredUsers = this.allUsers;
       } else {
         this.filteredUsers = this.allUsers.filter((user) =>
-          user.name.toLowerCase().includes(searchTerm)
+          user.name.toLowerCase().includes(searchTerm),
         );
       }
     } else {
