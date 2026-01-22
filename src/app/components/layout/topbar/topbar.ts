@@ -54,29 +54,25 @@ export class Topbar implements OnInit, OnDestroy {
   searchQuery = '';
   isSearchFocused = false;
 
-  // ========== NEUE SEARCH LOGIC ==========
+  editNameValue = '';
+
   showUserSuggestions = signal(false);
   showChannelSuggestions = signal(false);
   filteredUsers = signal<User[]>([]);
   filteredChannels = signal<Channel[]>([]);
 
-  // Computed: Alle User außer current user
   allUsers = computed(() => {
     const currentUid = this.auth.uid();
     return this.firestore.userList().filter(u => u.uid !== currentUid);
   });
 
-  // Computed: Alle Channels
   allChannels = computed(() => this.channelService.channels());
 
-  // ========== NEU: Current User Computed ==========
   currentUser = computed(() => {
     const uid = this.auth.uid();
     if (!uid) return null;
-    console.log(this.firestore.userList().find(u => u.uid === uid))
     return this.firestore.userList().find(u => u.uid === uid) || null;
   });
-  // ========== END NEU ==========
 
   constructor(
     private auth: AuthService,
@@ -101,11 +97,9 @@ export class Topbar implements OnInit, OnDestroy {
     this.destroy$.complete();
   }
 
-  // ========== SEARCH INPUT HANDLER ==========
   onSearchInput() {
     const query = this.searchQuery.trim();
 
-    // @ für User-Suche
     if (query.startsWith('@')) {
       this.showUserSuggestions.set(true);
       this.showChannelSuggestions.set(false);
@@ -113,10 +107,8 @@ export class Topbar implements OnInit, OnDestroy {
       const searchTerm = query.substring(1).toLowerCase();
       
       if (searchTerm.length === 0) {
-        // Zeige alle User
         this.filteredUsers.set(this.allUsers());
       } else {
-        // Filtere User
         this.filteredUsers.set(
           this.allUsers().filter(user =>
             user.displayName?.toLowerCase().includes(searchTerm) ||
@@ -128,7 +120,6 @@ export class Topbar implements OnInit, OnDestroy {
       return;
     }
 
-    // # für Channel-Suche
     if (query.startsWith('#')) {
       this.showChannelSuggestions.set(true);
       this.showUserSuggestions.set(false);
@@ -136,10 +127,8 @@ export class Topbar implements OnInit, OnDestroy {
       const searchTerm = query.substring(1).toLowerCase();
       
       if (searchTerm.length === 0) {
-        // Zeige alle Channels
         this.filteredChannels.set(this.allChannels());
       } else {
-        // Filtere Channels
         this.filteredChannels.set(
           this.allChannels().filter(channel =>
             channel.name?.toLowerCase().includes(searchTerm) ||
@@ -150,39 +139,31 @@ export class Topbar implements OnInit, OnDestroy {
       return;
     }
 
-    // Normale Suche (ohne @ oder #)
     this.showUserSuggestions.set(false);
     this.showChannelSuggestions.set(false);
     this.searchService.updateSearchQuery(query);
   }
 
-  // ========== USER SELECTED ==========
   selectUser(user: User) {
     if (!user.uid) return;
     
-    // Öffne DM mit User
     this.chatContext.openConversation(user.uid);
     
-    // Clear search
     this.searchQuery = '';
     this.showUserSuggestions.set(false);
     this.filteredUsers.set([]);
   }
 
-  // ========== CHANNEL SELECTED ==========
   selectChannel(channel: Channel) {
     if (!channel.id) return;
     
-    // Öffne Channel
     this.chatContext.openChannel(channel.id);
     
-    // Clear search
     this.searchQuery = '';
     this.showChannelSuggestions.set(false);
     this.filteredChannels.set([]);
   }
 
-  // ========== SEARCH FOCUS ==========
   onSearchFocus() {
     this.isSearchFocused = true;
 
@@ -216,7 +197,6 @@ export class Topbar implements OnInit, OnDestroy {
     }
   }
 
-  // ========== SEARCH BLUR ==========
   onSearchBlur() {
     setTimeout(() => {
       this.isSearchFocused = false;
@@ -225,7 +205,6 @@ export class Topbar implements OnInit, OnDestroy {
     }, 200);
   }
 
-  // ========== CLEAR SEARCH ==========
   clearSearch() {
     this.searchQuery = '';
     this.showUserSuggestions.set(false);
@@ -235,7 +214,6 @@ export class Topbar implements OnInit, OnDestroy {
     this.searchService.clearSearch();
   }
 
-  // ========== GET AVATAR SRC ==========
   getAvatarSrc(user: User): string {
     if (user.avatarId) {
       return getAvatarById(user.avatarId).src;
@@ -243,22 +221,18 @@ export class Topbar implements OnInit, OnDestroy {
     return '/assets/images/avatars/avatar_default.svg';
   }
 
-  // ========== NEU: Current User Avatar ==========
   getCurrentUserAvatar(): string {
     const user = this.currentUser();
     if (!user) return '/assets/images/avatars/avatar_default.svg';
     return this.getAvatarSrc(user);
   }
 
-  // ========== NEU: Current User Online Status ==========
   getCurrentUserOnlineStatus(): string {
     const user = this.currentUser();
     if (!user) return '/assets/icons/global/Offline.svg';
     return this.userService.getOnlineStatusIcon(user);
   }
-  // ========== END NEU ==========
 
-  // ========== PROFILE & DROPDOWN (unverändert) ==========
   toggleDropdownMenu(event: Event) {
     event.stopPropagation();
     this.isDropdownMenuOpen = !this.isDropdownMenuOpen;
@@ -281,6 +255,8 @@ export class Topbar implements OnInit, OnDestroy {
   }
 
   openProfilEditModal() {
+    const user = this.currentUser();
+    this.editNameValue = user?.displayName || user?.name || '';
     this.isProfilEditModalOpen = true;
     this.isProfilModalOpen = false;
     document.body.style.overflow = 'hidden';
@@ -309,6 +285,33 @@ export class Topbar implements OnInit, OnDestroy {
     this.activeProfilName = null;
     this.isProfilEditModalOpen = false;
     document.body.style.overflow = '';
+  }
+
+  async saveProfileName() {
+    const newName = this.editNameValue.trim();
+    
+    if (!newName) {
+      alert('Bitte gib einen Namen ein.');
+      return;
+    }
+
+    const user = this.currentUser();
+    if (!user?.uid) {
+      alert('Fehler: Benutzer nicht gefunden.');
+      return;
+    }
+
+    try {
+      await this.auth.updateUserName(newName);
+      
+      this.closeProfilEditModal();
+      
+      console.log('Name erfolgreich geändert:', newName);
+      
+    } catch (error) {
+      console.error('Fehler beim Speichern:', error);
+      alert('Fehler beim Speichern des Namens.');
+    }
   }
 
   async onLogout(event: Event) {
