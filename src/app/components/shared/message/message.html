@@ -25,7 +25,7 @@
           <img src="/assets/icons/global/reaction1.svg" alt="" class="action-btn reaction-btn"
             (click)="onToggleReactionPicker(msg)" />
 
-          <img *ngIf="contextType === 'channel'" src="/assets/icons/global/answer1.svg" alt="Thread öffnen"
+          <img *ngIf="contextType === 'channel'" src="/assets/icons/global/Answer1.svg" alt="Thread öffnen"
             class="action-btn answer-btn" (click)="onOpenThread(msg)" />
 
           <button *ngIf="isOwnMessage(msg)" class="action-btn option-btn"
