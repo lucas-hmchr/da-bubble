@@ -1,5 +1,5 @@
 import { Injectable, inject } from '@angular/core';
-import { AuthService } from '../../../../auth/auth.service';
+import { AuthService } from '../auth/auth.service';
 
 export interface ProfileSaveResult {
   success: boolean;
@@ -10,12 +10,6 @@ export interface ProfileSaveResult {
 export class ProfileHandlerService {
   private auth = inject(AuthService);
 
-/**
- * Saves a new profile name to the database.
- * @param newName The new name to be saved.
- * @param currentUserId The ID of the user who is saving the name. If null, the current user will be used.
- * @returns A Promise resolving to a ProfileSaveResult object, containing a success flag and a message.
- */
   async saveProfileName(newName: string, currentUserId: string | null): Promise<ProfileSaveResult> {
     const validationResult = this.validateProfileName(newName, currentUserId);
 
@@ -41,14 +35,6 @@ export class ProfileHandlerService {
     }
   }
 
-/**
- * Validates a given profile name.
- * @param name The name to be validated.
- * @param userId The ID of the user who is trying to save the name. If null, the current user will be used.
- * @returns An object containing a success flag and a message.
- * The success flag will be false if the name is invalid (e.g. empty or whitespace only).
- * The message will contain a human-readable error message explaining why the name is invalid.
- */
   private validateProfileName(
     name: string,
     userId: string | null,

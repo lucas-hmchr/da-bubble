@@ -30,8 +30,10 @@ export class NewMessageService {
 
     constructor(private mi: MessageInputService) {
         this.mi.loadUsers().subscribe((u) => {
-            this.users.set(u);
-            this.filteredUsers.set(u);
+            // ========== NEU: Filter users without names ==========
+            const usersWithNames = u.filter(user => user.displayName || user.name);
+            this.users.set(usersWithNames);
+            this.filteredUsers.set(usersWithNames);
         });
 
         this.mi.loadChannels().subscribe((c) => {
@@ -52,8 +54,12 @@ export class NewMessageService {
             this.mode.set(nextMode);
             this.show.set(true);
             this.target.set(null);
-            this.filteredUsers.set(this.users());
-            this.filteredChannels.set(this.channels());
+            // ========== GEÄNDERT: Filter users without names ==========
+            if (nextMode === 'user') {
+                this.filteredUsers.set(this.users().filter(u => u.displayName || u.name));
+            } else {
+                this.filteredChannels.set(this.channels());
+            }
             return;
         }
 
