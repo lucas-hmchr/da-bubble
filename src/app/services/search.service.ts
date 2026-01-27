@@ -6,23 +6,17 @@ import { AuthService } from '../auth/auth.service';
 import { User } from '../models/user.model';
 import { Channel } from '../models/channel.interface';
 
-/**
- * Unified Search Service
- * Handles both Topbar Dropdown search (@, #) and Workspace Sidebar search
- */
 @Injectable({ providedIn: 'root' })
 export class SearchService {
   private firestore = inject(FirestoreService);
   private channelService = inject(ChannelService);
   private auth = inject(AuthService);
 
-  // ========== TOPBAR DROPDOWN (Signals) ==========
   showUserSuggestions = signal(false);
   showChannelSuggestions = signal(false);
   filteredUsers = signal<User[]>([]);
   filteredChannels = signal<Channel[]>([]);
 
-  // ========== WORKSPACE SIDEBAR (BehaviorSubjects) ==========
   private searchQuerySubject = new BehaviorSubject<string>('');
   public searchQuery$ = this.searchQuerySubject.asObservable();
 
@@ -32,7 +26,6 @@ export class SearchService {
   private searchTypeSubject = new BehaviorSubject<'all' | 'channels' | 'users'>('all');
   public searchType$ = this.searchTypeSubject.asObservable();
 
-  // ========== COMPUTED DATA ==========
   allUsers = computed(() => {
     const currentUid = this.auth.uid();
     return this.firestore.userList().filter((u) => u.uid !== currentUid);
@@ -40,11 +33,7 @@ export class SearchService {
 
   allChannels = computed(() => this.channelService.channels());
 
-  // ==================== TOPBAR METHODS ====================
 
-  /**
-   * Handles Topbar search input (@ for users, # for channels)
-   */
   handleTopbarSearchInput(query: string): void {
     const trimmedQuery = query.trim();
 
@@ -61,9 +50,6 @@ export class SearchService {
     this.resetTopbarSuggestions();
   }
 
-  /**
-   * Handles Topbar search focus
-   */
   handleTopbarSearchFocus(query: string): void {
     const trimmedQuery = query.trim();
 
@@ -74,9 +60,6 @@ export class SearchService {
     }
   }
 
-  /**
-   * Clears Topbar search suggestions
-   */
   clearTopbarSearch(): void {
     this.showUserSuggestions.set(false);
     this.showChannelSuggestions.set(false);
@@ -84,7 +67,6 @@ export class SearchService {
     this.filteredChannels.set([]);
   }
 
-  // ========== PRIVATE TOPBAR METHODS ==========
 
   private searchTopbarUsers(query: string): void {
     this.showUserSuggestions.set(true);
@@ -123,12 +105,7 @@ export class SearchService {
     this.showChannelSuggestions.set(false);
   }
 
-  // ========== FILTER METHODS (shared by both) ==========
 
-  /**
-   * Filters users by search term and excludes users without names
-   * Used by both Topbar and Workspace Sidebar
-   */
   public filterUsersByTerm(term: string, excludeCurrentUser: boolean = false, currentUserId?: string | null): User[] {
     let users = term.length === 0 
       ? this.allUsers() 
@@ -141,12 +118,10 @@ export class SearchService {
 
         console.log('Before name filter:', users.length);
 
-    // Filter users without names
     users = users.filter(user => user.displayName || user.name);
 
     console.log('After name filter:', users.length);
-    
-    // Optionally exclude current user (for workspace sidebar)
+
     if (excludeCurrentUser && currentUserId) {
       users = users.filter(user => user.uid !== currentUserId);
     }
@@ -154,10 +129,6 @@ export class SearchService {
     return users;
   }
 
-  /**
-   * Filters channels by search term
-   * Used by both Topbar and Workspace Sidebar
-   */
   public filterChannelsByTerm(term: string): Channel[] {
     if (term.length === 0) return this.allChannels();
 
@@ -168,12 +139,7 @@ export class SearchService {
     );
   }
 
-  // ==================== WORKSPACE SIDEBAR METHODS ====================
 
-  /**
-   * Updates search query for Workspace Sidebar
-   * Handles @, #, and normal search
-   */
   updateSearchQuery(query: string): void {
     let type: 'all' | 'channels' | 'users' = 'all';
     let cleanQuery = query;
@@ -191,25 +157,16 @@ export class SearchService {
     this.searchActiveSubject.next(query.trim().length > 0);
   }
 
-  /**
-   * Clears Workspace Sidebar search
-   */
   clearSearch(): void {
     this.searchQuerySubject.next('');
     this.searchActiveSubject.next(false);
     this.searchTypeSubject.next('all');
   }
 
-  /**
-   * Checks if Workspace Sidebar search is active
-   */
   isSearchActive(): boolean {
     return this.searchActiveSubject.value;
   }
 
-  /**
-   * Gets current search type for Workspace Sidebar
-   */
   getSearchType(): 'all' | 'channels' | 'users' {
     return this.searchTypeSubject.value;
   }
