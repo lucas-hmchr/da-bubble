@@ -1,12 +1,10 @@
 @use './../../../../styles/variables.scss' as *;
 
 .login-animation-screen {
-  position: relative;
-  height: 100dvh;
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
   overflow: hidden;
-  z-index: 1;
-  animation: noDisplay 0.1s forwards;
-  animation-delay: 2.2s;
 
   &::before {
     content: "";
@@ -24,15 +22,15 @@
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
-  animation: toTopLeft 0.6s cubic-bezier(.22, .61, .36, 1) forwards;
-  animation-delay: 1.6s;
   width: fit-content;
+  will-change: transform;
 }
 
 .logo-animation {
   position: relative;
   display: inline-block;
   height: 70px;
+  width: calc(70px + clamp(300px, 18vw, 400px));
 }
 
 .logo-animation>.logo {
@@ -49,7 +47,7 @@
   position: absolute;
   top: 50%;
   left: 50%;
-  transform: translate(-40px, -50%);
+  transform: translate(-30px, -50%);
   height: 100%;
   width: 0;
   overflow: hidden;
