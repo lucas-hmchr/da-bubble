@@ -28,7 +28,7 @@ import { ChannelService } from '../../../services/channel.service';
 import { UserService } from '../../../services/user.service';
 import { ChatContextService } from '../../../services/chat-context.service';
 import { ConversationService } from '../../../services/conversation.service';
-import { SearchService } from '../../../services/search.topbar.service';
+import { SearchService } from '../../../services/search.service';
 import { NewMessageService } from '../../../services/message/new-message.service';
 import { getAvatarById } from '../../../../shared/data/avatars';
 import { AddPeopleDialogComponent } from '../../add-people-dialog/add-people-dialog';
@@ -117,7 +117,8 @@ export class WorkspaceSidebar implements OnInit, OnDestroy {
     if (this.isSearching()) {
       return this.filteredUsers();
     }
-    return this.firestore.userList();
+    // ========== GEÄNDERT: Filter users without names ==========
+    return this.getAllUsersWithNames();
   });
 
   visibleChannels = computed<Channel[]>(() => {
@@ -130,33 +131,25 @@ export class WorkspaceSidebar implements OnInit, OnDestroy {
     return this.channelService.channels();
   });
 
+  // ========== NEU: Helper method to filter users without names ==========
+  private getAllUsersWithNames(): User[] {
+    return this.firestore.userList().filter(u => u.displayName || u.name);
+  }
+
   performSearch(query: string, type: 'all' | 'channels' | 'users' = 'all') {
     const term = query.toLowerCase().trim();
 
     if (type === 'all' || type === 'channels') {
-      this.filteredChannels.set(
-        this.channelService
-          .channels()
-          .filter(
-            (c) =>
-              c.name?.toLowerCase().includes(term) || c.description?.toLowerCase().includes(term),
-          ),
-      );
+      // ========== NEU: Use service filter method ==========
+      this.filteredChannels.set(this.searchService.filterChannelsByTerm(term));
     } else {
       this.filteredChannels.set([]);
     }
 
     if (type === 'all' || type === 'users') {
+      // ========== NEU: Use service filter method with currentUserUid exclusion ==========
       this.filteredUsers.set(
-        this.firestore
-          .userList()
-          .filter(
-            (u) =>
-              u.uid !== this.currentUserUid &&
-              (u.displayName?.toLowerCase().includes(term) ||
-                u.name?.toLowerCase().includes(term) ||
-                u.email?.toLowerCase().includes(term)),
-          ),
+        this.searchService.filterUsersByTerm(term, true, this.currentUserUid)
       );
     } else {
       this.filteredUsers.set([]);
@@ -165,7 +158,8 @@ export class WorkspaceSidebar implements OnInit, OnDestroy {
 
   resetSearch() {
     this.filteredChannels.set(this.channelService.channels());
-    this.filteredUsers.set(this.firestore.userList());
+    // ========== GEÄNDERT: Use filtered users ==========
+    this.filteredUsers.set(this.getAllUsersWithNames());
     this.searchQuery.set('');
     this.searchType.set('all');
   }

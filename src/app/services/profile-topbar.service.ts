@@ -1,5 +1,5 @@
 import { Injectable, inject } from '@angular/core';
-import { AuthService } from '../../../../auth/auth.service';
+import { AuthService } from '../auth/auth.service';
 
 export interface ProfileSaveResult {
   success: boolean;

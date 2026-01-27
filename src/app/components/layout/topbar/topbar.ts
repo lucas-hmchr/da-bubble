@@ -12,9 +12,8 @@ import {
 } from '@angular/core';
 import { BreakpointObserver } from '@angular/cdk/layout';
 import { AuthService } from '../../../auth/auth.service';
-import { SearchService } from '../../../services/search.topbar.service';
-import { TopbarSearchService } from './services/topbar-search.service';
-import { ProfileHandlerService } from './services/profile.topbar.service';
+import { SearchService } from '../../../services/search.service';
+import { ProfileHandlerService } from '../../../services/profile-topbar.service';
 import { FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { FirestoreService } from '../../../services/firestore';
@@ -39,7 +38,7 @@ export class Topbar implements OnInit, OnDestroy {
   private chatContext = inject(ChatContextService);
   private profileHandler = inject(ProfileHandlerService);
   public userService = inject(UserService);
-  public topbarSearch = inject(TopbarSearchService);
+  private searchService = inject(SearchService);
   private destroy$ = new Subject<void>();
 
   @Input() isNewMessageMode = false;
@@ -57,10 +56,10 @@ export class Topbar implements OnInit, OnDestroy {
   isSearchFocused = false;
   editNameValue = '';
 
-  showUserSuggestions = computed(() => this.topbarSearch.showUserSuggestions());
-  showChannelSuggestions = computed(() => this.topbarSearch.showChannelSuggestions());
-  filteredUsers = computed(() => this.topbarSearch.filteredUsers());
-  filteredChannels = computed(() => this.topbarSearch.filteredChannels());
+  showUserSuggestions = computed(() => this.searchService.showUserSuggestions());
+  showChannelSuggestions = computed(() => this.searchService.showChannelSuggestions());
+  filteredUsers = computed(() => this.searchService.filteredUsers());
+  filteredChannels = computed(() => this.searchService.filteredChannels());
 
   currentUser = computed(() => {
     const uid = this.auth.uid();
@@ -80,7 +79,7 @@ export class Topbar implements OnInit, OnDestroy {
  */
   constructor(
     private auth: AuthService,
-    private searchService: SearchService,
+    // private searchService: SearchService,
   ) {
     this.breakpointObserver.observe(['(max-width: 375px)']).subscribe((result) => {
       this.MobileProfil = result.matches;
@@ -120,7 +119,7 @@ export class Topbar implements OnInit, OnDestroy {
  * If the query does not start with '@' or '#', updates the search query in the SearchService.
  */
   onSearchInput() {
-    this.topbarSearch.handleSearchInput(this.searchQuery);
+    this.searchService.handleTopbarSearchInput(this.searchQuery);
     if (!this.searchQuery.startsWith('@') && !this.searchQuery.startsWith('#')) {
       this.searchService.updateSearchQuery(this.searchQuery.trim());
     }
@@ -132,7 +131,7 @@ export class Topbar implements OnInit, OnDestroy {
  */
   onSearchFocus() {
     this.isSearchFocused = true;
-    this.topbarSearch.handleSearchFocus(this.searchQuery);
+    this.searchService.handleTopbarSearchFocus(this.searchQuery);
   }
 
 /**
@@ -143,7 +142,7 @@ export class Topbar implements OnInit, OnDestroy {
   onSearchBlur() {
     setTimeout(() => {
       this.isSearchFocused = false;
-      this.topbarSearch.clearSearch();
+      this.searchService.clearTopbarSearch();
     }, 200);
   }
 
@@ -155,7 +154,7 @@ export class Topbar implements OnInit, OnDestroy {
 
   clearSearch() {
     this.searchQuery = '';
-    this.topbarSearch.clearSearch();
+    this.searchService.clearTopbarSearch();
     this.searchService.clearSearch();
   }
 
