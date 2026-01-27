@@ -74,7 +74,7 @@ export class AuthView {
     const iconEl = this.splashIcon.nativeElement;
     const targetEl = this.targetLogo.nativeElement;
 
-    const flyDelayMs = 1200;
+    const flyDelayMs = 1600;
     const flyDurationMs = 550;
 
     this.hideTargetLogo(targetEl);

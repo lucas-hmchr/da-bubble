@@ -52,7 +52,7 @@
   width: 0;
   overflow: hidden;
   z-index: 2;
-  animation: nameWrapperGrow 0.7s cubic-bezier(.22, .61, .36, 1) forwards;
+  animation: nameWrapperGrow 0.4s cubic-bezier(.22, .61, .36, 1) forwards;
   animation-delay: 0.5s;
 
   >.logo-name {
@@ -62,8 +62,9 @@
     transform: translate(-100%, -50%);
     height: 24px;
     width: auto;
-    animation: nameSlideIn 1.2s ease forwards;
-    animation-delay: 0.5s;
+    animation: nameSlideIn 0.8s forwards;
+    animation-delay: 0.6s;
+    filter:invert(1);
   }
 }
 
