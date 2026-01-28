@@ -32,7 +32,6 @@ export class AddPeopleDialogComponent {
 
   get users(): User[] {
     const list = this.firestore.userList();
-    console.log('users:', list);
     return this.firestore.userList();
   }
 
@@ -59,11 +58,6 @@ export class AddPeopleDialogComponent {
 
   onDone() {
     if (!this.canSubmit()) return;
-
-    console.log({
-      option: this.selectedOption,
-      users: this.selectedUsers,
-    });
 
     this.done.emit({
       mode: this.selectedOption!,

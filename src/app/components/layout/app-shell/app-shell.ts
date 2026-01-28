@@ -39,7 +39,6 @@ export class AppShell {
   constructor(private chatContext: ChatContextService) {
     effect(() => {
       const active = this.authService.activeUser();
-      console.log('activeUser in AppShell:', active);
       this.currentUserUid = active?.uid ?? null;
     });
     

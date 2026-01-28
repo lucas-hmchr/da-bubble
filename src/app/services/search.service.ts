@@ -107,20 +107,16 @@ export class SearchService {
 
 
   public filterUsersByTerm(term: string, excludeCurrentUser: boolean = false, currentUserId?: string | null): User[] {
-    let users = term.length === 0 
-      ? this.allUsers() 
+    let users = term.length === 0
+      ? this.allUsers()
       : this.allUsers().filter(
-          (user) =>
-            user.displayName?.toLowerCase().includes(term) ||
-            user.name?.toLowerCase().includes(term) ||
-            user.email?.toLowerCase().includes(term),
-        );
-
-        console.log('Before name filter:', users.length);
+        (user) =>
+          user.displayName?.toLowerCase().includes(term) ||
+          user.name?.toLowerCase().includes(term) ||
+          user.email?.toLowerCase().includes(term),
+      );
 
     users = users.filter(user => user.displayName || user.name);
-
-    console.log('After name filter:', users.length);
 
     if (excludeCurrentUser && currentUserId) {
       users = users.filter(user => user.uid !== currentUserId);

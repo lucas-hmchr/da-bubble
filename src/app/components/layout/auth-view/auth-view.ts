@@ -36,10 +36,7 @@ export class AuthView {
   @ViewChild('targetLogo', { static: true }) targetLogo!: ElementRef<HTMLElement>;
   @ViewChild('splashIcon', { static: true }) splashIcon!: ElementRef<HTMLElement>;
 
-  constructor(private authService: AuthService) {
-    effect(() => {
-      console.log('activeUser in AppShell:', this.authService.activeUser());
-    });
+  constructor() {
   }
 
   currentChildPath = toSignal(
