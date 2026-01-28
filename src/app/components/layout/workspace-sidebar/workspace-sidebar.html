@@ -5,11 +5,11 @@
       @if (!isMobile) {
       <div class="channels-button-container">
         <div class="workspace-logo-text-container">
-          <img src="/assets/icons/global/workspace_logo.svg" alt="" />
+          <img src="assets/icons/global/workspace_logo.svg" alt="" />
           <span class="devspace-txt">Devspace</span>
         </div>
 
-        <img class="edit-square-icon cp" src="/assets/icons/global/edit_square_default.svg" alt=""
+        <img class="edit-square-icon cp" src="assets/icons/global/edit_square_default.svg" alt=""
           (click)="openNewMessage()" />
       </div>
       } @else {
@@ -21,7 +21,7 @@
 
       <div *ngIf="!isSearching()" class="channel-message-add-container">
 
-        <img class="add-icon cp" src="/assets/icons/global/add_default.svg" (click)="openAddChannelDialog()" />
+        <img class="add-icon cp" src="assets/icons/global/add_default.svg" (click)="openAddChannelDialog()" />
 
         <mat-accordion class="mat-accordion-container">
 
@@ -38,7 +38,7 @@
                 </mat-icon>
 
                 <div class="three-circle-channels-container">
-                  <img src="/assets/icons/global/workspaces_three_circles_default.svg" />
+                  <img src="assets/icons/global/workspaces_three_circles_default.svg" />
                   <span class="fs-20">Channels</span>
                 </div>
               </div>
@@ -48,13 +48,13 @@
             <div class="channel-list ml-16">
               @for (ch of visibleChannels(); track ch.id) {
               <div class="channel-item d-flex mb-16 cp" (click)="selectChannel(ch)">
-                <img src="/assets/icons/global/tag.svg" class="mr-8" />
+                <img src="assets/icons/global/tag.svg" class="mr-8" />
                 {{ ch.name }}
               </div>
               }
 
               <div class="channel-add cp" (click)="openAddChannelDialog()">
-                <img src="/assets/icons/global/add_circle.svg" class="mr-8" />
+                <img src="assets/icons/global/add_circle.svg" class="mr-8" />
                 Channel hinzufügen
               </div>
             </div>
@@ -74,7 +74,7 @@
                 </mat-icon>
 
                 <div class="account-directMessage-container">
-                  <img src="/assets/icons/global/account_circle.svg" class="mr-8" />
+                  <img src="assets/icons/global/account_circle.svg" class="mr-8" />
                   <span class="fs-20">Direktnachrichten</span>
                 </div>
               </div>
@@ -119,7 +119,7 @@
         </div>
 
         <div *ngIf="filteredChannels().length === 0 && filteredUsers().length === 0" class="no-results">
-          <img src="/assets/icons/global/search.svg" alt="no results" class="no-results-icon">
+          <img src="assets/icons/global/search.svg" alt="no results" class="no-results-icon">
           <p class="no-results-title">Keine Ergebnisse gefunden</p>
           <p class="no-results-text">
             <span *ngIf="searchType() === 'channels'">Versuche es mit einem anderen Channel-Namen</span>
@@ -132,13 +132,13 @@
 
           <div *ngIf="visibleChannels().length" class="results-section">
             <h4 class="results-section-title">
-              <img src="/assets/icons/global/workspaces_three_circles_default.svg" class="section-icon" />
+              <img src="assets/icons/global/workspaces_three_circles_default.svg" class="section-icon" />
               Channels ({{ visibleChannels().length }})
             </h4>
 
             @for (channel of visibleChannels(); track channel.id) {
             <div class="result-item channel-result cp" (click)="selectChannel(channel)">
-              <img src="/assets/icons/global/tag.svg" class="result-icon" />
+              <img src="assets/icons/global/tag.svg" class="result-icon" />
               <div class="result-info">
                 <span class="result-name">{{ channel.name }}</span>
                 <span *ngIf="channel.description" class="result-description">
@@ -151,7 +151,7 @@
 
           <div *ngIf="visibleUsers().length" class="results-section">
             <h4 class="results-section-title">
-              <img src="/assets/icons/global/account_circle.svg" class="section-icon" />
+              <img src="assets/icons/global/account_circle.svg" class="section-icon" />
               Direktnachrichten ({{ visibleUsers().length }})
             </h4>
 

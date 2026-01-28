@@ -13,13 +13,13 @@ export interface Avatar {
 }
 
 export const avatars: readonly Avatar[] = [
-    { id: 'avatar_default', src: '/images/avatars/avatar_default.svg'},
-    { id: 'avatar_female_1', src: '/images/avatars/avatar_female_1.svg'},
-    { id: 'avatar_female_2', src: '/images/avatars/avatar_female_2.svg'},
-    { id: 'avatar_male_1', src: '/images/avatars/avatar_male_1.svg'},
-    { id: 'avatar_male_2', src: '/images/avatars/avatar_male_2.svg'},
-    { id: 'avatar_male_3', src: '/images/avatars/avatar_male_3.svg'},
-    { id: 'avatar_male_4', src: '/images/avatars/avatar_male_4.svg'},
+    { id: 'avatar_default', src: 'images/avatars/avatar_default.svg'},
+    { id: 'avatar_female_1', src: 'images/avatars/avatar_female_1.svg'},
+    { id: 'avatar_female_2', src: 'images/avatars/avatar_female_2.svg'},
+    { id: 'avatar_male_1', src: 'images/avatars/avatar_male_1.svg'},
+    { id: 'avatar_male_2', src: 'images/avatars/avatar_male_2.svg'},
+    { id: 'avatar_male_3', src: 'images/avatars/avatar_male_3.svg'},
+    { id: 'avatar_male_4', src: 'images/avatars/avatar_male_4.svg'},
 ]
 
 export const defaultAvatarId: AvatarId = 'avatar_default';

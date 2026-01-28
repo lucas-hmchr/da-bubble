@@ -131,7 +131,7 @@ export class View {
     if (user.avatarId) {
       return getAvatarById(user.avatarId).src;
     }
-    return '/images/avatars/avatar_default.svg';
+    return 'images/avatars/avatar_default.svg';
   }
 
   private resetNewMessageState() {

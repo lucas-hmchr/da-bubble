@@ -124,7 +124,7 @@ export class AuthService {
     try {
       await signInWithEmailAndPassword(this.auth, email, password);
       this.router.navigate(['/']);
-      this.toast.show('Du bist jetzt eingeloggt!', 4000, '/assets/icons/global/send.svg');
+      this.toast.show('Du bist jetzt eingeloggt!', 4000, 'assets/icons/global/send.svg');
       return true;
     } catch (error) {
       console.log(error);
@@ -184,7 +184,7 @@ export class AuthService {
   async resetPassword(email: string): Promise<'ok' | 'user-not-found'> {
     try {
       await sendPasswordResetEmail(this.auth, email);
-      this.toast.show('E-Mail gesendet!', 4000, '/assets/icons/global/send.svg');
+      this.toast.show('E-Mail gesendet!', 4000, 'assets/icons/global/send.svg');
       return 'ok';
     } catch (error: any) {
       if (error.code === 'auth/user-not-found') {

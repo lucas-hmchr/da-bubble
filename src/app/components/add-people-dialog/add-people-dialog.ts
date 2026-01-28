@@ -102,7 +102,7 @@ export class AddPeopleDialogComponent {
   getAvatarSrc(user: User): string {
 
     if (!user.avatarId) {
-      return '/images/avatars/avatar_default.svg';
+      return 'images/avatars/avatar_default.svg';
     }
 
     return getAvatarById(user.avatarId).src;

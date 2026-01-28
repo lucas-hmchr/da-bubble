@@ -1,6 +1,6 @@
 <div class="add-member-popup">
     <div class="add-member-content">
-        <img src="/assets/icons/global/close.svg" class="close-icon" (click)="closePopup()">
+        <img src="assets/icons/global/close.svg" class="close-icon" (click)="closePopup()">
         <span class="fw-700 fs-24">Leute hinzufügen</span>
         <span class="channel-name fs-18"># {{ channel()?.name }}</span>
 
@@ -12,7 +12,7 @@
                     <img [src]="getAvatar(member.avatarId)">
                     <span>{{ member.displayName }}</span>
 
-                    <img src="/assets/icons/global/close.svg" class="chip-remove" alt="Entfernen"
+                    <img src="assets/icons/global/close.svg" class="chip-remove" alt="Entfernen"
                         (click)="removeMember(member); $event.stopPropagation()">
                 </div>
                 }

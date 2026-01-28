@@ -33,9 +33,9 @@ export class UserService {
 
     public getOnlineStatusIcon(user: User) {
         if (this.isOnline(user)) {
-            return `/assets/icons/global/Online.svg`;
+            return `assets/icons/global/Online.svg`;
         } else {
-            return `/assets/icons/global/Offline.svg`;
+            return `assets/icons/global/Offline.svg`;
         }
     }
 

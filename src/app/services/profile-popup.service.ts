@@ -43,7 +43,7 @@ export class ProfilePopupService {
         if (this.user()?.avatarId) {
             return getAvatarById(this.user()!.avatarId).src;
         }
-        return '/images/avatars/avatar_default.svg';
+        return 'images/avatars/avatar_default.svg';
     }
 
     navigateToChat() {
