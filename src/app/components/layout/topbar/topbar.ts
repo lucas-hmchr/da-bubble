@@ -136,7 +136,6 @@ export class Topbar implements OnInit, OnDestroy {
 
     if (result.success) {
       this.closeProfilEditModal();
-      console.log(result.message);
     } else {
       alert(result.message);
     }

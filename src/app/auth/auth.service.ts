@@ -62,7 +62,6 @@ export class AuthService {
       this.toast.show('Konto erfolgreich erstellt!', 4000);
       this.router.navigate(['/']);
     } catch (error) {
-      console.log(error);
       this.toast.show('Bei der Registrierung ist ein Fehler aufgetreten!');
     }
   }
@@ -83,15 +82,11 @@ export class AuthService {
 
       if (!data['avatarId'] || data['avatarId'] === 'avatar_default') {
         const randomId = this.getRandomAvatarId();
-        console.log(
-          `Updating user ${data['displayName'] || data['email']}: ${data['avatarId']} → ${randomId}`,
-        );
         updates.push(updateDoc(docSnap.ref, { avatarId: randomId }));
       }
     });
 
     await Promise.all(updates);
-    console.log(`✅ ${updates.length} User-Avatare wurden aktualisiert!`);
     this.toast.show(`${updates.length} Avatare aktualisiert!`, 4000);
   }
 
@@ -127,7 +122,7 @@ export class AuthService {
       this.toast.show('Du bist jetzt eingeloggt!', 4000, 'assets/icons/global/send.svg');
       return true;
     } catch (error) {
-      console.log(error);
+      console.error(error);
       return false;
     }
   }
@@ -203,7 +198,8 @@ export class AuthService {
       });
       this.toast.show('Dein Name ist erfolgreich geändert worden!');
     } catch (err) {
-      console.log(err);
+      console.error(err);
+      
     }
   }
 
@@ -214,7 +210,7 @@ export class AuthService {
         lastActiveAt: serverTimestamp(),
       });
     } catch (err) {
-      console.log(err);
+      console.error(err);
     }
   }
 }

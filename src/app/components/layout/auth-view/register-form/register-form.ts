@@ -51,7 +51,7 @@ export class RegisterForm {
     try {
       await this.authService.register(this.newUser.email, this.newUser.password, this.newUser.fullName, this.newUser.avatarId);
     } catch (err: any) {
-      console.log(err)
+      console.error(err);
     }
   }
 
