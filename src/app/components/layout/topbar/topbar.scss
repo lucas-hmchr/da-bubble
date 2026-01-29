@@ -346,3 +346,96 @@
         }
     }
 }
+
+// In topbar.scss
+
+.fulltext-results {
+  max-height: 500px;
+  
+  .search-header {
+    padding: 12px 16px;
+    border-bottom: 1px solid #e5e7eb;
+    
+    h4 {
+      font-size: 16px;
+      font-weight: 600;
+      margin: 0;
+    }
+    
+    .result-count {
+      font-size: 14px;
+      color: #6b7280;
+    }
+  }
+  
+  .result-section {
+    padding: 8px 0;
+    border-bottom: 1px solid #f3f4f6;
+    
+    &:last-child {
+      border-bottom: none;
+    }
+    
+    .section-header {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 16px;
+      font-weight: 600;
+      color: #374151;
+      
+      .section-icon {
+        width: 20px;
+        height: 20px;
+      }
+    }
+  }
+  
+  .message-item {
+    .message-content {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      
+      .message-sender {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        
+        .sender-avatar {
+          width: 24px;
+          height: 24px;
+          border-radius: 50%;
+        }
+        
+        .sender-name {
+          font-weight: 500;
+          font-size: 14px;
+        }
+      }
+      
+      .message-text {
+        font-size: 14px;
+        color: #4b5563;
+        padding-left: 32px; // Align with sender name
+      }
+      
+      .message-context {
+        font-size: 12px;
+        color: #9ca3af;
+        padding-left: 32px;
+      }
+    }
+  }
+}
+
+// Highlight effect
+.message-wrapper.highlight {
+  animation: highlight-fade 2s ease-out;
+  background-color: #fef3c7;
+}
+
+@keyframes highlight-fade {
+  0% { background-color: #fef3c7; }
+  100% { background-color: transparent; }
+}

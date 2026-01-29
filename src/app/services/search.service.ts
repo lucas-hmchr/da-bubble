@@ -5,6 +5,19 @@ import { ChannelService } from '../services/channel.service';
 import { AuthService } from '../auth/auth.service';
 import { User } from '../models/user.model';
 import { Channel } from '../models/channel.interface';
+import { MessageData } from '../models/message.interface';
+
+// ========== NEU: Message search result interface ==========
+export interface MessageSearchResult {
+  id: string;
+  text: string;
+  senderId: string;
+  senderName: string;
+  createdAt: any;
+  contextType: 'channel' | 'conversation';
+  contextId: string;
+  contextName: string;
+}
 
 @Injectable({ providedIn: 'root' })
 export class SearchService {
@@ -14,8 +27,11 @@ export class SearchService {
 
   showUserSuggestions = signal(false);
   showChannelSuggestions = signal(false);
+  // ========== NEU: Message suggestions ==========
+  showFullTextSearch = signal(false);
   filteredUsers = signal<User[]>([]);
   filteredChannels = signal<Channel[]>([]);
+  filteredMessages = signal<MessageSearchResult[]>([]);
 
   private searchQuerySubject = new BehaviorSubject<string>('');
   public searchQuery$ = this.searchQuerySubject.asObservable();
@@ -47,6 +63,12 @@ export class SearchService {
       return;
     }
 
+    // ========== NEU: Fulltext search ==========
+    if (trimmedQuery.length > 0) {
+      this.searchFullText(trimmedQuery);
+      return;
+    }
+
     this.resetTopbarSuggestions();
   }
 
@@ -63,8 +85,10 @@ export class SearchService {
   clearTopbarSearch(): void {
     this.showUserSuggestions.set(false);
     this.showChannelSuggestions.set(false);
+    this.showFullTextSearch.set(false);
     this.filteredUsers.set([]);
     this.filteredChannels.set([]);
+    this.filteredMessages.set([]);
   }
 
 
@@ -103,6 +127,110 @@ export class SearchService {
   private resetTopbarSuggestions(): void {
     this.showUserSuggestions.set(false);
     this.showChannelSuggestions.set(false);
+    this.showFullTextSearch.set(false);
+  }
+
+  // ========== NEU: Fulltext search method ==========
+  private searchFullText(query: string): void {
+    const term = query.toLowerCase();
+    
+    // Search in users and channels (synchronous)
+    const users = this.filterUsersByTerm(term);
+    const channels = this.filterChannelsByTerm(term);
+
+    this.filteredUsers.set(users);
+    this.filteredChannels.set(channels);
+    
+    // Search in messages (asynchronous - updates via signal)
+    this.searchMessages(term);
+    
+    this.showFullTextSearch.set(true);
+    this.showUserSuggestions.set(false);
+    this.showChannelSuggestions.set(false);
+  }
+
+  // ========== NEU: Search in messages ==========
+  private searchMessages(term: string): void {
+    const lowerTerm = term.toLowerCase();
+    const channels = this.allChannels();
+    
+    console.log('🔍 Searching for:', term);
+    console.log('📁 Channels to search:', channels.length);
+    
+    if (channels.length === 0) {
+      this.filteredMessages.set([]);
+      return;
+    }
+    
+    const results: MessageSearchResult[] = [];
+    let processedChannels = 0;
+    
+    // Search each channel using firestore directly
+    channels.forEach(channel => {
+      if (!channel.id) {
+        processedChannels++;
+        return;
+      }
+      
+      const messagesPath = `channels/${channel.id}/messages`;
+      console.log('🔎 Searching channel:', channel.name, messagesPath);
+      
+      this.firestore.getCollection<MessageData>(messagesPath).subscribe({
+        next: (messages) => {
+          console.log('💬 Messages found in', channel.name, ':', messages.length);
+          
+          const matching = messages.filter(msg => 
+            msg.text && msg.text.toLowerCase().includes(lowerTerm)
+          );
+          
+          console.log('✅ Matching messages:', matching.length);
+          
+          for (const msg of matching) {
+            if (!msg.id) continue;
+            
+            const sender = this.firestore.userList().find(u => u.uid === msg.senderId);
+            results.push({
+              id: msg.id,
+              text: msg.text || '',
+              senderId: msg.senderId || '',
+              senderName: sender?.displayName || sender?.name || 'Unbekannt',
+              createdAt: msg.createdAt,
+              contextType: 'channel',
+              contextId: channel.id!,
+              contextName: `# ${channel.name}`
+            });
+          }
+          
+          processedChannels++;
+          
+          // Update results when all channels are processed
+          if (processedChannels === channels.length) {
+            results.sort((a, b) => {
+              const aTime = a.createdAt?.toMillis?.() || 0;
+              const bTime = b.createdAt?.toMillis?.() || 0;
+              return bTime - aTime;
+            });
+            
+            console.log('🎉 Total matching messages:', results.length);
+            this.filteredMessages.set(results.slice(0, 20));
+          }
+        },
+        error: (error) => {
+          console.error(`Error searching channel ${channel.name}:`, error);
+          processedChannels++;
+          
+          if (processedChannels === channels.length) {
+            results.sort((a, b) => {
+              const aTime = a.createdAt?.toMillis?.() || 0;
+              const bTime = b.createdAt?.toMillis?.() || 0;
+              return bTime - aTime;
+            });
+            
+            this.filteredMessages.set(results.slice(0, 20));
+          }
+        }
+      });
+    });
   }
 
 

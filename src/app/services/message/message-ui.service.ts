@@ -14,9 +14,11 @@ export class MessageUiService {
     return this.reactionPickerForMessageId();
   }
 
-  toggleReactionPicker(messageId: string): void {
+  toggleReactionPicker(messageId: string, context?: string): void {
+    // ========== Add context prefix to make ID unique ==========
+    const uniqueId = context ? `${context}-${messageId}` : messageId;
     const current = this.reactionPickerForMessageId();
-    this.reactionPickerForMessageId.set(current === messageId ? null : messageId);
+    this.reactionPickerForMessageId.set(current === uniqueId ? null : uniqueId);
   }
 
   closeReactionPicker(): void {
@@ -35,12 +37,14 @@ export class MessageUiService {
     this.optionsMenuOpenUp.set(value);
   }
 
-  toggleOptionsMenu(messageId: string): void {
+  toggleOptionsMenu(messageId: string, context?: string): void {
+    // ========== Add context prefix to make ID unique ==========
+    const uniqueId = context ? `${context}-${messageId}` : messageId;
     const current = this.optionsMenuForMessageId();
-    if (current === messageId) {
+    if (current === uniqueId) {
       this.closeOptionsMenu();
     } else {
-      this.optionsMenuForMessageId.set(messageId);
+      this.optionsMenuForMessageId.set(uniqueId);
     }
   }
 

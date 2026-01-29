@@ -59,6 +59,79 @@
                 </div>
             </div>
 
+            <!-- ========== NEU: FULLTEXT SEARCH DROPDOWN ========== -->
+            <div class="search-results fulltext-results" 
+                 *ngIf="showFullTextSearch() && getTotalResultCount() > 0">
+                <div class="search-results-inner">
+                    
+                    <!-- Header -->
+                    <div class="search-header">
+                        <h4>Suchergebnisse für "{{ searchQuery }}"</h4>
+                        <span class="result-count">({{ getTotalResultCount() }} Ergebnisse)</span>
+                    </div>
+
+                    <!-- Channels Section -->
+                    <div class="result-section" *ngIf="filteredChannels().length > 0">
+                        <div class="section-header">
+                            <img src="/assets/icons/global/workspaces_three_circles_default.svg" class="section-icon">
+                            <span>Channels ({{ filteredChannels().length }})</span>
+                        </div>
+                        
+                        <div class="search-result-item channel-item" 
+                             *ngFor="let channel of filteredChannels()" 
+                             (click)="selectChannel(channel)">
+                            <img src="/assets/icons/global/tag.svg" class="item-icon">
+                            <div class="item-info">
+                                <span class="item-name"># {{ channel.name }}</span>
+                                <span class="item-description" *ngIf="channel.description">
+                                    {{ channel.description }}
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Users Section -->
+                    <div class="result-section" *ngIf="filteredUsers().length > 0">
+                        <div class="section-header">
+                            <img src="/assets/icons/global/account_circle.svg" class="section-icon">
+                            <span>Direktnachrichten ({{ filteredUsers().length }})</span>
+                        </div>
+                        
+                        <div class="search-result-item user-item" 
+                             *ngFor="let user of filteredUsers()" 
+                             (click)="selectUser(user)">
+                            <div class="user-avatar-container">
+                                <img [src]="getAvatarSrc(user)" class="user-avatar">
+                                <img [src]="userService.getOnlineStatusIcon(user)" class="online-status-icon">
+                            </div>
+                            <span class="item-name">{{ user.displayName || user.name }}</span>
+                        </div>
+                    </div>
+
+                    <!-- Messages Section -->
+                    <div class="result-section" *ngIf="filteredMessages().length > 0">
+                        <div class="section-header">
+                            <img src="/assets/icons/global/answer1.svg" class="section-icon">
+                            <span>Messages ({{ filteredMessages().length }})</span>
+                        </div>
+                        
+                        <div class="search-result-item message-item" 
+                             *ngFor="let msg of filteredMessages()" 
+                             (click)="selectMessage(msg)">
+                            <div class="message-content">
+                                <div class="message-sender">
+                                    <img [src]="getAvatarSrcById(msg.senderId)" class="sender-avatar">
+                                    <span class="sender-name">{{ msg.senderName }}</span>
+                                </div>
+                                <span class="message-text">{{ getMessageSnippet(msg.text) }}</span>
+                                <span class="message-context">📍 {{ msg.contextName }}</span>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+
         </div>
         <div class="profil" (click)="toggleDropdownMenu($event)">
             <h1>{{ currentUser()?.displayName || currentUser()?.name || 'Gast' }}</h1>

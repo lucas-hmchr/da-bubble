@@ -251,6 +251,13 @@ export class Message implements OnChanges {
     return this.uiService.getHoveredReaction().messageId;
   }
 
+  // ========== NEU: Helper to get unique message ID with context ==========
+  getUniqueMessageId(msg: MessageData): string | null {
+    if (!msg.id) return null;
+    const context = this.isThreadContext ? 'thread' : 'view';
+    return `${context}-${msg.id}`;
+  }
+
   startInlineEdit(msg: MessageData): void {
     this.editService.startEdit(msg);
     setTimeout(() => this.focusEditTextarea(msg.id), 50);
@@ -331,7 +338,9 @@ export class Message implements OnChanges {
 
   onToggleReactionPicker(msg: MessageData): void {
     if (!msg.id) return;
-    this.uiService.toggleReactionPicker(msg.id);
+    // ========== NEU: Pass context to make ID unique ==========
+    const context = this.isThreadContext ? 'thread' : 'view';
+    this.uiService.toggleReactionPicker(msg.id, context);
   }
 
   onEmojiReaction(msg: MessageData, reactionId: ReactionId): void {
@@ -341,7 +350,9 @@ export class Message implements OnChanges {
 
   toggleOptionsMenu(ev: MouseEvent, msgId: string): void {
     ev.stopPropagation();
-    this.uiService.toggleOptionsMenu(msgId);
+    // ========== NEU: Pass context to make ID unique ==========
+    const context = this.isThreadContext ? 'thread' : 'view';
+    this.uiService.toggleOptionsMenu(msgId, context);
     if (this.uiService.getOptionsMenuMessageId() === msgId) {
       this.calculateMenuPosition(ev);
     }

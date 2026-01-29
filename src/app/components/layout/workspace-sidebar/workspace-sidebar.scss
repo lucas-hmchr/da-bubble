@@ -327,3 +327,32 @@ mat-expansion-panel {
         }
     }
 }
+
+.sender-avatar-small,
+.result-avatar {
+    height: 70px;
+    border-radius: 50%;
+}
+
+.results-section-title {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.results-section {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    margin-bottom: 30px;
+}
+
+.result-item {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.search-header {
+    margin-bottom: 30px;
+}

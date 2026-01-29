@@ -18,11 +18,8 @@
     <div class="messages-scroll">
 
       <div class="parent-message-section" *ngIf="threadService.parentMessage() as parent">
-        <app-message
-          [contextType]="threadService.contextType()"
-          [currentUserUid]="currentUserUid"
-          [externalMessages]="[parent]"
-          [showFullDate]="true"
+        <app-message [contextType]="threadService.contextType()" [currentUserUid]="currentUserUid"
+          [externalMessages]="[parent]" [isThreadContext]="true" [showFullDate]="true"
           [channel]="threadService.contextType() === 'channel' ? getChannelById(threadService.contextId()) : undefined"
           [conversationId]="threadService.contextType() === 'conversation' ? threadService.contextId() : null">
         </app-message>
@@ -30,25 +27,20 @@
 
       <div class="thread-separator">
         <span>
-          {{ threadService.threadMessages().length }} 
+          {{ threadService.threadMessages().length }}
           {{ threadService.threadMessages().length === 1 ? 'Antwort' : 'Antworten' }}
         </span>
       </div>
 
       <div class="thread-messages-section">
-        
+
         <div *ngIf="threadService.threadMessages().length === 0" class="thread-empty">
           <p>Noch keine Antworten. Sei der Erste!</p>
         </div>
 
-        <app-message
-          *ngIf="threadService.threadMessages().length > 0"
-          [contextType]="threadService.contextType()"
-          [currentUserUid]="currentUserUid"
-          [externalMessages]="threadService.threadMessages()"
-          [isThreadContext]="true"
-          [threadParentMessageId]="threadService.parentMessage()?.id"
-          [showFullDate]="true"
+        <app-message *ngIf="threadService.threadMessages().length > 0" [contextType]="threadService.contextType()"
+          [currentUserUid]="currentUserUid" [externalMessages]="threadService.threadMessages()" [isThreadContext]="true"
+          [threadParentMessageId]="threadService.parentMessage()?.id" [showFullDate]="true"
           [channel]="threadService.contextType() === 'channel' ? getChannelById(threadService.contextId()) : undefined"
           [conversationId]="threadService.contextType() === 'conversation' ? threadService.contextId() : null">
         </app-message>
@@ -57,10 +49,7 @@
 
     </div>
 
-    <app-message-input
-      [currentUserUid]="currentUserUid"
-      [contextType]="'thread'"
-      [placeholderText]="'Antworten...'"
+    <app-message-input [currentUserUid]="currentUserUid" [contextType]="'thread'" [placeholderText]="'Antworten...'"
       (threadMessageSent)="onThreadMessageSent($event)">
     </app-message-input>
 
