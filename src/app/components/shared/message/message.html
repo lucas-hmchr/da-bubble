@@ -6,7 +6,7 @@
     </div>
 
     <section *ngFor="let msg of msgs; let i = index" class="message-wrapper"
-      [class.menu-open]="optionsMenuForMessageId === msg.id">
+      [class.menu-open]="optionsMenuForMessageId === getUniqueMessageId(msg)">
       <div class="date-separator" *ngIf="i === 0 || !isSameDay(msg.createdAt, msgs[i - 1]?.createdAt)">
         <span>
           {{ getFormattedDateWithWeekday(msg.createdAt) }}
@@ -33,7 +33,7 @@
             <img src="assets/icons/global/option1.svg" alt="">
           </button>
 
-          @if (optionsMenuForMessageId === msg.id) {
+          @if (optionsMenuForMessageId === getUniqueMessageId(msg)) {
           <div class="message-options-menu" [class.open-up]="optionsMenuOpenUp" (mouseenter)="onOptionsMenuMouseEnter()"
             (mouseleave)="onOptionsMenuMouseLeave()" (click)="$event.stopPropagation()">
             <button class="menu-item" type="button" (click)="startInlineEdit(msg); closeOptionsMenu()">
@@ -46,7 +46,7 @@
           }
         </div>
 
-        <div class="reaction-picker" *ngIf="reactionPickerForMessageId === msg.id">
+        <div class="reaction-picker" *ngIf="reactionPickerForMessageId === getUniqueMessageId(msg)">
           <button class="reaction-emoji-btn" *ngFor="let r of emojiReactions" (click)="onEmojiReaction(msg, r.id)">
             {{ r.icon }}
           </button>
