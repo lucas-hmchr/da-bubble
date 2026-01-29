@@ -5,7 +5,7 @@
       <p>Sei der Erste, der eine Nachricht in diesem Channel schreibt!</p>
     </div>
 
-    <section *ngFor="let msg of msgs; let i = index" class="message-wrapper"
+    <section *ngFor="let msg of msgs; let i = index" class="message-wrapper" [attr.data-message-id]="msg.id"
       [class.menu-open]="optionsMenuForMessageId === getUniqueMessageId(msg)">
       <div class="date-separator" *ngIf="i === 0 || !isSameDay(msg.createdAt, msgs[i - 1]?.createdAt)">
         <span>

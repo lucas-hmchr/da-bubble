@@ -23,6 +23,7 @@ import { takeUntil, debounceTime } from 'rxjs/operators';
 import { AddChannelDialog } from '../../add-channel-dialog/add-channel-dialog';
 import { Channel } from '../../../models/channel.interface';
 import { User } from '../../../models/user.model';
+import { MessageSearchResult } from '../../../services/search.service';
 import { FirestoreService } from '../../../services/firestore';
 import { ChannelService } from '../../../services/channel.service';
 import { UserService } from '../../../services/user.service';
@@ -68,6 +69,7 @@ export class WorkspaceSidebar implements OnInit, OnDestroy {
 
   filteredChannels = signal<Channel[]>([]);
   filteredUsers = signal<User[]>([]);
+  filteredMessages = signal<MessageSearchResult[]>([]);
 
   showAddPeopleDialog = false;
   createdChannelId: string | null = null;
@@ -106,7 +108,15 @@ export class WorkspaceSidebar implements OnInit, OnDestroy {
 
   onNewMessageToKeyup(event: KeyboardEvent) {
     const input = event.target as HTMLInputElement;
-    this.newMessage$.setQuery(input.value);
+    const query = input.value;
+    
+    // Check if it's @ or # search
+    if (query.startsWith('@') || query.startsWith('#')) {
+      this.newMessage$.setQuery(query);
+    } else {
+      // Normal search - use SearchService
+      this.searchService.updateSearchQuery(query);
+    }
   }
 
   /** ⭐ EINZIGE DATENQUELLEN FÜR DAS TEMPLATE ⭐ */
@@ -154,6 +164,86 @@ export class WorkspaceSidebar implements OnInit, OnDestroy {
     } else {
       this.filteredUsers.set([]);
     }
+
+    // ========== NEU: Search messages in mobile ==========
+    if (type === 'all') {
+      this.searchMessages(term);
+    } else {
+      this.filteredMessages.set([]);
+    }
+  }
+
+  // ========== NEU: Search messages method ==========
+  private searchMessages(term: string): void {
+    const lowerTerm = term.toLowerCase();
+    const channels = this.channelService.channels();
+    
+    if (channels.length === 0) {
+      this.filteredMessages.set([]);
+      return;
+    }
+    
+    const results: MessageSearchResult[] = [];
+    let processedChannels = 0;
+    
+    channels.forEach(channel => {
+      if (!channel.id) {
+        processedChannels++;
+        return;
+      }
+      
+      const messagesPath = `channels/${channel.id}/messages`;
+      
+      this.firestore.getCollection<any>(messagesPath).subscribe({
+        next: (messages) => {
+          const matching = messages.filter((msg: any) => 
+            msg.text && msg.text.toLowerCase().includes(lowerTerm)
+          );
+          
+          for (const msg of matching) {
+            if (!msg.id) continue;
+            
+            const sender = this.firestore.userList().find(u => u.uid === msg.senderId);
+            results.push({
+              id: msg.id,
+              text: msg.text || '',
+              senderId: msg.senderId || '',
+              senderName: sender?.displayName || sender?.name || 'Unbekannt',
+              createdAt: msg.createdAt,
+              contextType: 'channel',
+              contextId: channel.id!,
+              contextName: `# ${channel.name}`
+            });
+          }
+          
+          processedChannels++;
+          
+          if (processedChannels === channels.length) {
+            results.sort((a, b) => {
+              const aTime = a.createdAt?.toMillis?.() || 0;
+              const bTime = b.createdAt?.toMillis?.() || 0;
+              return bTime - aTime;
+            });
+            
+            this.filteredMessages.set(results.slice(0, 20));
+          }
+        },
+        error: (error) => {
+          console.error(`Error searching channel ${channel.name}:`, error);
+          processedChannels++;
+          
+          if (processedChannels === channels.length) {
+            results.sort((a, b) => {
+              const aTime = a.createdAt?.toMillis?.() || 0;
+              const bTime = b.createdAt?.toMillis?.() || 0;
+              return bTime - aTime;
+            });
+            
+            this.filteredMessages.set(results.slice(0, 20));
+          }
+        }
+      });
+    });
   }
 
   resetSearch() {
@@ -222,6 +312,48 @@ export class WorkspaceSidebar implements OnInit, OnDestroy {
 
   getAvatarPath(user: User) {
     return getAvatarById(user.avatarId).src;
+  }
+
+  // ========== NEU: Message selection methods ==========
+  selectMessage(msg: MessageSearchResult) {
+    if (msg.contextType === 'channel') {
+      this.chatContext.openChannel(msg.contextId);
+    } else {
+      this.chatContext.openConversation(msg.senderId);
+    }
+    
+    if (this.isMobile) {
+      this.mobileViewChange.emit('chat');
+    }
+    
+    setTimeout(() => {
+      this.scrollToMessage(msg.id);
+    }, 500);
+    
+    this.clearSearchIfActive();
+  }
+
+  private scrollToMessage(messageId: string): void {
+    const element = document.querySelector(`[data-message-id="${messageId}"]`) as HTMLElement;
+    if (element) {
+      element.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      
+      element.classList.add('highlight');
+      setTimeout(() => {
+        element.classList.remove('highlight');
+      }, 2000);
+    }
+  }
+
+  getMessageSnippet(text: string, maxLength: number = 60): string {
+    if (text.length <= maxLength) return text;
+    return text.substring(0, maxLength) + '...';
+  }
+
+  getAvatarSrcById(userId: string): string {
+    const user = this.firestore.userList().find(u => u.uid === userId);
+    if (!user) return '/assets/images/avatars/avatar_default.svg';
+    return this.getAvatarPath(user);
   }
 
   ngOnDestroy() {

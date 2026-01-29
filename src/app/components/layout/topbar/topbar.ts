@@ -22,6 +22,7 @@ import { UserService } from '../../../services/user.service';
 import { ChatContextService } from '../../../services/chat-context.service';
 import { User } from '../../../models/user.model';
 import { Channel } from '../../../models/channel.interface';
+import { MessageSearchResult } from '../../../services/search.service';
 import { getAvatarById } from '../../../../shared/data/avatars';
 import { Subject } from 'rxjs';
 
@@ -58,8 +59,10 @@ export class Topbar implements OnInit, OnDestroy {
 
   showUserSuggestions = computed(() => this.searchService.showUserSuggestions());
   showChannelSuggestions = computed(() => this.searchService.showChannelSuggestions());
+  showFullTextSearch = computed(() => this.searchService.showFullTextSearch());
   filteredUsers = computed(() => this.searchService.filteredUsers());
   filteredChannels = computed(() => this.searchService.filteredChannels());
+  filteredMessages = computed(() => this.searchService.filteredMessages());
 
   currentUser = computed(() => {
     const uid = this.auth.uid();
@@ -217,5 +220,52 @@ export class Topbar implements OnInit, OnDestroy {
     event.stopPropagation();
     this.isDropdownMenuOpen = false;
     await this.auth.logout();
+  }
+
+  // ========== FULLTEXT SEARCH METHODS ==========
+
+  getTotalResultCount(): number {
+    return this.filteredChannels().length + 
+           this.filteredUsers().length + 
+           this.filteredMessages().length;
+  }
+
+  getMessageSnippet(text: string, maxLength: number = 80): string {
+    if (text.length <= maxLength) return text;
+    return text.substring(0, maxLength) + '...';
+  }
+
+  getAvatarSrcById(userId: string): string {
+    const user = this.firestore.userList().find(u => u.uid === userId);
+    if (!user) return '/assets/images/avatars/avatar_default.svg';
+    return this.getAvatarSrc(user);
+  }
+
+  selectMessage(msg: MessageSearchResult): void {
+    if (msg.contextType === 'channel') {
+      this.chatContext.openChannel(msg.contextId);
+    } else {
+      this.chatContext.openConversation(msg.senderId);
+    }
+    
+    // Scroll to message after context is loaded
+    setTimeout(() => {
+      this.scrollToMessage(msg.id);
+    }, 500);
+    
+    this.clearSearch();
+  }
+
+  private scrollToMessage(messageId: string): void {
+    const element = document.querySelector(`[data-message-id="${messageId}"]`) as HTMLElement;
+    if (element) {
+      element.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      
+      // Highlight effect
+      element.classList.add('highlight');
+      setTimeout(() => {
+        element.classList.remove('highlight');
+      }, 2000);
+    }
   }
 }

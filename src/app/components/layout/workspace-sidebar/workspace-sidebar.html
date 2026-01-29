@@ -114,11 +114,11 @@
             "{{ searchQuery() }}"
           </h3>
           <span class="result-count">
-            ({{ filteredChannels().length + filteredUsers().length }} Ergebnisse)
+            ({{ filteredChannels().length + filteredUsers().length + filteredMessages().length }} Ergebnisse)
           </span>
         </div>
 
-        <div *ngIf="filteredChannels().length === 0 && filteredUsers().length === 0" class="no-results">
+        <div *ngIf="filteredChannels().length === 0 && filteredUsers().length === 0 && filteredMessages().length === 0" class="no-results">
           <img src="assets/icons/global/search.svg" alt="no results" class="no-results-icon">
           <p class="no-results-title">Keine Ergebnisse gefunden</p>
           <p class="no-results-text">
@@ -165,6 +165,26 @@
                 <span class="result-name">
                   {{ user.displayName || user.name }}
                 </span>
+              </div>
+            </div>
+            }
+          </div>
+
+          <div *ngIf="filteredMessages().length" class="results-section">
+            <h4 class="results-section-title">
+              <img src="assets/icons/global/answer1.svg" class="section-icon" />
+              Messages ({{ filteredMessages().length }})
+            </h4>
+
+            @for (msg of filteredMessages(); track msg.id) {
+            <div class="result-item message-result cp" (click)="selectMessage(msg)">
+              <div class="message-result-content">
+                <div class="message-sender-row">
+                  <img [src]="getAvatarSrcById(msg.senderId)" class="sender-avatar-small" />
+                  <span class="sender-name">{{ msg.senderName }}</span>
+                </div>
+                <span class="message-text-snippet">{{ getMessageSnippet(msg.text) }}</span>
+                <span class="message-context">📍 {{ msg.contextName }}</span>
               </div>
             </div>
             }
