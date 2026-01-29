@@ -63,8 +63,8 @@ export class SearchService {
       return;
     }
 
-    // ========== NEU: Fulltext search ==========
-    if (trimmedQuery.length > 0) {
+    // ========== NEU: Fulltext search - minimum 3 characters ==========
+    if (trimmedQuery.length >= 3) {
       this.searchFullText(trimmedQuery);
       return;
     }
@@ -235,16 +235,20 @@ export class SearchService {
 
 
   public filterUsersByTerm(term: string, excludeCurrentUser: boolean = false, currentUserId?: string | null): User[] {
-    let users = term.length === 0
-      ? this.allUsers()
+    let users = term.length === 0 
+      ? this.allUsers() 
       : this.allUsers().filter(
-        (user) =>
-          user.displayName?.toLowerCase().includes(term) ||
-          user.name?.toLowerCase().includes(term) ||
-          user.email?.toLowerCase().includes(term),
-      );
+          (user) =>
+            user.displayName?.toLowerCase().includes(term) ||
+            user.name?.toLowerCase().includes(term) ||
+            user.email?.toLowerCase().includes(term),
+        );
+
+        console.log('Before name filter:', users.length);
 
     users = users.filter(user => user.displayName || user.name);
+
+    console.log('After name filter:', users.length);
 
     if (excludeCurrentUser && currentUserId) {
       users = users.filter(user => user.uid !== currentUserId);

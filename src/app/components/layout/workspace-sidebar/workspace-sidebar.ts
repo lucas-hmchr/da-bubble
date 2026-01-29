@@ -92,6 +92,12 @@ export class WorkspaceSidebar implements OnInit, OnDestroy {
     this.searchService.searchQuery$
       .pipe(takeUntil(this.destroy$), debounceTime(300))
       .subscribe((query) => {
+        // ========== NEU: Only show search in sidebar on mobile ==========
+        if (!this.isMobile) {
+          this.isSearching.set(false);
+          return;
+        }
+        
         this.searchQuery.set(query);
         const type = this.searchService.getSearchType();
         this.searchType.set(type);
