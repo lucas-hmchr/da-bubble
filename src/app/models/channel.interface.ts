@@ -5,4 +5,6 @@ export interface Channel {
   createdAt?: any;
   lastMessageAt?: any;
   description?: string;
+  creatorId?: string;
+  creatorName?: string;  // ← NEU!
 }

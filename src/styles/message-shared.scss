@@ -1,0 +1,161 @@
+// ============================================================
+// SHARED MESSAGE STYLES
+// Wird verwendet von: message.scss UND thread-menu.scss
+// ============================================================
+
+// Message Bubble (die blaue Sprechblase)
+@mixin message-bubble {
+  padding: 12px 16px;
+  border-radius: 0 20px 20px 20px;
+  background: #eceefe;
+  color: #000000;
+  font-size: 16px;
+  line-height: 1.5;
+  word-wrap: break-word;
+  max-width: 100%;
+  margin: 0;
+}
+
+// Eigene Message Bubble (rechts, blau)
+@mixin message-bubble-own {
+  background: var(--clr-purple-3);
+  color: #ffffff;
+  border-radius: 20px 20px 0 20px;
+}
+
+// Message Header (Name + Zeit)
+@mixin message-header {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  margin-bottom: 4px;
+}
+
+// Sender Name
+@mixin sender-name {
+  font-size: 18px;
+  font-weight: 600;
+  color: #000000;
+}
+
+// Timestamp
+@mixin timestamp {
+  font-size: 14px;
+  color: #686868;
+  font-weight: 400;
+}
+
+// Avatar
+@mixin avatar($size: 50px) {
+  width: $size;
+  height: $size;
+  border-radius: 50%;
+  object-fit: cover;
+  flex-shrink: 0;
+}
+
+// Message Container (Avatar + Content)
+@mixin message-container {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+  margin-bottom: 16px;
+}
+
+// Message Container (eigene Message, rechts)
+@mixin message-container-own {
+  flex-direction: row-reverse;
+}
+
+// Reactions
+@mixin reaction-chip {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 10px;
+  border-radius: 20px;
+  border: 1px solid #e0e0e0;
+  background: #ffffff;
+  cursor: pointer;
+  transition: all 0.2s;
+  font-size: 18px;
+
+  &:hover {
+    background: #f5f5f5;
+    border-color: var(--clr-purple-3);
+  }
+
+  &.mine {
+    background: #eceefe;
+    border-color: var(--clr-purple-3);
+  }
+
+  .reaction-emoji {
+    font-size: 16px;
+    line-height: 1;
+  }
+
+  .reaction-count {
+    font-size: 12px;
+    font-weight: 600;
+    color: #444ce7;
+  }
+}
+
+// Reactions Summary Container
+@mixin reactions-summary {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-top: 8px;
+}
+
+// Date Separator
+@mixin date-separator {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 24px 0 16px;
+  position: relative;
+
+  &::before,
+  &::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: #e0e0e0;
+  }
+
+  span {
+    padding: 0 16px;
+    font-size: 18px;
+    color: var(--clr-black);
+    font-weight: 500;
+    white-space: nowrap;
+  }
+}
+
+// Thread Replies Link
+@mixin thread-replies {
+  margin-top: 8px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  
+  .thread-link {
+    color: var(--clr-purple-3);
+    font-size: 13px;
+    font-weight: 600;
+    text-decoration: none;
+    cursor: pointer;
+    
+    &:hover {
+      text-decoration: underline;
+    }
+  }
+  
+  .last-reply-time {
+    font-size: 12px;
+    color: var(--clr-gray);
+  }
+}

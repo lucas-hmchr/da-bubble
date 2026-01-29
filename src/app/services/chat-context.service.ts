@@ -55,7 +55,6 @@ export class ChatContextService {
 
     switch (prefix) {
       case 'c': {
-        // weil /c/general -> "neue Nachricht"
         if (id === NEW_MESSAGE_CHANNEL_ID) return this.newState();
         return this.channelState(id);
       }
@@ -63,9 +62,6 @@ export class ChatContextService {
       case 'dm':
         return this.convState(id);
 
-      // Optional: falls irgendwo noch /new existiert
-      // case 'new':
-      //   return this.newState();
 
       default:
         return INITIAL_STATE;
@@ -103,7 +99,6 @@ export class ChatContextService {
   async openConversation(userId: string) {
     const activeUser = this.authService.activeUser();
     if (!activeUser?.uid) {
-      console.warn('No active user – cannot open DM');
       return;
     }
 
@@ -111,7 +106,6 @@ export class ChatContextService {
       activeUser.uid,
       userId
     );
-    // wichtig: State setzen + navigieren
     this._state.set({ type: 'dm', channelId: null, convId });
     await this.router.navigate(['/dm', convId]);
   }
@@ -121,7 +115,6 @@ export class ChatContextService {
   }
 
   openNewMessage() {
-    // "neue nachricht" = /c/general
     this.router.navigate(['/c', NEW_MESSAGE_CHANNEL_ID]);
   }
 }

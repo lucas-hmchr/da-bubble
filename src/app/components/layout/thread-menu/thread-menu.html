@@ -1,5 +1,69 @@
 <section>
-    <div>
-        <p>THREAD</p>
+
+  <header class="dm-header dm-header-small">
+    <div style="width: 100%;">
+      <div id="header-left" style="display: flex; align-items: center; gap: 8px;">
+        <h2>Thread</h2>
+        <span class="channel-name"># {{ threadService.channelName() }}</span>
+      </div>
     </div>
+
+    <button class="close-btn" (click)="closeThread()" type="button">
+      <img src="assets/icons/global/close.svg" alt="Schließen">
+    </button>
+  </header>
+
+  <div id="chat-container-new">
+
+    <div class="messages-scroll">
+
+      <div class="parent-message-section" *ngIf="threadService.parentMessage() as parent">
+        <app-message
+          [contextType]="threadService.contextType()"
+          [currentUserUid]="currentUserUid"
+          [externalMessages]="[parent]"
+          [showFullDate]="true"
+          [channel]="threadService.contextType() === 'channel' ? getChannelById(threadService.contextId()) : undefined"
+          [conversationId]="threadService.contextType() === 'conversation' ? threadService.contextId() : null">
+        </app-message>
+      </div>
+
+      <div class="thread-separator">
+        <span>
+          {{ threadService.threadMessages().length }} 
+          {{ threadService.threadMessages().length === 1 ? 'Antwort' : 'Antworten' }}
+        </span>
+      </div>
+
+      <div class="thread-messages-section">
+        
+        <div *ngIf="threadService.threadMessages().length === 0" class="thread-empty">
+          <p>Noch keine Antworten. Sei der Erste!</p>
+        </div>
+
+        <app-message
+          *ngIf="threadService.threadMessages().length > 0"
+          [contextType]="threadService.contextType()"
+          [currentUserUid]="currentUserUid"
+          [externalMessages]="threadService.threadMessages()"
+          [isThreadContext]="true"
+          [threadParentMessageId]="threadService.parentMessage()?.id"
+          [showFullDate]="true"
+          [channel]="threadService.contextType() === 'channel' ? getChannelById(threadService.contextId()) : undefined"
+          [conversationId]="threadService.contextType() === 'conversation' ? threadService.contextId() : null">
+        </app-message>
+
+      </div>
+
+    </div>
+
+    <app-message-input
+      [currentUserUid]="currentUserUid"
+      [contextType]="'thread'"
+      [placeholderText]="'Antworten...'"
+      (threadMessageSent)="onThreadMessageSent($event)">
+    </app-message-input>
+
+  </div>
+
 </section>

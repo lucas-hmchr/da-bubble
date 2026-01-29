@@ -2,15 +2,14 @@
   <mat-drawer-container class="mat-drawer-container" autosize>
     <mat-drawer #drawer class="left-menu-sidenav" mode="side" opened="true">
 
-      <!-- HEADER -->
       @if (!isMobile) {
       <div class="channels-button-container">
         <div class="workspace-logo-text-container">
-          <img src="/assets/icons/global/workspace_logo.svg" alt="" />
+          <img src="assets/icons/global/workspace_logo.svg" alt="" />
           <span class="devspace-txt">Devspace</span>
         </div>
 
-        <img class="edit-square-icon cp" src="/assets/icons/global/edit_square_default.svg" alt=""
+        <img class="edit-square-icon cp" src="assets/icons/global/edit_square_default.svg" alt=""
           (click)="openNewMessage()" />
       </div>
       } @else {
@@ -20,18 +19,16 @@
       </div>
       }
 
-      <!-- NORMAL VIEW -->
       <div *ngIf="!isSearching()" class="channel-message-add-container">
 
-        <img class="add-icon cp" src="/assets/icons/global/add_default.svg" (click)="openAddChannelDialog()" />
+        <img class="add-icon cp" src="assets/icons/global/add_default.svg" (click)="openAddChannelDialog()" />
 
         <mat-accordion class="mat-accordion-container">
 
-          <!-- CHANNELS -->
           @if (!isUserFilterActive()) {
 
-          <mat-expansion-panel hideToggle="true" class="channel-panel" [expanded]="channelOpen()" (opened)="channelOpen.set(true)"
-            (closed)="channelOpen.set(false)">
+          <mat-expansion-panel hideToggle="true" class="channel-panel" [expanded]="channelOpen()"
+            (opened)="channelOpen.set(true)" (closed)="channelOpen.set(false)">
             @if (isNormalView()) {
 
             <mat-expansion-panel-header class="arrow-channel-add-container">
@@ -41,7 +38,7 @@
                 </mat-icon>
 
                 <div class="three-circle-channels-container">
-                  <img src="/assets/icons/global/workspaces_three_circles_default.svg" />
+                  <img src="assets/icons/global/workspaces_three_circles_default.svg" />
                   <span class="fs-20">Channels</span>
                 </div>
               </div>
@@ -51,20 +48,19 @@
             <div class="channel-list ml-16">
               @for (ch of visibleChannels(); track ch.id) {
               <div class="channel-item d-flex mb-16 cp" (click)="selectChannel(ch)">
-                <img src="/assets/icons/global/tag.svg" class="mr-8" />
+                <img src="assets/icons/global/tag.svg" class="mr-8" />
                 {{ ch.name }}
               </div>
               }
 
               <div class="channel-add cp" (click)="openAddChannelDialog()">
-                <img src="/assets/icons/global/add_circle.svg" class="mr-8" />
+                <img src="assets/icons/global/add_circle.svg" class="mr-8" />
                 Channel hinzufügen
               </div>
             </div>
           </mat-expansion-panel>
           }
 
-          <!-- DIRECT MESSAGES -->
           @if (!isChannelFilterActive()) {
           <mat-expansion-panel hideToggle="true" class="channel-panel" [expanded]="dmOpen()" (opened)="dmOpen.set(true)"
             (closed)="dmOpen.set(false)">
@@ -78,7 +74,7 @@
                 </mat-icon>
 
                 <div class="account-directMessage-container">
-                  <img src="/assets/icons/global/account_circle.svg" class="mr-8" />
+                  <img src="assets/icons/global/account_circle.svg" class="mr-8" />
                   <span class="fs-20">Direktnachrichten</span>
                 </div>
               </div>
@@ -108,33 +104,41 @@
         </mat-accordion>
       </div>
 
-      <!-- SEARCH RESULTS (TOPBAR SEARCH) -->
       <div *ngIf="isSearching()" class="search-results-container">
 
         <div class="search-header">
-          <h3>Suchergebnisse für "{{ searchQuery() }}"</h3>
+          <h3>
+            <span *ngIf="searchType() === 'channels'">Channels für</span>
+            <span *ngIf="searchType() === 'users'">Benutzer für</span>
+            <span *ngIf="searchType() === 'all'">Suchergebnisse für</span>
+            "{{ searchQuery() }}"
+          </h3>
           <span class="result-count">
-            ({{ visibleChannels().length + visibleUsers().length }} Ergebnisse)
+            ({{ filteredChannels().length + filteredUsers().length }} Ergebnisse)
           </span>
         </div>
 
-        <div *ngIf="!visibleChannels().length && !visibleUsers().length" class="no-results">
-          <img src="/assets/icons/global/search.svg" class="no-results-icon" />
+        <div *ngIf="filteredChannels().length === 0 && filteredUsers().length === 0" class="no-results">
+          <img src="assets/icons/global/search.svg" alt="no results" class="no-results-icon">
           <p class="no-results-title">Keine Ergebnisse gefunden</p>
-          <p class="no-results-text">Versuche es mit anderen Suchbegriffen</p>
+          <p class="no-results-text">
+            <span *ngIf="searchType() === 'channels'">Versuche es mit einem anderen Channel-Namen</span>
+            <span *ngIf="searchType() === 'users'">Versuche es mit einem anderen Benutzernamen</span>
+            <span *ngIf="searchType() === 'all'">Versuche es mit anderen Suchbegriffen</span>
+          </p>
         </div>
 
         <div class="results-list">
 
           <div *ngIf="visibleChannels().length" class="results-section">
             <h4 class="results-section-title">
-              <img src="/assets/icons/global/workspaces_three_circles_default.svg" class="section-icon" />
+              <img src="assets/icons/global/workspaces_three_circles_default.svg" class="section-icon" />
               Channels ({{ visibleChannels().length }})
             </h4>
 
             @for (channel of visibleChannels(); track channel.id) {
             <div class="result-item channel-result cp" (click)="selectChannel(channel)">
-              <img src="/assets/icons/global/tag.svg" class="result-icon" />
+              <img src="assets/icons/global/tag.svg" class="result-icon" />
               <div class="result-info">
                 <span class="result-name">{{ channel.name }}</span>
                 <span *ngIf="channel.description" class="result-description">
@@ -147,7 +151,7 @@
 
           <div *ngIf="visibleUsers().length" class="results-section">
             <h4 class="results-section-title">
-              <img src="/assets/icons/global/account_circle.svg" class="section-icon" />
+              <img src="assets/icons/global/account_circle.svg" class="section-icon" />
               Direktnachrichten ({{ visibleUsers().length }})
             </h4>
 
@@ -172,10 +176,16 @@
     </mat-drawer>
   </mat-drawer-container>
 
-  <div class="left-menu-button-icon-container cp fs-20" (click)="drawer.toggle()">
+  <div class="left-menu-button-icon-container cp fs-20" (click)="onDrawerToggle()">
     <div class="left-menu-button">
       {{ drawer.opened ? 'Workspace-Menü schließen'
       : 'Workspace-Menü öffnen' }}
     </div>
   </div>
 </div>
+
+@if (showAddPeopleDialog) {
+<app-add-people-dialog [channelId]="createdChannelId!" [channelName]="createdChannelName!"
+  (close)="showAddPeopleDialog = false" (done)="onAddPeopleDone($event)">
+</app-add-people-dialog>
+}

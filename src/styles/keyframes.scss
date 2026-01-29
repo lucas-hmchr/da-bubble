@@ -1,8 +1,9 @@
+@use './variables.scss' as *;
+
 @keyframes logoShiftLeft {
   0% {
     left: 50%;
     transform: translate(-50%, -50%) scale(1);
-    filter: none;
   }
   100% {
     left: 50%;
@@ -18,11 +19,6 @@
 @keyframes nameSlideIn {
   0% { transform: translate(-50%, -50%); }
   100% { transform: translate(0%, -50%); }
-}
-
-@keyframes toTopLeft {
-  0%   { top: 50%; left: 50%; transform: translate(-50%, -50%); }
-  100% { top: 64px; left: 188px; transform: translate(0, 0); }
 }
 
 @keyframes bgFade {

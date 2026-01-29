@@ -7,34 +7,42 @@ import {
   ViewChild,
   Output,
   EventEmitter,
+  inject,
   HostListener,
   input,
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { Observable, tap } from 'rxjs';
+import { Observable, of } from 'rxjs';
+import { take } from 'rxjs/operators';
 import { FormsModule } from '@angular/forms';
 
 import { Channel } from '../../../models/channel.interface';
 import { FirestoreService } from '../../../services/firestore';
-import { ChannelService } from '../../../services/channel.service';
-import { ConversationService } from '../../../services/conversation.service';
-import { MessageService } from '../../../services/message.service';
-import { MessageInputService } from '../../../services/message-intput.service';
+import { MessageService } from '../../../services/message/message.service';
+import { MessageFormatterService } from '../../../services/message/message-formatter.service';
+import { MessageScrollService } from '../../../services/message/message-scroll.service';
+import { MessageReactionService } from '../../../services/message/message-reaction.service';
+import { MessageEditService } from '../../../services/message/message-edit.service';
+import { MessageUiService } from '../../../services/message/message-ui.service';
+import { MessageHelperService } from '../../../services/message/message-helper.service';
+import { MessageDataService } from '../../../services/message/message-data.service';
+import { MessageDeleteService } from '../../../services/message/message-delete.service';
 
 import { MessageData } from '../../../models/message.interface';
 import { User } from '../../../models/user.model';
-import { getAvatarById } from '../../../../shared/data/avatars';
 import {
   ReactionId,
   ReactionDef,
   getReactionDef,
   emojiReactions as EMOJI_REACTIONS,
 } from '../../../../shared/data/reactions';
+import { ProfilePopupService } from '../../../services/profile-popup.service';
+import { ProfilePopup } from '../profile-popup/profile-popup';
 
 @Component({
   selector: 'app-message',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, ProfilePopup],
   templateUrl: './message.html',
   styleUrl: './message.scss',
 })
@@ -45,453 +53,415 @@ export class Message implements OnChanges {
   @Input() currentUserUid: string | null = null;
   @Input() threadChannelId?: string | null;
   @Input() threadParentMessageId?: string | null;
-
+  @Input() externalMessages?: MessageData[] | null;
+  @Input() isThreadContext: boolean = false;
+  @Input() showFullDate?: boolean = false;
   @Output() editRequested = new EventEmitter<MessageData>();
-  @Output() threadRequested = new EventEmitter<{ channelId: string; message: MessageData }>();
+  @Output() threadRequested = new EventEmitter<MessageData>();
 
   messages$?: Observable<MessageData[]>;
   users: User[] = [];
-  hoveredReaction: ReactionId | null = null;
-  hoveredMessageId: string | null = null;
-  lastMessageCount = 0;
+  emojiReactions: ReactionDef[] = EMOJI_REACTIONS as ReactionDef[];
 
   @ViewChild('bottom') bottom!: ElementRef<HTMLDivElement>;
-  private userMap = new Map<string, User>();
 
-  reactionPickerForMessageId: string | null = null;
-  emojiReactions: ReactionDef[] = EMOJI_REACTIONS as ReactionDef[];
-  optionsMenuForMessageId: string | null = null;
-  optionsMenuOpenUp = false;
-  isOptionsMenuHovered = false;
-
-  // ---------------------------
-  // Inline Edit
-  // ---------------------------
-  editingMessageId: string | null = null;
-  editText: string = '';
-  private originalEditText: string = '';
-
-  /**
-   * OPTIONAL:
-   * true  -> wenn Text geändert ist, fragt Outside-Click/Wechsel "Änderungen verwerfen?"
-   * false -> Outside-Click/Wechsel bricht immer kommentarlos ab
-   */
-  private confirmDiscardOnOutside = true;
+  private profilePopupService = inject(ProfilePopupService);
 
   constructor(
     private firestoreService: FirestoreService,
-    private channelService: ChannelService,
-    private conversationService: ConversationService,
     private messageService: MessageService,
-    private messageInputService: MessageInputService,
-    private hostEl: ElementRef<HTMLElement>
+    private hostEl: ElementRef<HTMLElement>,
+    public formatter: MessageFormatterService,
+    public scrollService: MessageScrollService,
+    public reactionService: MessageReactionService,
+    public editService: MessageEditService,
+    public uiService: MessageUiService,
+    public helper: MessageHelperService,
+    private dataService: MessageDataService,
+    private deleteService: MessageDeleteService
   ) {
+    this.loadUsers();
+  }
+
+  private loadUsers(): void {
     this.firestoreService.getCollection<User>('users').subscribe((users) => {
       this.users = users;
-      this.userMap.clear();
-      for (const u of users) {
-        if (u.uid) this.userMap.set(u.uid, u);
-      }
+      this.helper.buildUserMap(users);
     });
   }
 
-  // ---------------------------
-  // Lifecycle
-  // ---------------------------
   ngOnChanges(changes: SimpleChanges): void {
-    if (changes['channel'] || changes['conversationId'] || changes['contextType']) {
+    this.handleExternalMessagesChange(changes);
+    this.handleChannelChange(changes);
+    this.handleConversationChange(changes);
+    this.handleContextTypeChange(changes);
+  }
+
+  private handleExternalMessagesChange(changes: SimpleChanges): void {
+    if (!changes['externalMessages']) return;
+    if (this.externalMessages && this.externalMessages.length > 0) {
+      this.messages$ = of(this.externalMessages);
+      setTimeout(() => {
+        this.scrollService.scrollToBottom(this.bottom, this.isThreadContext);
+      }, 200);
+    }
+  }
+
+  private handleChannelChange(changes: SimpleChanges): void {
+    if (!changes['channel']) return;
+    const oldId = changes['channel'].previousValue?.id;
+    const newId = changes['channel'].currentValue?.id;
+    if (oldId !== newId) {
+      this.loadMessagesIfNeeded();
+      this.resetEditState();
+    }
+  }
+
+  private handleConversationChange(changes: SimpleChanges): void {
+    if (!changes['conversationId']) return;
+    const oldId = changes['conversationId'].previousValue;
+    const newId = changes['conversationId'].currentValue;
+    if (oldId !== newId) {
+      this.loadMessagesIfNeeded();
+      this.resetEditState();
+    }
+  }
+
+  private handleContextTypeChange(changes: SimpleChanges): void {
+    if (!changes['contextType']) return;
+    this.loadMessagesIfNeeded();
+    this.resetEditState();
+  }
+
+  private loadMessagesIfNeeded(): void {
+    if (!this.externalMessages || this.externalMessages.length === 0) {
       this.loadMessages();
-
-      // ✅ Idee 2: Beim Kontextwechsel Inline-Edit sauber beenden
-      this.tryDiscardInlineEdit('context-change');
-
-      // Overlays sauber schließen
-      this.closeOptionsMenu();
-      this.reactionPickerForMessageId = null;
+      this.scheduleScroll();
     }
   }
 
-  // ---------------------------
-  // Outside Click (Idee 1)
-  // ---------------------------
-  @HostListener('document:click', ['$event'])
-  onDocumentClick(ev: MouseEvent) {
-    // wenn kein Inline-Edit aktiv ist, kein Aufwand
-    if (!this.editingMessageId) return;
-
-    const target = ev.target as HTMLElement | null;
-    if (!target) return;
-
-    // nur reagieren, wenn Klick überhaupt "in" diesem Message-Component passiert oder außerhalb;
-    // relevant ist: wenn außerhalb der Inline-Edit-Box geklickt wird → abbrechen
-    this.handleOutsideClick(target);
-  }
-
-  private handleOutsideClick(target: HTMLElement) {
-    // Klick innerhalb der Edit-UI? dann nichts tun
-    const insideInlineEdit = !!target.closest('.inline-edit');
-    if (insideInlineEdit) return;
-
-    // Klick im Options-Menü? dann auch nichts tun
-    const insideOptionsMenu = !!target.closest('.message-options-menu');
-    if (insideOptionsMenu) return;
-
-    // Klick auf Options-Button (3 Punkte) ebenfalls ignorieren
-    const insideOptionsButton = !!target.closest('.option-btn');
-    if (insideOptionsButton) return;
-
-    // Optional: Klick außerhalb dieses Components komplett ignorieren?
-    // Nein: Wir wollen ja genau "außerhalb" abbrechen.
-
-    this.tryDiscardInlineEdit('outside-click');
-  }
-
-  private tryDiscardInlineEdit(reason: 'outside-click' | 'context-change') {
-    if (!this.editingMessageId) return;
-
-    const dirty = this.isInlineEditDirty();
-
-    if (!dirty || !this.confirmDiscardOnOutside) {
-      this.cancelInlineEdit();
-      return;
-    }
-
-    // Bestätigung nur bei Änderungen
-    const ok = window.confirm('Änderungen verwerfen?');
-    if (ok) this.cancelInlineEdit();
-  }
-
-  private isInlineEditDirty(): boolean {
-    const a = (this.editText ?? '').trim();
-    const b = (this.originalEditText ?? '').trim();
-    return a !== b;
-  }
-
-  // ---------------------------
-  // Messages laden
-  // ---------------------------
-  private loadMessages() {
-    if (this.contextType === 'channel') {
-      if (!this.channel?.id) {
-        console.warn('MessageComponent: Channel hat keine ID → Channel-Nachrichten können nicht geladen werden.');
-        this.messages$ = undefined;
-        return;
+  private scheduleScroll(): void {
+    setTimeout(() => {
+      if (this.messages$) {
+        this.messages$.pipe(take(1)).subscribe(() => {
+          setTimeout(() => {
+            this.scrollService.scrollToBottom(this.bottom, this.isThreadContext);
+          }, 200);
+        });
       }
+    }, 100);
+  }
 
-      this.messages$ = this.channelService
-        .getChannelMessages(this.channel.id)
-        .pipe(tap((msgs) => this.handleScrollOnNewMessages(msgs.length)));
+  private resetEditState(): void {
+    this.editService.tryDiscardEdit('context-change');
+    this.uiService.closeOptionsMenu();
+    this.uiService.closeReactionPicker();
+  }
+
+  private loadMessages(): void {
+    const getBottom = () => this.bottom;
+    if (this.contextType === 'channel' && this.channel?.id) {
+      this.loadChannelMessages(this.channel.id, getBottom);
+    } else if (this.contextType === 'conversation' && this.conversationId) {
+      this.loadConversationMessages(this.conversationId, getBottom);
     } else {
-      if (!this.conversationId) {
-        console.warn('MessageComponent: Keine conversationId gesetzt → DM-Nachrichten können nicht geladen werden.');
-        this.messages$ = undefined;
-        return;
-      }
-
-      this.messages$ = this.conversationService
-        .getConversationMessages(this.conversationId)
-        .pipe(tap((msgs) => this.handleScrollOnNewMessages(msgs.length)));
+      this.messages$ = undefined;
     }
   }
 
-  private handleScrollOnNewMessages(currentCount: number) {
-    if (currentCount > this.lastMessageCount) {
-      setTimeout(() => this.scrollToBottom(), 0);
-    }
-    this.lastMessageCount = currentCount;
-  }
-
-  private scrollToBottom(retry: boolean = true) {
-    if (!this.bottom) {
-      if (retry) setTimeout(() => this.scrollToBottom(false), 50);
-      return;
-    }
-    this.bottom.nativeElement.scrollIntoView({ behavior: 'smooth' });
-  }
-
-  // ---------------------------
-  // Sender / Anzeige-Helfer
-  // ---------------------------
-  getSenderName(senderId: string): string {
-    const user = this.userMap.get(senderId);
-    if (!user) return 'Unknown user';
-    return user.displayName ?? user.name ?? 'Unknown user';
-  }
-
-  getSenderAvatarUrl(senderId: string): string {
-    const user = this.userMap.get(senderId);
-    const avatar = getAvatarById(user?.avatarId);
-    return avatar.src;
-  }
-
-  isOwnMessage(msg: MessageData): boolean {
-    return !!this.currentUserUid && msg.senderId === this.currentUserUid;
-  }
-
-  isSameDay(a: any, b: any): boolean {
-    const d1 = this.toDate(a);
-    const d2 = this.toDate(b);
-    if (!d1 || !d2) return false;
-
-    return (
-      d1.getFullYear() === d2.getFullYear() &&
-      d1.getMonth() === d2.getMonth() &&
-      d1.getDate() === d2.getDate()
+  private loadChannelMessages(channelId: string, getBottom: () => any): void {
+    this.messages$ = this.dataService.loadChannelMessages(
+      channelId,
+      getBottom,
+      this.isThreadContext
     );
   }
 
-  toDate(value: any): Date | null {
-    if (!value) return null;
-    if (value instanceof Date) return value;
-    if (value.toDate) return value.toDate();
-    return new Date(value);
+  private loadConversationMessages(conversationId: string, getBottom: () => any): void {
+    this.messages$ = this.dataService.loadConversationMessages(
+      conversationId,
+      getBottom,
+      this.isThreadContext
+    );
   }
 
-  // ---------------------------
-  // Inline Edit
-  // ---------------------------
-  startInlineEdit(msg: MessageData) {
-    if (!msg?.id) return;
-    if (!this.isOwnMessage(msg)) return;
-
-    this.editingMessageId = msg.id;
-    this.editText = msg.text ?? '';
-    this.originalEditText = this.editText;
-
-    this.closeOptionsMenu();
-    this.reactionPickerForMessageId = null;
-
-    setTimeout(() => {
-      const el = document.querySelector<HTMLTextAreaElement>(`textarea[data-edit-id="${msg.id}"]`);
-      el?.focus();
-      const v = el?.value ?? '';
-      if (el) el.setSelectionRange(v.length, v.length);
-    }, 0);
+  isOwnMessage(msg: MessageData): boolean {
+    return this.helper.isOwnMessage(msg.senderId, this.currentUserUid);
   }
 
-  cancelInlineEdit() {
-    this.editingMessageId = null;
-    this.editText = '';
-    this.originalEditText = '';
+  getSenderName(senderId: string): string {
+    return this.helper.getUserDisplayName(senderId);
+  }
+
+  getSenderAvatarUrl(senderId: string): string {
+    return this.helper.getSenderAvatarUrl(senderId);
+  }
+
+  onOpenThread(msg: MessageData): void {
+    if (!msg.id) return;
+    this.threadRequested.emit(msg);
+  }
+
+  @HostListener('document:click', ['$event'])
+  onDocumentClick(ev: MouseEvent): void {
+    if (!this.editService.getEditingMessageId()) return;
+    const target = ev.target as HTMLElement | null;
+    if (target) this.handleOutsideClick(target);
+  }
+
+  private handleOutsideClick(target: HTMLElement): void {
+    const isInside = target.closest('.inline-edit') ||
+      target.closest('.message-options-menu') ||
+      target.closest('.option-btn');
+    if (!isInside) this.editService.tryDiscardEdit('outside-click');
+  }
+
+  get editingMessageId(): string | null {
+    return this.editService.getEditingMessageId();
+  }
+
+  get editText(): string {
+    return this.editService.getEditText();
+  }
+
+  set editText(value: string) {
+    this.editService.setEditText(value);
   }
 
   get canSaveInlineEdit(): boolean {
-    const trimmed = (this.editText ?? '').trim();
-    const original = (this.originalEditText ?? '').trim();
-    return trimmed.length > 0 && trimmed !== original;
+    return this.editService.canSave();
   }
 
-  async saveInlineEdit(msg: MessageData) {
-    if (!msg?.id) return;
-    if (!this.isOwnMessage(msg)) return;
+  get reactionPickerForMessageId(): string | null {
+    return this.uiService.getReactionPickerMessageId();
+  }
 
-    const newText = (this.editText ?? '').trim();
-    if (!newText) return;
+  get optionsMenuForMessageId(): string | null {
+    return this.uiService.getOptionsMenuMessageId();
+  }
 
-    try {
-      if (this.contextType === 'channel') {
-        const channelId = this.channel?.id;
-        if (!channelId) return;
-        await this.messageInputService.updateChannelMessage(channelId, msg.id, newText);
-      } else {
-        const convId = this.conversationId;
-        if (!convId) return;
-        await this.messageInputService.updateConversationMessage(convId, msg.id, newText);
-      }
+  get optionsMenuOpenUp(): boolean {
+    return this.uiService.isOptionsMenuOpenUp();
+  }
 
-      this.cancelInlineEdit();
-    } catch (e) {
-      console.error('Fehler beim Speichern der bearbeiteten Nachricht:', e);
+  get hoveredReaction(): ReactionId | null {
+    return this.uiService.getHoveredReaction().reactionId;
+  }
+
+  get hoveredMessageId(): string | null {
+    return this.uiService.getHoveredReaction().messageId;
+  }
+
+  startInlineEdit(msg: MessageData): void {
+    this.editService.startEdit(msg);
+    setTimeout(() => this.focusEditTextarea(msg.id), 50);
+  }
+
+  private focusEditTextarea(msgId?: string): void {
+    if (!msgId) return;
+    const textarea = this.hostEl.nativeElement.querySelector(
+      `textarea[data-edit-id="${msgId}"]`
+    ) as HTMLTextAreaElement | null;
+    if (textarea) {
+      textarea.focus();
+      textarea.setSelectionRange(textarea.value.length, textarea.value.length);
     }
   }
 
-  onInlineEditKeydown(ev: KeyboardEvent, msg: MessageData) {
-    if (ev.key === 'Escape') {
+  cancelInlineEdit(): void {
+    this.editService.cancelEdit();
+  }
+
+  async saveInlineEdit(msg: MessageData): Promise<void> {
+    const contextId = this.getContextId();
+    if (!contextId) return;
+    await this.editService.saveEdit(
+      msg,
+      this.contextType,
+      contextId,
+      this.isThreadContext,
+      this.threadParentMessageId ?? undefined
+    );
+  }
+
+  onInlineEditKeydown(ev: KeyboardEvent, msg: MessageData): void {
+    if (ev.key === 'Escape') this.cancelInlineEdit();
+    else if (ev.key === 'Enter' && !ev.shiftKey) {
       ev.preventDefault();
-      this.cancelInlineEdit();
-      return;
-    }
-
-    // ENTER speichert, Shift+Enter = Zeilenumbruch
-    if (ev.key === 'Enter' && !ev.shiftKey) {
-      ev.preventDefault();
-      if (this.canSaveInlineEdit) this.saveInlineEdit(msg);
+      this.saveInlineEdit(msg);
     }
   }
 
-  // ---------------------------
-  // Reactions
-  // ---------------------------
-  toggleReaction(msg: MessageData, reactionId: ReactionId) {
-    if (!this.currentUserUid || !msg.id) return;
-
-    if (this.contextType === 'channel' && this.channel?.id) {
-      this.messageService.toggleReactionOnChannelMessage(
-        this.channel.id,
-        msg.id,
-        reactionId,
-        this.currentUserUid
-      );
-    } else if (this.contextType === 'conversation' && this.conversationId) {
-      this.messageService.toggleReactionOnConversationMessage(
-        this.conversationId,
-        msg.id,
-        reactionId,
-        this.currentUserUid
-      );
-    }
+  async toggleReaction(msg: MessageData, reactionId: ReactionId): Promise<void> {
+    if (!this.currentUserUid) return;
+    const contextId = this.getContextId();
+    if (!contextId) return;
+    await this.reactionService.toggleReaction(
+      msg, reactionId, this.currentUserUid, this.contextType,
+      contextId, this.isThreadContext, this.threadParentMessageId ?? undefined
+    );
   }
 
-  getReactionIds(msg: MessageData): ReactionId[] {
-    const reactions: any = msg.reactions || {};
-    return Object.keys(reactions).filter(
-      (key) => Array.isArray(reactions[key]) && reactions[key].length > 0
-    ) as ReactionId[];
+  private getContextId(): string | null {
+    if (this.contextType === 'channel') return this.channel?.id ?? null;
+    if (this.contextType === 'conversation') return this.conversationId ?? null;
+    if (this.contextType === 'thread') return this.channel?.id ?? this.conversationId ?? null;
+    return null;
   }
 
   hasReactions(msg: MessageData): boolean {
-    return this.getReactionIds(msg).length > 0;
+    return this.reactionService.hasReactions(msg);
+  }
+
+  getReactionIds(msg: MessageData): ReactionId[] {
+    return this.reactionService.getReactionIds(msg);
   }
 
   hasCurrentUserReaction(msg: MessageData, reactionId: ReactionId): boolean {
-    if (!this.currentUserUid || !msg.reactions) return false;
-    const users = msg.reactions[reactionId] || [];
-    return users.includes(this.currentUserUid);
+    if (!this.currentUserUid) return false;
+    return this.reactionService.hasCurrentUserReaction(msg, reactionId, this.currentUserUid);
   }
 
   getReactionCount(msg: MessageData, reactionId: ReactionId): number {
-    const val: any = msg.reactions?.[reactionId];
-    if (!Array.isArray(val)) return 0;
-    return val.length;
+    return this.reactionService.getReactionCount(msg, reactionId);
   }
 
   getReactionDefById(id: ReactionId): ReactionDef {
     return getReactionDef(id);
   }
 
-  onToggleReactionPicker(msg: MessageData) {
+  onToggleReactionPicker(msg: MessageData): void {
     if (!msg.id) return;
-    this.reactionPickerForMessageId =
-      this.reactionPickerForMessageId === msg.id ? null : msg.id;
+    this.uiService.toggleReactionPicker(msg.id);
   }
 
-  onEmojiReaction(msg: MessageData, reactionId: ReactionId) {
+  onEmojiReaction(msg: MessageData, reactionId: ReactionId): void {
     this.toggleReaction(msg, reactionId);
-    this.reactionPickerForMessageId = null;
+    this.uiService.closeReactionPicker();
   }
 
-  // ---------------------------
-  // Options Menü
-  // ---------------------------
-  toggleOptionsMenu(ev: MouseEvent, msgId: string) {
+  toggleOptionsMenu(ev: MouseEvent, msgId: string): void {
     ev.stopPropagation();
-
-    if (this.optionsMenuForMessageId === msgId) {
-      this.closeOptionsMenu();
-      return;
+    this.uiService.toggleOptionsMenu(msgId);
+    if (this.uiService.getOptionsMenuMessageId() === msgId) {
+      this.calculateMenuPosition(ev);
     }
+  }
 
-    this.optionsMenuForMessageId = msgId;
-
+  private calculateMenuPosition(ev: MouseEvent): void {
     queueMicrotask(() => {
       const btn = ev.currentTarget as HTMLElement | null;
       if (!btn) return;
-
       const scroll = btn.closest('.messages-scroll') as HTMLElement | null;
       const menu = scroll?.querySelector('.message-options-menu') as HTMLElement | null;
-
       const menuHeight = menu?.getBoundingClientRect().height ?? 160;
-      const margin = 12;
-
       const btnRect = btn.getBoundingClientRect();
       const scrollRect = (scroll ?? document.documentElement).getBoundingClientRect();
-
       const spaceBelow = scrollRect.bottom - btnRect.bottom;
       const spaceAbove = btnRect.top - scrollRect.top;
-
-      this.optionsMenuOpenUp =
-        spaceBelow < (menuHeight + margin) && spaceAbove > (menuHeight + margin);
+      const openUp = spaceBelow < (menuHeight + 12) && spaceAbove > (menuHeight + 12);
+      this.uiService.setOptionsMenuOpenUp(openUp);
     });
   }
 
-  onOptionsMenuMouseEnter() {
-    this.isOptionsMenuHovered = true;
+  onOptionsMenuMouseEnter(): void {
+    this.uiService.setOptionsMenuHovered(true);
   }
 
-  onOptionsMenuMouseLeave() {
-    this.isOptionsMenuHovered = false;
-    this.closeOptionsMenu();
+  onOptionsMenuMouseLeave(): void {
+    this.uiService.setOptionsMenuHovered(false);
+    this.uiService.closeOptionsMenu();
   }
 
-  closeOptionsMenu() {
-    this.optionsMenuForMessageId = null;
-    this.optionsMenuOpenUp = false;
-    this.isOptionsMenuHovered = false;
+  closeOptionsMenu(): void {
+    this.uiService.closeOptionsMenu();
   }
 
-  closeOverlays() {
-    this.reactionPickerForMessageId = null;
-    this.optionsMenuForMessageId = null;
-    this.hoveredReaction = null;
-    this.hoveredMessageId = null;
-  }
-
-  onMessageMouseLeave(msg: MessageData) {
-    if (this.isOptionsMenuHovered) return;
-    if (this.reactionPickerForMessageId === msg.id) this.reactionPickerForMessageId = null;
-    this.closeOverlays();
-  }
-
-  async onDeleteMessage(msg: any) {
-    if (!msg?.id) return;
-    if (!this.isOwnMessage(msg)) return;
-
-    if (this.contextType === 'channel' && this.channel?.id) {
-      await this.messageService.deleteChannelMessage(this.channel.id, msg.id);
-      return;
+  onMessageMouseLeave(msg: MessageData): void {
+    if (this.uiService.getIsOptionsMenuHovered()) return;
+    if (this.uiService.getReactionPickerMessageId() === msg.id) {
+      this.uiService.closeReactionPicker();
     }
+    this.uiService.closeAllOverlays();
+  }
 
-    if (this.contextType === 'conversation' && this.conversationId) {
-      await this.messageService.deleteConversationMessage(this.conversationId, msg.id);
-      return;
+  async onDeleteMessage(msg: any): Promise<void> {
+    if (!msg?.id || !this.isOwnMessage(msg)) return;
+    const contextId = this.getContextId();
+    if (!contextId) return;
+    if (this.deleteService.confirmThreadDeletion(msg, this.isThreadContext)) {
+      await this.deleteService.deleteMessage(
+        msg,
+        this.contextType,
+        contextId,
+        this.isThreadContext,
+        this.threadParentMessageId ?? undefined
+      );
     }
   }
 
-  onHoverReaction(messageId: string, reactionId: ReactionId) {
-    this.hoveredMessageId = messageId;
-    this.hoveredReaction = reactionId;
+  onHoverReaction(messageId: string, reactionId: ReactionId): void {
+    this.uiService.setHoveredReaction(messageId, reactionId);
   }
 
-  onLeaveReaction() {
-    this.hoveredMessageId = null;
-    this.hoveredReaction = null;
-  }
-
-  getReactionUserIds(msg: MessageData, reactionId: ReactionId): string[] {
-    return msg.reactions?.[reactionId] || [];
-  }
-
-  getUserDisplayName(uid: string): string {
-    const user = this.userMap.get(uid);
-    return user?.displayName ?? user?.name ?? 'Unbekannter Nutzer';
+  onLeaveReaction(): void {
+    this.uiService.setHoveredReaction(null, null);
   }
 
   getReactionUserLabel(msg: MessageData, reactionId: ReactionId): string {
-    const uids = this.getReactionUserIds(msg, reactionId);
+    const uids = this.reactionService.getReactionUserIds(msg, reactionId);
     if (!uids.length) return '';
-
-    if (uids.length === 1) return this.getUserDisplayName(uids[0]);
-    if (uids.length === 2) return this.getUserDisplayName(uids[0]) + ' und ' + this.getUserDisplayName(uids[1]);
-
-    const others = uids.length - 1;
-    return `${this.getUserDisplayName(uids[0])} und ${others} weitere`;
+    if (uids.length === 1) return this.helper.getUserDisplayName(uids[0]);
+    if (uids.length === 2) {
+      return `${this.helper.getUserDisplayName(uids[0])} und ${this.helper.getUserDisplayName(uids[1])}`;
+    }
+    return `${this.helper.getUserDisplayName(uids[0])} und ${uids.length - 1} weitere`;
   }
 
-  onOpenThread(msg: MessageData) {
-    if (this.contextType !== 'channel') return;
-    if (!this.channel?.id) return;
-    if (!msg?.id) return;
+  toDate(date: Date | any): Date | null {
+    return this.formatter.toDate(date);
+  }
 
-    this.threadRequested.emit({ channelId: this.channel.id, message: msg });
+  isSameDay(dateA: any, dateB: any): boolean {
+    return this.formatter.isSameDay(dateA, dateB);
+  }
+
+  getFormattedDate(date: Date | any): string {
+    return this.formatter.getFormattedDate(date);
+  }
+
+  getFormattedDateWithWeekday(date: Date | any): string {
+    return this.formatter.getFormattedDateWithWeekday(date);
+  }
+
+  parseMessageText(text: string): string {
+    return this.formatter.parseMessageText(text, this.users);
+  }
+
+  openUserProfile(userId: string, event?: Event): void {
+    if (event) event.stopPropagation();
+    this.profilePopupService.open(userId);
+  }
+
+  onMessageTextClick(event: MouseEvent): void {
+    const target = event.target as HTMLElement;
+    const userId = this.formatter.getUserIdFromElement(target);
+    if (userId) {
+      event.preventDefault();
+      event.stopPropagation();
+      this.openUserProfile(userId, event);
+    }
+  }
+
+  getFullDateTimeString(date: Date | any): string {
+    const formattedDate = this.getFormattedDate(date);
+    const msgDate = this.toDate(date);
+    if (!msgDate) return formattedDate;
+
+    const time = msgDate.toLocaleTimeString('de-DE', {
+      hour: '2-digit',
+      minute: '2-digit'
+    });
+    return `${formattedDate} ${time} Uhr`;
   }
 }

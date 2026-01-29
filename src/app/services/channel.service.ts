@@ -4,6 +4,8 @@ import { MessageData } from "../models/message.interface";
 import { FirestoreService } from "./firestore";
 import { Observable, Subscription } from "rxjs";
 import { User } from "../models/user.model";
+import { Timestamp } from 'firebase/firestore';
+
 
 @Injectable({ providedIn: 'root' })
 
@@ -72,4 +74,90 @@ export class ChannelService {
         this.activeChannelSub?.unsubscribe();
         this.activeMessagesSub?.unsubscribe();
     }
+
+    async updateChannelName(channelId: string, newName: string): Promise<void> {
+        try {
+            await this.firestore.updateDocument('channels', channelId, {
+                name: newName,
+                updatedAt: Timestamp.now()
+            });
+        } catch (error) {
+            throw error;
+        }
+    }
+
+    async updateChannelDescription(channelId: string, newDescription: string): Promise<void> {
+        try {
+            await this.firestore.updateDocument('channels', channelId, {
+                description: newDescription,
+                updatedAt: Timestamp.now()
+            });
+        } catch (error) {
+            throw error;
+        }
+    }
+
+    async leaveChannel(channelId: string, userId: string): Promise<void> {
+        try {
+
+            // Hole aktuelles Channel-Dokument
+            const channel = await this.getChannelById(channelId);
+
+            if (!channel) {
+                throw new Error('Channel not found');
+            }
+
+            // Aktuelle Members-Liste
+            const currentMembers = (channel.members || []) as string[];
+
+            // User aus Members entfernen
+            const updatedMembers = currentMembers.filter(id => id !== userId);
+
+
+            // Firebase updaten
+            await this.firestore.updateDocument('channels', channelId, {
+                members: updatedMembers,
+                updatedAt: Timestamp.now()
+            });
+
+
+        } catch (error) {
+            throw error;
+        }
+    }
+
+    private async getChannelById(channelId: string): Promise<Channel | null> {
+        return new Promise((resolve) => {
+            const sub = this.getChannel(channelId).subscribe(channel => {
+                sub.unsubscribe();
+                resolve(channel || null);
+            });
+        });
+    }
+
+    async addMembersToChannel(channelId: string, userIds: string[]): Promise<void> {
+  try {
+    const channel = await this.getChannelById(channelId);
+
+    if (!channel) {
+      throw new Error('Channel not found');
+    }
+
+    const currentMembers = (channel.members || []) as string[];
+
+    // 🔑 doppelte vermeiden
+    const updatedMembers = Array.from(
+      new Set([...currentMembers, ...userIds])
+    );
+
+    await this.firestore.updateDocument('channels', channelId, {
+      members: updatedMembers,
+      updatedAt: Timestamp.now()
+    });
+
+  } catch (error) {
+    throw error;
+  }
+}
+
 }

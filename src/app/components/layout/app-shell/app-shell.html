@@ -1,39 +1,48 @@
-<!-- <app-topbar></app-topbar>
+<app-topbar [isNewMessageMode]="isNewMessageMode()" [showMobileBack]="isMobile() && activeMobileView() !== 'sidebar'"
+  (back)="backOneLevel()">
+</app-topbar>
 
-<section>
-  <app-workspace-sidebar
-    [currentUserUid]="currentUserUid"
-  ></app-workspace-sidebar>
-
-  <app-view
-    [currentUserUid]="currentUserUid"
-  ></app-view>
-
-  <app-thread-menu></app-thread-menu>
-</section> -->
-
-
-<app-topbar [isNewMessageMode]="isNewMessageMode()" (back)="closeNewMessage()"></app-topbar>
 
 <section class="shell">
 
   @if (!isMobile() || activeMobileView() === 'sidebar') {
-  <app-workspace-sidebar [isMobile]="isMobile()" [currentUserUid]="currentUserUid"
-    (newMessage)="openNewMessage()"></app-workspace-sidebar>
+  <app-workspace-sidebar 
+    [isMobile]="isMobile()" 
+    [currentUserUid]="currentUserUid" 
+    (newMessage)="openNewMessage()"
+    (mobileViewChange)="activeMobileView.set($event)"
+    (workspaceToggle)="onWorkspaceToggle($event)">
+  </app-workspace-sidebar>
   }
 
-  @if (!isMobile() || activeMobileView() === 'chat') {
-  <app-view [currentUserUid]="currentUserUid"></app-view>
+  @if (!isMobile()) {
+    <app-view 
+      [currentUserUid]="currentUserUid" 
+      (openThread)="onOpenThread()"
+      [class.hidden]="!shouldShowView()">
+    </app-view>
+  } @else if (activeMobileView() === 'chat' || activeMobileView() === 'new-message') {
+    <app-view 
+      [currentUserUid]="currentUserUid" 
+      (openThread)="onOpenThread()">
+    </app-view>
   }
+
 
   @if (!isMobile() || activeMobileView() === 'thread') {
-  <app-thread-menu></app-thread-menu>
+  <app-thread-menu 
+    [currentUserUid]="currentUserUid"
+    [class.thread-open]="threadService.isOpen()"
+    [class.full-width]="!shouldShowView()">
+  </app-thread-menu>
   }
 
 </section>
 
-@if (isMobile() && !isNewMessageMode()) {
+<app-channel-info-popup></app-channel-info-popup>
+
+@if (isMobile() && activeMobileView() === 'sidebar') {
 <button class="resp-fab" matFab (click)="openNewMessage()">
-  <img src="/assets/icons/global/edit_square_white.svg" alt="">
+  <img src="assets/icons/global/edit_square_white.svg" alt="">
 </button>
 }

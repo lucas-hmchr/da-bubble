@@ -1,0 +1,94 @@
+.inline-edit {
+  background: var(-clr-white);
+  border: 1px solid var(--clr-purple-light);
+  border-radius: 20px;
+  padding: 12px;
+  margin: 10px 0;
+  box-sizing: border-box;
+  width: 100% !important;
+  max-width: min(680px, 70%);
+  min-width: 280px;
+}
+
+.inline-edit-textarea {
+  width: 100%;
+  min-height: 70px;
+  resize: both;
+  border: 0;
+  outline: none;
+  font-size: 16px;
+  line-height: 1.4;
+  background: transparent;
+  resize: none;
+}
+
+.inline-edit-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  margin-top: 10px;
+}
+
+.inline-edit-cancel,
+.inline-edit-save {
+  height: 38px;
+  padding: 0 18px;
+  border-radius: 999px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.inline-edit-cancel {
+  background: #fff;
+  border: 1px solid var(--clr-purple-2);
+  color: var(--clr-purple-2);
+}
+
+.inline-edit-save {
+  background: var(--clr-purple-2);
+  border: 1px solid var(--clr-purple-2);
+  color: #fff;
+
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+}
+
+.fdc {
+  flex-direction: column;
+}
+
+.thread-replies {
+  margin-top: 8px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+
+  .thread-link {
+    color: var(--clr-purple-3);
+    font-size: 13px;
+    font-weight: 600;
+    text-decoration: none;
+    cursor: pointer;
+
+    &:hover {
+      text-decoration: underline;
+    }
+  }
+
+  .last-reply-time {
+    font-size: 12px;
+    color: var(--clr-gray);
+
+    &::before {
+      content: 'Letzte Antwort: ';
+    }
+
+    @container (max-width: 500px) {
+      &::before {
+        content: 'Letzte: ';
+      }
+    }
+  }
+}

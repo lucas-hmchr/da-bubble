@@ -1,6 +1,5 @@
-import { Component, Input, effect, inject, signal } from '@angular/core';
+import { Component, EventEmitter, Input, Output, effect, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
-
 import { FirestoreService } from '../../../services/firestore';
 import { MessageInput } from '../../shared/message-input/message-input';
 import { Message } from '../../shared/message/message';
@@ -15,11 +14,13 @@ import {
 } from '../../../services/chat-context.service';
 import { ChannelService } from '../../../services/channel.service';
 import { ConversationService } from '../../../services/conversation.service';
-import { NewMessageService } from '../../../services/new-message.service';
+import { NewMessageService } from '../../../services/message/new-message.service';
 import { ViewStateService } from '../../../services/view-state.service';
 import { ProfilePopup } from '../../shared/profile-popup/profile-popup';
 import { ProfilePopupService } from '../../../services/profile-popup.service';
 import { AddMemberPopup } from "./add-member-popup/add-member-popup";
+import { ThreadService } from '../../../services/thread.service';
+import { ChannelInfoService } from '../../../services/channel-info.service';
 
 type RecipientType = 'channel' | 'user' | null;
 
@@ -43,11 +44,15 @@ type ThreadRequest = { channelId: string; message: MessageData };
 export class View {
   public newMessage = inject(NewMessageService);
   public viewState = inject(ViewStateService);
-
+  private threadService = inject(ThreadService);
+  private channelInfoService = inject(ChannelInfoService);
   @Input() currentUserUid: string | null = null;
 
   contextType: ChatContextType = 'channel';
   editingMessage: { id: string; text: string } | null = null;
+  threadOpen = false;
+  threadChannelId: string | null = null;
+  threadParentMessage: MessageData | null = null;
 
   recipientInputValue = '';
   recipientSuggestions: RecipientSuggestion[] = [];
@@ -56,6 +61,7 @@ export class View {
 
   showChannelMemberList = signal<Boolean>(false);
   showAddChannelMemberPopup = signal<Boolean>(false);
+  @Output() openThread = new EventEmitter<MessageData>();
 
   // =========================================================
   // THREAD STATE (rechts im Panel)
@@ -77,7 +83,6 @@ export class View {
     public userService: UserService,
     private profilePopupService: ProfilePopupService
   ) {
-    console.log('Neu Nachricht: s',this.newMessage);
 
     effect(() => {
       const type = this.chatContext.contextType();
@@ -160,7 +165,7 @@ export class View {
     if (user.avatarId) {
       return getAvatarById(user.avatarId).src;
     }
-    return '/images/avatars/avatar_default.svg';
+    return 'images/avatars/avatar_default.svg';
   }
 
   private resetNewMessageState() {
@@ -221,4 +226,47 @@ export class View {
     this.showChannelMemberList.set(false);
     this.showAddChannelMemberPopup.set(true);
   }
+
+
+  onThreadRequested(msg: MessageData) {
+    const contextType = this.contextType;
+    let threadContextType: 'channel' | 'conversation';
+    let contextId: string | null = null;
+
+    if (contextType === 'channel') {
+      threadContextType = 'channel';
+      contextId = this.channel?.id ?? null;
+    } else if (contextType === 'dm') {
+      threadContextType = 'conversation';
+      contextId = this.dmConversationId;
+    } else {
+      return;
+    }
+
+    if (!contextId) {
+      return;
+    }
+
+    this.threadService.open(threadContextType, contextId, msg);
+
+    this.threadOpen = false;
+    this.threadChannelId = null;
+    this.threadParentMessage = null;
+    this.openThread.emit(msg);
+  }
+
+  closeThread() {
+    this.threadService.close();
+
+    this.threadOpen = false;
+    this.threadChannelId = null;
+    this.threadParentMessage = null;
+  }
+
+  openChannelInfo() {
+    if (this.channel) {
+      this.channelInfoService.open(this.channel);
+    }
+  }
+
 }

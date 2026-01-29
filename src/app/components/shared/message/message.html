@@ -9,27 +9,28 @@
       [class.menu-open]="optionsMenuForMessageId === msg.id">
       <div class="date-separator" *ngIf="i === 0 || !isSameDay(msg.createdAt, msgs[i - 1]?.createdAt)">
         <span>
-          {{ toDate(msg.createdAt) | date: 'EEEE, d. MMMM' }}
+          {{ getFormattedDateWithWeekday(msg.createdAt) }}
         </span>
       </div>
 
       <div class="message-content" [ngClass]="{ fdrr: isOwnMessage(msg) }" (mouseleave)="onMessageMouseLeave(msg)">
         <div class="message-actions">
-          <img src="/assets/icons/global/check1.svg" alt="" class="action-btn check-btn"
-            (click)="toggleReaction(msg, 'check')" />
-          <img src="/assets/icons/global/thumbsup1.svg" alt="" class="action-btn thumbsup-btn"
-            (click)="toggleReaction(msg, 'thumbsup')" />
+          <button class="emoji-quick-btn" (click)="toggleReaction(msg, 'check')">
+            ✅
+          </button>
+          <button class="emoji-quick-btn" (click)="toggleReaction(msg, 'thumbsup')">
+            👍
+          </button>
 
-          <img src="/assets/icons/global/reaction1.svg" alt="" class="action-btn reaction-btn"
+          <img src="assets/icons/global/reaction1.svg" alt="" class="action-btn reaction-btn"
             (click)="onToggleReactionPicker(msg)" />
 
-          <img *ngIf="contextType === 'channel'" src="/assets/icons/global/answer1.svg" alt=""
+          <img *ngIf="contextType === 'channel'" src="assets/icons/global/answer1.svg" alt="Thread öffnen"
             class="action-btn answer-btn" (click)="onOpenThread(msg)" />
 
-          <!-- 3-Punkte nur bei eigener Message -->
           <button *ngIf="isOwnMessage(msg)" class="action-btn option-btn"
             (click)="msg.id && toggleOptionsMenu($event, msg.id)" type="button">
-            <img src="/assets/icons/global/option1.svg" alt="">
+            <img src="assets/icons/global/option1.svg" alt="">
           </button>
 
           @if (optionsMenuForMessageId === msg.id) {
@@ -51,14 +52,19 @@
           </button>
         </div>
 
-        <img class="profile-pic" [src]="getSenderAvatarUrl(msg.senderId)" [alt]="getSenderName(msg.senderId)" />
+
+        <img class="profile-pic" [src]="getSenderAvatarUrl(msg.senderId)" [alt]="getSenderName(msg.senderId)"
+          (click)="openUserProfile(msg.senderId, $event)" style="cursor: pointer;" />
 
         <div>
-          <div>
-            <span class="send-name">
+          <div [class.message-header-reverse]="isOwnMessage(msg)" class="gap5">
+            <span class="send-name clickable" (click)="openUserProfile(msg.senderId, $event)">
               {{ getSenderName(msg.senderId) }}
             </span>
             <span class="send-info">
+              <ng-container *ngIf="showFullDate">
+                {{ getFormattedDate(msg.createdAt) }}
+              </ng-container>
               {{ toDate(msg.createdAt) | date: 'HH:mm' }} Uhr
             </span>
           </div>
@@ -80,8 +86,12 @@
 
 
           <ng-template #normalBubble>
-            <p class="text bubble" [ngClass]="isOwnMessage(msg) ? 'me-person' : 'other-person'">
-              {{ msg.text }}
+            <!-- <p class="text bubble" [ngClass]="isOwnMessage(msg) ? 'me-person' : 'other-person'"
+              [innerHTML]="parseMessageText(msg.text)" (click)="onMessageTextClick($event)">
+            </p> -->
+            <p class="text bubble" [ngClass]="isOwnMessage(msg) ? 'me-person' : 'other-person'"
+              [innerHTML]="users.length > 0 ? parseMessageText(msg.text) : msg.text"
+              (click)="onMessageTextClick($event)">
             </p>
           </ng-template>
 
@@ -118,10 +128,13 @@
             </button>
           </div>
 
-          <div *ngIf="msg.threadCount > 0">
-            <a href="javascript:void(0)">
-              {{ msg.threadCount }} Antworten
+          <div *ngIf="msg.threadCount > 0" class="thread-replies">
+            <a href="javascript:void(0)" (click)="onOpenThread(msg)" class="thread-link">
+              {{ msg.threadCount }} {{ msg.threadCount === 1 ? 'Antwort' : 'Antworten' }}
             </a>
+            <span class="last-reply-time" *ngIf="msg.lastReplyAt">
+              {{ toDate(msg.lastReplyAt) | date: 'HH:mm' }} Uhr
+            </span>
           </div>
         </div>
       </div>

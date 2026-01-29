@@ -1,12 +1,12 @@
 import { Injectable } from '@angular/core';
-import { FirestoreService } from './firestore';
-import { User } from '../models/user.model';
-import { Channel } from '../models/channel.interface';
+import { FirestoreService } from './../firestore';
+import { User } from '../../models/user.model';
+import { Channel } from '../../models/channel.interface';
 import { Observable } from 'rxjs';
 
 @Injectable({ providedIn: 'root' })
 export class MessageInputService {
-  constructor(private firestore: FirestoreService) {}
+  constructor(private firestore: FirestoreService) { }
 
   loadUsers(): Observable<User[]> {
     return this.firestore.getCollection<User>('users');
@@ -23,7 +23,7 @@ export class MessageInputService {
       createdAt: now,
       editedAt: now,
       threadCount: 0,
-      reactions: {}, 
+      reactions: {},
     };
   }
 
@@ -89,37 +89,62 @@ export class MessageInputService {
   }
 
   async updateChannelMessage(
-  channelId: string,
-  messageId: string,
-  text: string
-) {
-  const now = new Date();
+    channelId: string,
+    messageId: string,
+    text: string
+  ) {
+    const now = new Date();
 
-  return this.firestore.updateDocument(
-    `channels/${channelId}/messages`,
-    messageId,
-    {
-      text,
-      editedAt: now,
-    }
-  );
-}
+    return this.firestore.updateDocument(
+      `channels/${channelId}/messages`,
+      messageId,
+      {
+        text,
+        editedAt: now,
+      }
+    );
+  }
 
-async updateConversationMessage(
-  convId: string,
-  messageId: string,
-  text: string
-) {
-  const now = new Date();
+  async updateConversationMessage(
+    convId: string,
+    messageId: string,
+    text: string
+  ) {
+    const now = new Date();
 
-  return this.firestore.updateDocument(
-    `conversations/${convId}/messages`,
-    messageId,
-    {
-      text,
-      editedAt: now,
-    }
-  );
-}
+    return this.firestore.updateDocument(
+      `conversations/${convId}/messages`,
+      messageId,
+      {
+        text,
+        editedAt: now,
+      }
+    );
+  }
+
+  async updateThreadMessage(
+    contextType: 'channel' | 'conversation',
+    contextId: string,
+    parentMessageId: string,
+    threadMessageId: string,
+    text: string
+  ) {
+    const now = new Date();
+
+    const basePath = contextType === 'channel'
+      ? `channels/${contextId}/messages`
+      : `conversations/${contextId}/messages`;
+
+    const threadPath = `${basePath}/${parentMessageId}/threadMessages`;
+
+    return this.firestore.updateDocument(
+      threadPath,
+      threadMessageId,
+      {
+        text,
+        editedAt: now,
+      }
+    );
+  }
 
 }

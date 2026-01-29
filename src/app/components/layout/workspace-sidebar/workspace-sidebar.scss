@@ -23,7 +23,7 @@
 
 .mat-drawer-container {
     height: 100%;
-    background-color: #ECEEFE;
+    background-color: var(--bg-blr);
     margin-left: 16px;
 }
 
@@ -31,32 +31,6 @@
     margin-left: 0 !important;
 }
 
-// .left-menu-button-icon-container {
-//     position: absolute;
-//     left: -142px;
-//     top: 60%;
-//     z-index: 1;
-//     transform: rotate(270deg);
-//     width: 339px;
-//     height: 56px;
-//     display: flex;
-//     align-items: center;
-//     justify-content: center;
-//     border-radius: 0 0 30px 30px;
-//     box-shadow: -4px 4px 7px rgba(0, 0, 0, 0.2);
-//     font-weight: 700;
-//     background-color: #ffffff;
-
-//     &:hover {
-//         color: #535AF1;
-//         font-weight: 700;
-
-//         .show-menu-icon {
-//             color: #535AF1;
-//             content: url(/assets/icons/global/show_menu_hover.svg);
-//         }
-//     }
-// }
 
 .left-menu-button {
     display: flex;
@@ -66,25 +40,20 @@
 .left-menu-sidenav {
     padding: 30px;
     border-radius: 30px;
-    // margin-top: 16px;
-    // margin-left: 20px;
-    // margin-bottom: 20px;
     width: 360px;
-    background-color: white;
+    background-color: var(--clr-white);
 }
 
-// .show-menu-icon {
-//     // content: url(/assets/icons/global/show_menu.svg);
-//     height: 32px;
-//     width: 32px;
-//     transform: rotate(90deg);
-// }
 
 .channels-button-container {
     display: flex;
     align-items: center;
     justify-content: space-between;
     margin-bottom: 32px;
+    position: sticky;
+    top: 0;
+    z-index: 4;
+    background-color: white;
 
     div {
         display: flex;
@@ -117,13 +86,13 @@
 }
 
 .channel-item {
-    background-color: #FFFFFF;
+    background-color: var(--clr-white);
     padding: 8px 16px;
     margin-bottom: 8px;
 
     &:hover {
-        background-color: #ECEEFE;
-        color: #535AF1;
+        background-color: var(--bg-clr);
+        color: var(--clr-purple-3);
         border-radius: 30px;
         font-weight: 700;
 
@@ -149,7 +118,7 @@
 }
 
 mat-expansion-panel {
-    background-color: white;
+    background-color: var(--clr-white);
 }
 
 .header-left {
@@ -188,7 +157,7 @@ mat-expansion-panel {
         color: #000000;
 
         .arrow-icon {
-            color: #535AF1
+            color: var(--clr-purple-3);
         }
 
         .three-circle-channels-container {
@@ -223,7 +192,7 @@ mat-expansion-panel {
     align-items: center;
 
     &:hover {
-        color: #535AF1;
+        color: var(--clr-purple-3);
 
         img {
             content: url(/assets/icons/global/add_circle_hover.svg);
@@ -244,7 +213,6 @@ mat-expansion-panel {
 .account-avatar-name {
     display: flex;
     align-items: center;
-    // margin-bottom: 16px;
 
     img {
         border-radius: 50%;
@@ -297,7 +265,7 @@ mat-expansion-panel {
 }
 
 .left-menu-button-icon-container {
-    z-index: 1;
+    z-index: 1000;
     position: absolute;
     left: -142px;
     top: 60%;
@@ -311,7 +279,7 @@ mat-expansion-panel {
     justify-content: center;
     gap: 12px;
 
-    background-color: #ffffff;
+    background-color: var(--clr-white);
     border-radius: 0 0 30px 30px;
     box-shadow: -4px 4px 7px rgba(0, 0, 0, 0.2);
 
@@ -321,7 +289,7 @@ mat-expansion-panel {
 
     &:hover {
         transform: rotate(270deg);
-        color: #535AF1;
+        color: var(--clr-purple-3);
     }
 }
 
@@ -331,7 +299,6 @@ mat-expansion-panel {
     height: 32px;
     fill: white;
 }
-
 
 @media (max-width: 1024px) {
     .left-menu-button-icon-container {

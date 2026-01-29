@@ -5,9 +5,8 @@ import { Observable } from 'rxjs';
 import { FirestoreService } from './firestore';
 
 @Injectable({
-    providedIn: 'root',
+  providedIn: 'root',
 })
-
 export class UserService {
 
     private now = signal(Date.now());
@@ -34,9 +33,9 @@ export class UserService {
 
     public getOnlineStatusIcon(user: User) {
         if (this.isOnline(user)) {
-            return `/assets/icons/global/Online.svg`;
+            return `assets/icons/global/Online.svg`;
         } else {
-            return `/assets/icons/global/Offline.svg`;
+            return `assets/icons/global/Offline.svg`;
         }
     }
 
@@ -45,5 +44,3 @@ export class UserService {
     }
 
 }
-
-

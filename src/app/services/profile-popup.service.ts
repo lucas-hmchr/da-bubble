@@ -6,6 +6,7 @@ import { getAvatarById } from '../../shared/data/avatars';
 import { Router } from '@angular/router';
 import { ChatContextService } from './chat-context.service';
 import { ConversationService } from './conversation.service';
+import { ChannelInfoService } from './channel-info.service';
 
 @Injectable({ providedIn: 'root' })
 export class ProfilePopupService {
@@ -14,6 +15,7 @@ export class ProfilePopupService {
     user = signal<User | null>(null);
     loading = signal(false);
     router = inject(Router);
+    private channelInfoService = inject(ChannelInfoService);
 
     constructor(public userService: UserService, private chatCtx: ChatContextService, private coversationService: ConversationService) { }
 
@@ -41,16 +43,22 @@ export class ProfilePopupService {
         if (this.user()?.avatarId) {
             return getAvatarById(this.user()!.avatarId).src;
         }
-        return '/images/avatars/avatar_default.svg';
+        return 'images/avatars/avatar_default.svg';
     }
 
     navigateToChat() {
         const u = this.user();
         const uid = u?.uid;
         if (!uid) return;
+
         this.chatCtx.openConversation(uid);
-        // this.coversationService.setConvPartner(this.user()!)
         this.close();
+
+        // Channel-Info auch schließen
+        if (this.channelInfoService.isOpen()) {
+            this.channelInfoService.close();
+        }
     }
+
 
 }
