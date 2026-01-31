@@ -148,12 +148,12 @@ export class Topbar implements OnInit, OnDestroy {
     if (user.avatarId) {
       return getAvatarById(user.avatarId).src;
     }
-    return 'assets/imagesavatars/avatar_default.svg';
+    return 'assets/images/avatars/avatar_default.svg';
   }
 
   getCurrentUserAvatar(): string {
     const user = this.currentUser();
-    if (!user) return 'assets/imagesavatars/avatar_default.svg';
+    if (!user) return 'assets/images/avatars/avatar_default.svg';
     return this.getAvatarSrc(user);
   }
 
