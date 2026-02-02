@@ -155,7 +155,7 @@ app-message-input {
       .date-separator {
         display: none !important;
       }
-      
+
       .thread-replies,
       .thread-link {
         display: none !important;
@@ -171,5 +171,9 @@ app-message-input {
 @media (max-width: 1024px) {
   .close-btn {
     display: none !important;
+  }
+
+  section {
+    border-radius: 0;
   }
 }
