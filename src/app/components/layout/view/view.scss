@@ -172,6 +172,32 @@ app-message-input {
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+
+  // ========== NEU: Avatar container styles ==========
+  .user-avatar-container {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+
+  .user-avatar {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    object-fit: cover;
+  }
+
+  .online-status-icon {
+    position: absolute;
+    bottom: -2px;
+    right: -2px;
+    width: 14px;
+    height: 14px;
+    border-radius: 50%;
+    border: 2px solid #fff;
+  }
 }
 
 .to-item:hover {
@@ -181,6 +207,23 @@ app-message-input {
 .to-hash,
 .to-at {
   font-weight: 700;
+}
+
+// ========== NEU: Channel description styles ==========
+.channel-info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  flex: 1;
+}
+
+.channel-name {
+  font-weight: 500;
+}
+
+.channel-description {
+  font-size: 13px;
+  color: #686868;
 }
 
 .justify-content-end {
@@ -304,3 +347,8 @@ app-message-input {
 .channel-name {
   color: var(--clr-purple-2);
 }
+
+// .user-avatar {
+//   height: 70px;
+//   border-radius: 50%;
+// }

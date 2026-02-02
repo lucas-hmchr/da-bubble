@@ -43,11 +43,19 @@ export class SearchService {
   public searchType$ = this.searchTypeSubject.asObservable();
 
   allUsers = computed(() => {
-    const currentUid = this.auth.uid();
-    return this.firestore.userList().filter((u) => u.uid !== currentUid);
+    // ========== FIXED: Include all users, filtering happens in filterUsersByTerm ==========
+    return this.firestore.userList();
   });
 
-  allChannels = computed(() => this.channelService.channels());
+  allChannels = computed(() => {
+    const currentUid = this.auth.uid();
+    if (!currentUid) return [];
+    
+    // ========== NEU: Only show channels where user is a member ==========
+    return this.channelService.channels().filter(ch => 
+      ch.members && ch.members.includes(currentUid)
+    );
+  });
 
 
   handleTopbarSearchInput(query: string): void {

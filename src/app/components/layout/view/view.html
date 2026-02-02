@@ -39,7 +39,12 @@
               @for (ch of newMessage.filteredChannels(); track ch.id ?? $index) {
               <div class="to-item" (click)="newMessage.selectChannel(ch)">
                 <span class="to-hash">#</span>
-                <span>{{ ch.name }}</span>
+                <div class="channel-info">
+                  <span class="channel-name">{{ ch.name }}</span>
+                  @if (ch.description) {
+                  <span class="channel-description">{{ ch.description }}</span>
+                  }
+                </div>
               </div>
               }
             </div>
@@ -51,7 +56,10 @@
             <div class="to-autocomplete-inner">
               @for (u of newMessage.filteredUsers(); track u.uid ?? $index) {
               <div class="to-item" (click)="newMessage.selectUser(u)">
-                <span class="to-at">@</span>
+                <div class="user-avatar-container">
+                  <img [src]="getAvatarSrc(u)" [alt]="u.displayName || u.name" class="user-avatar">
+                  <img [src]="userService.getOnlineStatusIcon(u)" class="online-status-icon">
+                </div>
                 <span>{{ u.displayName || u.name || 'Unbekannter Nutzer' }}</span>
               </div>
               }
