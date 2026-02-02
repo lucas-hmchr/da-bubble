@@ -236,7 +236,6 @@ export class View {
     }
   }
 
-  // ========== NEU: Close "Neue Nachricht" dropdown on window resize ==========
   @HostListener('window:resize')
   onWindowResize() {
     if (this.newMessage.show()) {

@@ -7,7 +7,6 @@ import { User } from '../models/user.model';
 import { Channel } from '../models/channel.interface';
 import { MessageData } from '../models/message.interface';
 
-// ========== NEU: Message search result interface ==========
 export interface MessageSearchResult {
   id: string;
   text: string;
@@ -27,7 +26,6 @@ export class SearchService {
 
   showUserSuggestions = signal(false);
   showChannelSuggestions = signal(false);
-  // ========== NEU: Message suggestions ==========
   showFullTextSearch = signal(false);
   filteredUsers = signal<User[]>([]);
   filteredChannels = signal<Channel[]>([]);
@@ -43,7 +41,6 @@ export class SearchService {
   public searchType$ = this.searchTypeSubject.asObservable();
 
   allUsers = computed(() => {
-    // ========== FIXED: Include all users, filtering happens in filterUsersByTerm ==========
     return this.firestore.userList();
   });
 
@@ -51,7 +48,6 @@ export class SearchService {
     const currentUid = this.auth.uid();
     if (!currentUid) return [];
     
-    // ========== NEU: Only show channels where user is a member ==========
     return this.channelService.channels().filter(ch => 
       ch.members && ch.members.includes(currentUid)
     );
@@ -71,7 +67,6 @@ export class SearchService {
       return;
     }
 
-    // ========== NEU: Fulltext search - minimum 3 characters ==========
     if (trimmedQuery.length >= 3) {
       this.searchFullText(trimmedQuery);
       return;
@@ -138,18 +133,15 @@ export class SearchService {
     this.showFullTextSearch.set(false);
   }
 
-  // ========== NEU: Fulltext search method ==========
   private searchFullText(query: string): void {
     const term = query.toLowerCase();
     
-    // Search in users and channels (synchronous)
     const users = this.filterUsersByTerm(term);
     const channels = this.filterChannelsByTerm(term);
 
     this.filteredUsers.set(users);
     this.filteredChannels.set(channels);
     
-    // Search in messages (asynchronous - updates via signal)
     this.searchMessages(term);
     
     this.showFullTextSearch.set(true);
@@ -157,7 +149,6 @@ export class SearchService {
     this.showChannelSuggestions.set(false);
   }
 
-  // ========== NEU: Search in messages ==========
   private searchMessages(term: string): void {
     const lowerTerm = term.toLowerCase();
     const channels = this.allChannels();
@@ -173,7 +164,6 @@ export class SearchService {
     const results: MessageSearchResult[] = [];
     let processedChannels = 0;
     
-    // Search each channel using firestore directly
     channels.forEach(channel => {
       if (!channel.id) {
         processedChannels++;
@@ -185,7 +175,6 @@ export class SearchService {
       
       this.firestore.getCollection<MessageData>(messagesPath).subscribe({
         next: (messages) => {
-          console.log('💬 Messages found in', channel.name, ':', messages.length);
           
           const matching = messages.filter(msg => 
             msg.text && msg.text.toLowerCase().includes(lowerTerm)
@@ -211,7 +200,6 @@ export class SearchService {
           
           processedChannels++;
           
-          // Update results when all channels are processed
           if (processedChannels === channels.length) {
             results.sort((a, b) => {
               const aTime = a.createdAt?.toMillis?.() || 0;
