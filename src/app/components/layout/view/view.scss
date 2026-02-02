@@ -304,3 +304,9 @@ app-message-input {
 .channel-name {
   color: var(--clr-purple-2);
 }
+
+@media (max-width:1024px) {
+  section {
+    border-radius: 0;
+  }
+}

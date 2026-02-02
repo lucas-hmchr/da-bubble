@@ -222,6 +222,16 @@ mat-expansion-panel {
 
 }
 
+::ng-deep .mat-drawer-inner-container {
+    overflow: hidden !important;
+}
+
+:host ::ng-deep .channel-panel .mat-expansion-panel-content .mat-expansion-panel-body {
+  max-height: 68vh;  
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+
 .channel-message-add-container {
     position: relative;
 
