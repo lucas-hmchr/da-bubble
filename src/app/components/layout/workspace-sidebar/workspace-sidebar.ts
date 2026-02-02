@@ -10,6 +10,7 @@ import {
   computed,
   effect,
   ViewChild,
+  HostListener,
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { MatSidenavModule } from '@angular/material/sidenav';
@@ -132,6 +133,13 @@ export class WorkspaceSidebar implements OnInit, OnDestroy {
     }
   }
 
+  // ========== NEU: Clear search input (custom X button) ==========
+  clearSearchInput() {
+    this.newMessage$.setQuery('');
+    this.isSearching.set(false);
+    this.resetSearch();
+  }
+
   /** ⭐ EINZIGE DATENQUELLEN FÜR DAS TEMPLATE ⭐ */
   visibleUsers = computed<User[]>(() => {
     if (this.isSearching()) {
@@ -153,7 +161,14 @@ export class WorkspaceSidebar implements OnInit, OnDestroy {
   }
 
   performSearch(query: string, type: 'all' | 'channels' | 'users' = 'all') {
-    const term = query.toLowerCase().trim();
+    let term = query.toLowerCase().trim();
+    
+    // ========== NEU: Strip @ or # prefix before searching ==========
+    if (term.startsWith('@') || term.startsWith('#')) {
+      term = term.substring(1);
+    }
+    
+    console.log('🔍 WORKSPACE performSearch called:', { query, type, term });
 
     if (type === 'all' || type === 'channels') {
       // ========== NEU: Use service filter method ==========
@@ -163,10 +178,13 @@ export class WorkspaceSidebar implements OnInit, OnDestroy {
     }
 
     if (type === 'all' || type === 'users') {
+      console.log('🔍 WORKSPACE: Calling filterUsersByTerm with excludeCurrentUser: false');
+      console.log('🔍 WORKSPACE: allUsers from searchService:', this.searchService['allUsers']().length);
+      
       // ========== NEU: Show ALL users (don't exclude current user) ==========
-      this.filteredUsers.set(
-        this.searchService.filterUsersByTerm(term, false, this.currentUserUid)
-      );
+      const filtered = this.searchService.filterUsersByTerm(term, false, this.currentUserUid);
+      console.log('🔍 WORKSPACE: Got filtered users:', filtered.length);
+      this.filteredUsers.set(filtered);
     } else {
       this.filteredUsers.set([]);
     }
@@ -182,7 +200,19 @@ export class WorkspaceSidebar implements OnInit, OnDestroy {
   // ========== NEU: Search messages method ==========
   private searchMessages(term: string): void {
     const lowerTerm = term.toLowerCase();
-    const channels = this.channelService.channels();
+    
+    // ========== FIXED: Only search in channels where user is member ==========
+    const currentUid = this.currentUserUid;
+    if (!currentUid) {
+      this.filteredMessages.set([]);
+      return;
+    }
+    
+    const channels = this.channelService.channels().filter(ch => 
+      ch.members && ch.members.includes(currentUid)
+    );
+    
+    console.log('🔍 WORKSPACE searchMessages: Searching in', channels.length, 'member channels');
     
     if (channels.length === 0) {
       this.filteredMessages.set([]);
@@ -202,9 +232,13 @@ export class WorkspaceSidebar implements OnInit, OnDestroy {
       
       this.firestore.getCollection<any>(messagesPath).subscribe({
         next: (messages) => {
+          console.log('🔍 WORKSPACE: Found', messages.length, 'messages in', channel.name);
+          
           const matching = messages.filter((msg: any) => 
             msg.text && msg.text.toLowerCase().includes(lowerTerm)
           );
+          
+          console.log('🔍 WORKSPACE: Matching messages:', matching.length);
           
           for (const msg of matching) {
             if (!msg.id) continue;
@@ -231,6 +265,7 @@ export class WorkspaceSidebar implements OnInit, OnDestroy {
               return bTime - aTime;
             });
             
+            console.log('🔍 WORKSPACE: Total matching messages:', results.length);
             this.filteredMessages.set(results.slice(0, 20));
           }
         },
@@ -365,6 +400,14 @@ export class WorkspaceSidebar implements OnInit, OnDestroy {
   ngOnDestroy() {
     this.destroy$.next();
     this.destroy$.complete();
+  }
+  
+  // ========== NEU: Handle window resize with HostListener (instant response) ==========
+  @HostListener('window:resize')
+  onWindowResize() {
+    if (this.isSearching()) {
+      this.clearSearchIfActive();
+    }
   }
 
   onAddPeopleDone(event: { mode: 'all' | 'specific'; channelId: string; userIds: string[] }) {

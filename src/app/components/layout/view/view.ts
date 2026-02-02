@@ -1,4 +1,4 @@
-import { Component, EventEmitter, Input, Output, effect, inject, signal } from '@angular/core';
+import { Component, EventEmitter, Input, Output, effect, inject, signal, HostListener } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FirestoreService } from '../../../services/firestore';
 import { MessageInput } from '../../shared/message-input/message-input';
@@ -18,6 +18,7 @@ import { ProfilePopupService } from '../../../services/profile-popup.service';
 import { AddMemberPopup } from "./add-member-popup/add-member-popup";
 import { ThreadService } from '../../../services/thread.service';
 import { ChannelInfoService } from '../../../services/channel-info.service';
+import { ChannelInfoPopup } from '../../shared/channel-info-popup/channel-info-popup';
 
 type RecipientType = 'channel' | 'user' | null;
 
@@ -31,7 +32,7 @@ interface RecipientSuggestion {
 @Component({
   selector: 'app-view',
   standalone: true,
-  imports: [CommonModule, MessageInput, Message, ProfilePopup, AddMemberPopup],
+  imports: [CommonModule, MessageInput, Message, ProfilePopup, AddMemberPopup,ChannelInfoPopup],
   templateUrl: './view.html',
   styleUrls: ['./view.scss'],
 })
@@ -131,7 +132,7 @@ export class View {
     if (user.avatarId) {
       return getAvatarById(user.avatarId).src;
     }
-    return 'images/avatars/avatar_default.svg';
+    return '/images/avatars/avatar_default.svg';
   }
 
   private resetNewMessageState() {
@@ -232,6 +233,13 @@ export class View {
   openChannelInfo() {
     if (this.channel) {
       this.channelInfoService.open(this.channel);
+    }
+  }
+
+  @HostListener('window:resize')
+  onWindowResize() {
+    if (this.newMessage.show()) {
+      this.newMessage.resetDropdown();
     }
   }
 

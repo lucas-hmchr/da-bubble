@@ -14,8 +14,10 @@
       </div>
       } @else {
       <div class="channels-button-container">
-        <input class="resp-input-workspace" type="search" placeholder="Gehe zu..." [value]="newMessage$.query()"
+        <input class="resp-input-workspace" type="text" placeholder="Gehe zu..." [value]="newMessage$.query()"
           (keyup)="onNewMessageToKeyup($event)" />
+        <img *ngIf="newMessage$.query().length > 0" src="assets/icons/global/close.svg" alt="clear"
+          class="search-icon-clear-sidebar" (click)="clearSearchInput()">
       </div>
       }
 
@@ -155,6 +157,26 @@
                 <span class="result-name">
                   {{ user.displayName || user.name }}
                 </span>
+              </div>
+            </div>
+            }
+          </div>
+
+          <div *ngIf="filteredMessages().length" class="results-section">
+            <h4 class="results-section-title">
+              <img src="assets/icons/global/answer1.svg" class="section-icon" />
+              Messages ({{ filteredMessages().length }})
+            </h4>
+
+            @for (msg of filteredMessages(); track msg.id) {
+            <div class="result-item message-result cp" (click)="selectMessage(msg)">
+              <div class="message-result-content">
+                <div class="message-sender-row">
+                  <img [src]="getAvatarSrcById(msg.senderId)" class="sender-avatar-small" />
+                  <span class="sender-name">{{ msg.senderName }}</span>
+                </div>
+                <span class="message-text-snippet">{{ getMessageSnippet(msg.text) }}</span>
+                <span class="message-context">📍 {{ msg.contextName }}</span>
               </div>
             </div>
             }
