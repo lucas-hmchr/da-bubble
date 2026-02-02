@@ -93,6 +93,7 @@ export class WorkspaceSidebar implements OnInit, OnDestroy {
     this.searchService.searchQuery$
       .pipe(takeUntil(this.destroy$), debounceTime(300))
       .subscribe((query) => {
+        // ========== NEU: Only show search in sidebar on mobile ==========
         if (!this.isMobile) {
           this.isSearching.set(false);
           return;
@@ -116,6 +117,7 @@ export class WorkspaceSidebar implements OnInit, OnDestroy {
     const input = event.target as HTMLInputElement;
     const query = input.value;
     
+    // ========== Mobile: Handle search directly ==========
     if (this.isMobile) {
       this.searchQuery.set(query);
       const type = this.searchService.getSearchType();
@@ -131,6 +133,14 @@ export class WorkspaceSidebar implements OnInit, OnDestroy {
     }
   }
 
+  // ========== NEU: Clear search input (custom X button) ==========
+  clearSearchInput() {
+    this.newMessage$.setQuery('');
+    this.isSearching.set(false);
+    this.resetSearch();
+  }
+
+  /** ⭐ EINZIGE DATENQUELLEN FÜR DAS TEMPLATE ⭐ */
   visibleUsers = computed<User[]>(() => {
     if (this.isSearching()) {
       return this.filteredUsers();
@@ -145,6 +155,7 @@ export class WorkspaceSidebar implements OnInit, OnDestroy {
     return this.channelService.channels();
   });
 
+  // ========== NEU: Helper method to filter users without names ==========
   private getAllUsersWithNames(): User[] {
     return this.firestore.userList().filter(u => u.displayName || u.name);
   }
@@ -152,25 +163,33 @@ export class WorkspaceSidebar implements OnInit, OnDestroy {
   performSearch(query: string, type: 'all' | 'channels' | 'users' = 'all') {
     let term = query.toLowerCase().trim();
     
+    // ========== NEU: Strip @ or # prefix before searching ==========
     if (term.startsWith('@') || term.startsWith('#')) {
       term = term.substring(1);
     }
     
+    console.log('🔍 WORKSPACE performSearch called:', { query, type, term });
 
     if (type === 'all' || type === 'channels') {
+      // ========== NEU: Use service filter method ==========
       this.filteredChannels.set(this.searchService.filterChannelsByTerm(term));
     } else {
       this.filteredChannels.set([]);
     }
 
     if (type === 'all' || type === 'users') {
+      console.log('🔍 WORKSPACE: Calling filterUsersByTerm with excludeCurrentUser: false');
+      console.log('🔍 WORKSPACE: allUsers from searchService:', this.searchService['allUsers']().length);
       
+      // ========== NEU: Show ALL users (don't exclude current user) ==========
       const filtered = this.searchService.filterUsersByTerm(term, false, this.currentUserUid);
+      console.log('🔍 WORKSPACE: Got filtered users:', filtered.length);
       this.filteredUsers.set(filtered);
     } else {
       this.filteredUsers.set([]);
     }
 
+    // ========== NEU: Search messages in mobile ==========
     if (type === 'all') {
       this.searchMessages(term);
     } else {
@@ -178,9 +197,11 @@ export class WorkspaceSidebar implements OnInit, OnDestroy {
     }
   }
 
+  // ========== NEU: Search messages method ==========
   private searchMessages(term: string): void {
     const lowerTerm = term.toLowerCase();
     
+    // ========== FIXED: Only search in channels where user is member ==========
     const currentUid = this.currentUserUid;
     if (!currentUid) {
       this.filteredMessages.set([]);
@@ -211,11 +232,13 @@ export class WorkspaceSidebar implements OnInit, OnDestroy {
       
       this.firestore.getCollection<any>(messagesPath).subscribe({
         next: (messages) => {
+          console.log('🔍 WORKSPACE: Found', messages.length, 'messages in', channel.name);
           
           const matching = messages.filter((msg: any) => 
             msg.text && msg.text.toLowerCase().includes(lowerTerm)
           );
           
+          console.log('🔍 WORKSPACE: Matching messages:', matching.length);
           
           for (const msg of matching) {
             if (!msg.id) continue;
@@ -266,6 +289,7 @@ export class WorkspaceSidebar implements OnInit, OnDestroy {
 
   resetSearch() {
     this.filteredChannels.set(this.channelService.channels());
+    // ========== GEÄNDERT: Use filtered users ==========
     this.filteredUsers.set(this.getAllUsersWithNames());
     this.searchQuery.set('');
     this.searchType.set('all');
@@ -331,6 +355,7 @@ export class WorkspaceSidebar implements OnInit, OnDestroy {
     return getAvatarById(user.avatarId).src;
   }
 
+  // ========== NEU: Message selection methods ==========
   selectMessage(msg: MessageSearchResult) {
     if (msg.contextType === 'channel') {
       this.chatContext.openChannel(msg.contextId);
@@ -377,6 +402,7 @@ export class WorkspaceSidebar implements OnInit, OnDestroy {
     this.destroy$.complete();
   }
   
+  // ========== NEU: Handle window resize with HostListener (instant response) ==========
   @HostListener('window:resize')
   onWindowResize() {
     if (this.isSearching()) {
@@ -395,6 +421,7 @@ export class WorkspaceSidebar implements OnInit, OnDestroy {
 
       this.channelService.addMembersToChannel(event.channelId, allUserIds);
     } else {
+      // specific
       this.channelService.addMembersToChannel(event.channelId, event.userIds);
     }
     this.chatContext.openChannel(event.channelId);
@@ -405,8 +432,10 @@ export class WorkspaceSidebar implements OnInit, OnDestroy {
   }
 
   onDrawerToggle() {
+    // Toggle drawer HIER
     this.drawer.toggle();
 
+    // Emit Zustand nach Toggle
     setTimeout(() => {
       this.workspaceToggle.emit(this.drawer.opened);
     }, 50);
