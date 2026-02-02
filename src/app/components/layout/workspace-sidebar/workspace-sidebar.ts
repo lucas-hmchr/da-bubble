@@ -116,31 +116,31 @@ export class WorkspaceSidebar implements OnInit, OnDestroy {
     const input = event.target as HTMLInputElement;
     const query = input.value;
     
-    // Check if it's @ or # search
-    if (query.startsWith('@') || query.startsWith('#')) {
-      this.newMessage$.setQuery(query);
-    } else {
-      // Normal search - use SearchService
-      this.searchService.updateSearchQuery(query);
+    // ========== Mobile: Handle search directly ==========
+    if (this.isMobile) {
+      this.searchQuery.set(query);
+      const type = this.searchService.getSearchType();
+      this.searchType.set(type);
+
+      if (query.trim()) {
+        this.isSearching.set(true);
+        this.performSearch(query, type);
+      } else {
+        this.isSearching.set(false);
+        this.resetSearch();
+      }
     }
   }
 
   /** ⭐ EINZIGE DATENQUELLEN FÜR DAS TEMPLATE ⭐ */
   visibleUsers = computed<User[]>(() => {
-    if (this.newMessage$.mode() === 'user') {
-      return this.newMessage$.filteredUsers();
-    }
     if (this.isSearching()) {
       return this.filteredUsers();
     }
-    // ========== GEÄNDERT: Filter users without names ==========
     return this.getAllUsersWithNames();
   });
 
   visibleChannels = computed<Channel[]>(() => {
-    if (this.newMessage$.mode() === 'channel') {
-      return this.newMessage$.filteredChannels();
-    }
     if (this.isSearching()) {
       return this.filteredChannels();
     }
@@ -163,9 +163,9 @@ export class WorkspaceSidebar implements OnInit, OnDestroy {
     }
 
     if (type === 'all' || type === 'users') {
-      // ========== NEU: Use service filter method with currentUserUid exclusion ==========
+      // ========== NEU: Show ALL users (don't exclude current user) ==========
       this.filteredUsers.set(
-        this.searchService.filterUsersByTerm(term, true, this.currentUserUid)
+        this.searchService.filterUsersByTerm(term, false, this.currentUserUid)
       );
     } else {
       this.filteredUsers.set([]);
@@ -366,30 +366,6 @@ export class WorkspaceSidebar implements OnInit, OnDestroy {
     this.destroy$.next();
     this.destroy$.complete();
   }
-
-  private autoOpenPanels = effect(() => {
-    const mode = this.newMessage$.mode();
-
-    if (mode === 'user') {
-      this.dmOpen.set(true);
-      this.channelOpen.set(false);
-      return;
-    }
-
-    if (mode === 'channel') {
-      this.channelOpen.set(true);
-      this.dmOpen.set(false);
-      return;
-    }
-
-    // mode === null → nichts erzwingen
-  });
-
-  isUserFilterActive = computed(() => this.newMessage$.mode() === 'user');
-
-  isChannelFilterActive = computed(() => this.newMessage$.mode() === 'channel');
-
-  isNormalView = computed(() => this.newMessage$.mode() === null);
 
   onAddPeopleDone(event: { mode: 'all' | 'specific'; channelId: string; userIds: string[] }) {
     this.showAddPeopleDialog = false;

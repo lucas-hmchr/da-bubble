@@ -37,8 +37,13 @@ export class NewMessageService {
         });
 
         this.mi.loadChannels().subscribe((c) => {
-            this.channels.set(c);
-            this.filteredChannels.set(c);
+            // ========== NEU: Filter channels by membership ==========
+            const currentUid = this.auth.activeUser()?.uid;
+            const memberChannels = currentUid 
+                ? c.filter(ch => ch.members && ch.members.includes(currentUid))
+                : [];
+            this.channels.set(memberChannels);
+            this.filteredChannels.set(memberChannels);
         });
     }
 

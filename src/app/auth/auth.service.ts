@@ -117,9 +117,10 @@ export class AuthService {
 
   async login(email: string, password: string): Promise<boolean> {
     try {
-      await signInWithEmailAndPassword(this.auth, email, password);
+      const cred = await signInWithEmailAndPassword(this.auth, email, password);
       this.router.navigate(['/']);
       this.toast.show('Du bist jetzt eingeloggt!', 4000, 'assets/icons/global/send.svg');
+      await this.markMeOnline(cred.user.uid);
       return true;
     } catch (error) {
       console.error(error);
@@ -132,6 +133,7 @@ export class AuthService {
       const cred = await signInWithPopup(this.auth, this.googleProvider);
       const user = cred.user;
       const snap = await getDoc(this.getUserRef(user.uid));
+      await this.markMeOnline(user.uid);
       if (!snap.exists()) {
         await this.createUserDocForNewUser(user, {
           displayName: user.displayName ?? undefined,
@@ -154,6 +156,7 @@ export class AuthService {
     } else {
       await setDoc(ref, { lastActiveAt: serverTimestamp() }, { merge: true });
     }
+    await this.markMeOnline(cred.user.uid);
     this.router.navigate(['/']);
   }
 
@@ -199,7 +202,7 @@ export class AuthService {
       this.toast.show('Dein Name ist erfolgreich geändert worden!');
     } catch (err) {
       console.error(err);
-      
+
     }
   }
 
@@ -213,4 +216,14 @@ export class AuthService {
       console.error(err);
     }
   }
+
+  private async markMeOnline(uid: string) {
+    const ref = this.getUserRef(uid);
+    await setDoc(ref, {
+      isOnline: true,
+      lastActiveAt: serverTimestamp(),
+      lastActiveClientAt: Date.now(),
+    }, { merge: true });
+  }
+
 }
