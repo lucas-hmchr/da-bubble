@@ -8,12 +8,12 @@ app-thread-menu {
     min-width: 0;
     opacity: 0;
     overflow: hidden;
-    transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1), 
-                min-width 0.3s cubic-bezier(0.4, 0, 0.2, 1), 
-                opacity 0.3s cubic-bezier(0.4, 0, 0.2, 1), 
-                margin 0.3s cubic-bezier(0.4, 0, 0.2, 1),
-                flex 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    
+    transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1),
+        min-width 0.3s cubic-bezier(0.4, 0, 0.2, 1),
+        opacity 0.3s cubic-bezier(0.4, 0, 0.2, 1),
+        margin 0.3s cubic-bezier(0.4, 0, 0.2, 1),
+        flex 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+
     &.thread-open {
         width: 485px;
         min-width: 485px;
@@ -21,14 +21,14 @@ app-thread-menu {
         margin-right: 10px;
         flex: 0 0 485px;
     }
-    
+
     &.thread-open.full-width {
         width: 100%;
         max-width: none;
         min-width: 0;
         flex: 1;
     }
-    
+
     height: calc(100% - 10px);
     flex-shrink: 0;
 }
@@ -38,14 +38,14 @@ app-view {
     height: calc(100% - 10px);
     flex: 1;
     min-width: 0;
-    
-    transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1), 
-                opacity 0.3s cubic-bezier(0.4, 0, 0.2, 1), 
-                transform 0.3s cubic-bezier(0.4, 0, 0.2, 1),
-                flex 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+
+    transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1),
+        opacity 0.3s cubic-bezier(0.4, 0, 0.2, 1),
+        transform 0.3s cubic-bezier(0.4, 0, 0.2, 1),
+        flex 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     opacity: 1;
     transform: translateX(0);
-    
+
     &.hidden {
         flex: 0 0 0;
         width: 0;
@@ -65,9 +65,9 @@ app-view {
     gap: 16px;
     height: calc(100vh - 76px - 30px);
     overflow: hidden;
-    
+
     transition: gap 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    
+
     &:has(app-view.hidden) {
         gap: 8px;
     }
@@ -103,10 +103,10 @@ app-view {
     .shell {
         display: block;
     }
-    
+
     app-view {
         transition: none;
-        
+
         &.hidden {
             transform: none;
         }
@@ -119,11 +119,17 @@ app-view {
             width: 350px;
             min-width: 350px;
         }
-        
+
         &.thread-open.full-width {
             width: 100%;
             max-width: none;
             min-width: 0;
         }
+    }
+}
+
+@media (max-width: 375px) {
+    .shell {
+        height: calc(100vh - 76px - 4px);
     }
 }

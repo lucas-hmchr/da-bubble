@@ -352,3 +352,10 @@ app-message-input {
 //   height: 70px;
 //   border-radius: 50%;
 // }
+
+
+@media (max-width: 1024px) {
+  section {
+    border-radius: 0;
+  }
+}
