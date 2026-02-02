@@ -119,6 +119,9 @@ export class WorkspaceSidebar implements OnInit, OnDestroy {
     
     // ========== Mobile: Handle search directly ==========
     if (this.isMobile) {
+      // ========== IMPORTANT: Sync to newMessage$ for input binding and X icon ==========
+      this.newMessage$.setQuery(query);
+      
       this.searchQuery.set(query);
       const type = this.searchService.getSearchType();
       this.searchType.set(type);
