@@ -356,6 +356,10 @@
     padding: 12px 16px;
     border-bottom: 1px solid #e5e7eb;
     
+    &.no-border {
+      border-bottom: none;
+    }
+    
     h4 {
       font-size: 16px;
       font-weight: 600;

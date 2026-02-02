@@ -123,12 +123,32 @@ export class WorkspaceSidebar implements OnInit, OnDestroy {
       this.newMessage$.setQuery(query);
       
       this.searchQuery.set(query);
-      const type = this.searchService.getSearchType();
+      
+      // ========== Determine type from query directly ==========
+      let type: 'all' | 'channels' | 'users' = 'all';
+      if (query.trim().startsWith('@')) {
+        type = 'users';
+      } else if (query.trim().startsWith('#')) {
+        type = 'channels';
+      }
+      
       this.searchType.set(type);
 
+      // ========== 3-character minimum for fulltext search ==========
       if (query.trim()) {
-        this.isSearching.set(true);
-        this.performSearch(query, type);
+        // For @ and # searches: allow any length after prefix
+        // For fulltext: require 3+ characters
+        const trimmed = query.trim();
+        const isSpecialSearch = trimmed.startsWith('@') || trimmed.startsWith('#');
+        const meetsMinLength = isSpecialSearch || trimmed.length >= 3;
+        
+        if (meetsMinLength) {
+          this.isSearching.set(true);
+          this.performSearch(query, type);
+        } else {
+          this.isSearching.set(false);
+          this.resetSearch();
+        }
       } else {
         this.isSearching.set(false);
         this.resetSearch();

@@ -132,6 +132,18 @@
                 </div>
             </div>
 
+            <!-- ========== NEU: NO RESULTS DROPDOWN - Simple header only ========== -->
+            <div class="search-results fulltext-results" 
+                 *ngIf="showFullTextSearch() && getTotalResultCount() === 0">
+                <div class="search-results-inner">
+                    <!-- Header without bottom border -->
+                    <div class="search-header no-border">
+                        <h4>Suchergebnisse für "{{ searchQuery }}"</h4>
+                        <span class="result-count">(0 Ergebnisse)</span>
+                    </div>
+                </div>
+            </div>
+
         </div>
         <div class="profil" (click)="toggleDropdownMenu($event)">
             <h1>{{ currentUser()?.displayName || currentUser()?.name || 'Gast' }}</h1>

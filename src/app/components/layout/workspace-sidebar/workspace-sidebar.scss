@@ -76,11 +76,11 @@
         transform: translateY(-50%);
         width: 26px;
         height: 26px;
-        padding: 4px;
         cursor: pointer;
         opacity: 0.5;
         transition: opacity 0.2s ease;
-        z-index: 10;
+        z-index: 10; // Above input
+        padding: 4px;
         border-radius: 50%;
 
         &:hover {
@@ -391,7 +391,7 @@ mat-expansion-panel {
     margin-bottom: 30px;
 }
 
-.result-name {
-    font-weight: bold;
-    color: var(--clr-black)
+.result-info {
+    display: flex;
+    flex-direction: column;
 }
