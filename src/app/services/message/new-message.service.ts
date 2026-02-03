@@ -54,6 +54,28 @@ export class NewMessageService {
         const firstChar = trimmed.slice(0, 1);
         const lastChar = value.slice(-1);
 
+        // ========== NEU: Email search detection (BEFORE lastChar check!) ==========
+        const containsAt = trimmed.includes('@') && !trimmed.startsWith('@');
+        const looksLikeEmail = containsAt && trimmed.length > 2;
+
+        if (looksLikeEmail) {
+            // Email search mode - search from start of email only
+            console.log('🔍 EMAIL SEARCH:', trimmed);
+            this.mode.set('user');
+            const emailQuery = trimmed.toLowerCase();
+            const res = this.users().filter(u => {
+                const matches = u.email && u.email.toLowerCase().startsWith(emailQuery);
+                if (matches) {
+                    console.log('✅ Match:', u.displayName || u.name, '-', u.email);
+                }
+                return matches;
+            });
+            console.log('📊 Total matches:', res.length);
+            this.filteredUsers.set(res);
+            this.show.set(res.length > 0);
+            return;
+        }
+
         if (lastChar === '@' || lastChar === '#') {
             const nextMode: Mode = lastChar === '@' ? 'user' : 'channel';
             this.mode.set(nextMode);
@@ -94,8 +116,17 @@ export class NewMessageService {
             return;
         }
 
-        const label = u.displayName ?? u.name ?? '';
-        this.query.set(`@${label}`);
+        // ========== NEU: If from email search, show email in query ==========
+        const currentQuery = this.query().trim();
+        const isEmailSearch = currentQuery.includes('@') && !currentQuery.startsWith('@');
+        
+        if (isEmailSearch) {
+            this.query.set(u.email || '');
+        } else {
+            const label = u.displayName ?? u.name ?? '';
+            this.query.set(`@${label}`);
+        }
+        
         this.target.set({ type: 'user', id: u.uid });
         this.resetDropdown();
     }

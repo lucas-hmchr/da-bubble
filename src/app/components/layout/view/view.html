@@ -60,7 +60,12 @@
                   <img [src]="getAvatarSrc(u)" [alt]="u.displayName || u.name" class="user-avatar">
                   <img [src]="userService.getOnlineStatusIcon(u)" class="online-status-icon">
                 </div>
-                <span>{{ u.displayName || u.name || 'Unbekannter Nutzer' }}</span>
+                <div class="user-info-container">
+                  <span class="user-name">{{ u.displayName || u.name || 'Unbekannter Nutzer' }}</span>
+                  @if (isEmailSearch() && u.email) {
+                  <span class="user-email">{{ u.email }}</span>
+                  }
+                </div>
               </div>
               }
             </div>

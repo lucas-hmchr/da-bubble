@@ -74,7 +74,8 @@ export class View {
       this.contextType = type;
 
       if (type === 'channel' && channelId) {
-        this.channelService.subscribeSelectedChannel(channelId, this.currentUserUid!);
+        const userId = this.currentUserUid || '';
+        this.channelService.subscribeSelectedChannel(channelId, userId);
         this.conversationService.cleanup();
         this.resetNewMessageState();
       } else if (type === 'dm' && convId) {
@@ -236,6 +237,13 @@ export class View {
     }
   }
 
+  // ========== NEU: Check if current search is email search ==========
+  isEmailSearch(): boolean {
+    const query = this.newMessage.query().trim();
+    return query.includes('@') && !query.startsWith('@');
+  }
+
+  // ========== NEU: Close "Neue Nachricht" dropdown on window resize ==========
   @HostListener('window:resize')
   onWindowResize() {
     if (this.newMessage.show()) {

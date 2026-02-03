@@ -226,6 +226,22 @@ app-message-input {
   color: #686868;
 }
 
+.user-info-container {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  flex: 1;
+}
+
+.user-name {
+  font-weight: 500;
+}
+
+.user-email {
+  font-size: 13px;
+  color: var(--clr-gray);
+}
+
 .justify-content-end {
   justify-content: end;
 }
