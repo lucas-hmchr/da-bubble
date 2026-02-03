@@ -58,10 +58,26 @@ export class ChannelService {
             lastMessageAt: date,
         });
     }
-
-    subscribeSelectedChannel(id: string) {
+    canUserAccessChannel(channel: Channel, userId: string): boolean {
+        if (!channel.isPrivate) return true;
+        return channel.members.includes(userId);
+    }
+    isUserChannelAdmin(channel: Channel, userId: string): boolean {
+        return channel.admins?.includes(userId) || channel.createdBy === userId;
+    }
+    getAccessibleChannels(userId: string): Channel[] {
+        return this.channels().filter(channel => 
+            this.canUserAccessChannel(channel, userId)
+        );
+    }
+    subscribeSelectedChannel(id: string, userId: string) {
         this.cleanUp();
         this.activeChannelSub = this.getChannel(id).subscribe(ch => {
+            if (ch && !this.canUserAccessChannel(ch, userId)) {
+                console.error('Kein Zugriff auf diesen Channel');
+                this.activeChannel.set(null);
+                return;
+            }
             // this.activeChannel.set(ch ?? null);
             this.activeChannel.set(ch ? ({ ...ch, id } as Channel) : null);
         });

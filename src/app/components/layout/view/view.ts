@@ -74,7 +74,7 @@ export class View {
       this.contextType = type;
 
       if (type === 'channel' && channelId) {
-        this.channelService.subscribeSelectedChannel(channelId);
+        this.channelService.subscribeSelectedChannel(channelId, this.currentUserUid!);
         this.conversationService.cleanup();
         this.resetNewMessageState();
       } else if (type === 'dm' && convId) {

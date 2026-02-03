@@ -3,8 +3,12 @@ export interface Channel {
   name: string;
   members: string[];
   createdAt?: any;
-  lastMessageAt?: any;
+  lastMessageAt: number | null;
   description?: string;
   creatorId?: string;
-  creatorName?: string;  // ← NEU!
+  creatorName?: string;
+
+  isPrivate: boolean;
+  createdBy: string;
+  admins?: string[];
 }

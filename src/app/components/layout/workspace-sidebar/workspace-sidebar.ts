@@ -97,7 +97,7 @@ export class WorkspaceSidebar implements OnInit, OnDestroy {
           this.isSearching.set(false);
           return;
         }
-        
+
         this.searchQuery.set(query);
         const type = this.searchService.getSearchType();
         this.searchType.set(type);
@@ -115,26 +115,26 @@ export class WorkspaceSidebar implements OnInit, OnDestroy {
   onNewMessageToKeyup(event: KeyboardEvent) {
     const input = event.target as HTMLInputElement;
     const query = input.value;
-    
+
     if (this.isMobile) {
       this.newMessage$.setQuery(query);
-      
+
       this.searchQuery.set(query);
-      
+
       let type: 'all' | 'channels' | 'users' = 'all';
       if (query.trim().startsWith('@')) {
         type = 'users';
       } else if (query.trim().startsWith('#')) {
         type = 'channels';
       }
-      
+
       this.searchType.set(type);
 
       if (query.trim()) {
         const trimmed = query.trim();
         const isSpecialSearch = trimmed.startsWith('@') || trimmed.startsWith('#');
         const meetsMinLength = isSpecialSearch || trimmed.length >= 3;
-        
+
         if (meetsMinLength) {
           this.isSearching.set(true);
           this.performSearch(query, type);
@@ -168,23 +168,20 @@ export class WorkspaceSidebar implements OnInit, OnDestroy {
     }
     const currentUid = this.currentUserUid;
     if (!currentUid) return [];
-    
-    return this.channelService.channels().filter(ch => 
-      ch.members && ch.members.includes(currentUid)
-    );
+
+    return this.channelService.getAccessibleChannels(currentUid);
   });
 
   private getAllUsersWithNames(): User[] {
-    return this.firestore.userList().filter(u => u.displayName || u.name);
+    return this.firestore.userList().filter((u) => u.displayName || u.name);
   }
 
   performSearch(query: string, type: 'all' | 'channels' | 'users' = 'all') {
     let term = query.toLowerCase().trim();
-    
+
     if (term.startsWith('@') || term.startsWith('#')) {
       term = term.substring(1);
     }
-    
 
     if (type === 'all' || type === 'channels') {
       this.filteredChannels.set(this.searchService.filterChannelsByTerm(term));
@@ -193,7 +190,6 @@ export class WorkspaceSidebar implements OnInit, OnDestroy {
     }
 
     if (type === 'all' || type === 'users') {
-      
       const filtered = this.searchService.filterUsersByTerm(term, false, this.currentUserUid);
       this.filteredUsers.set(filtered);
     } else {
@@ -209,46 +205,43 @@ export class WorkspaceSidebar implements OnInit, OnDestroy {
 
   private searchMessages(term: string): void {
     const lowerTerm = term.toLowerCase();
-    
+
     const currentUid = this.currentUserUid;
     if (!currentUid) {
       this.filteredMessages.set([]);
       return;
     }
-    
-    const channels = this.channelService.channels().filter(ch => 
-      ch.members && ch.members.includes(currentUid)
-    );
-    
-    
+
+    const channels = this.channelService
+      .channels()
+      .filter((ch) => ch.members && ch.members.includes(currentUid));
+
     if (channels.length === 0) {
       this.filteredMessages.set([]);
       return;
     }
-    
+
     const results: MessageSearchResult[] = [];
     let processedChannels = 0;
-    
-    channels.forEach(channel => {
+
+    channels.forEach((channel) => {
       if (!channel.id) {
         processedChannels++;
         return;
       }
-      
+
       const messagesPath = `channels/${channel.id}/messages`;
-      
+
       this.firestore.getCollection<any>(messagesPath).subscribe({
         next: (messages) => {
-          
-          const matching = messages.filter((msg: any) => 
-            msg.text && msg.text.toLowerCase().includes(lowerTerm)
+          const matching = messages.filter(
+            (msg: any) => msg.text && msg.text.toLowerCase().includes(lowerTerm),
           );
-          
-          
+
           for (const msg of matching) {
             if (!msg.id) continue;
-            
-            const sender = this.firestore.userList().find(u => u.uid === msg.senderId);
+
+            const sender = this.firestore.userList().find((u) => u.uid === msg.senderId);
             results.push({
               id: msg.id,
               text: msg.text || '',
@@ -257,35 +250,35 @@ export class WorkspaceSidebar implements OnInit, OnDestroy {
               createdAt: msg.createdAt,
               contextType: 'channel',
               contextId: channel.id!,
-              contextName: `# ${channel.name}`
+              contextName: `# ${channel.name}`,
             });
           }
-          
+
           processedChannels++;
-          
+
           if (processedChannels === channels.length) {
             results.sort((a, b) => {
               const aTime = a.createdAt?.toMillis?.() || 0;
               const bTime = b.createdAt?.toMillis?.() || 0;
               return bTime - aTime;
             });
-            
+
             this.filteredMessages.set(results.slice(0, 20));
           }
         },
         error: (error) => {
           processedChannels++;
-          
+
           if (processedChannels === channels.length) {
             results.sort((a, b) => {
               const aTime = a.createdAt?.toMillis?.() || 0;
               const bTime = b.createdAt?.toMillis?.() || 0;
               return bTime - aTime;
             });
-            
+
             this.filteredMessages.set(results.slice(0, 20));
           }
-        }
+        },
       });
     });
   }
@@ -363,15 +356,15 @@ export class WorkspaceSidebar implements OnInit, OnDestroy {
     } else {
       this.chatContext.openConversation(msg.senderId);
     }
-    
+
     if (this.isMobile) {
       this.mobileViewChange.emit('chat');
     }
-    
+
     setTimeout(() => {
       this.scrollToMessage(msg.id);
     }, 500);
-    
+
     this.clearSearchIfActive();
   }
 
@@ -379,7 +372,7 @@ export class WorkspaceSidebar implements OnInit, OnDestroy {
     const element = document.querySelector(`[data-message-id="${messageId}"]`) as HTMLElement;
     if (element) {
       element.scrollIntoView({ behavior: 'smooth', block: 'center' });
-      
+
       element.classList.add('highlight');
       setTimeout(() => {
         element.classList.remove('highlight');
@@ -393,7 +386,7 @@ export class WorkspaceSidebar implements OnInit, OnDestroy {
   }
 
   getAvatarSrcById(userId: string): string {
-    const user = this.firestore.userList().find(u => u.uid === userId);
+    const user = this.firestore.userList().find((u) => u.uid === userId);
     if (!user) return '/assets/images/avatars/avatar_default.svg';
     return this.getAvatarPath(user);
   }
@@ -402,7 +395,7 @@ export class WorkspaceSidebar implements OnInit, OnDestroy {
     this.destroy$.next();
     this.destroy$.complete();
   }
-  
+
   @HostListener('window:resize')
   onWindowResize() {
     if (this.isSearching()) {
