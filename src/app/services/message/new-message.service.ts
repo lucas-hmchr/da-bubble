@@ -33,7 +33,11 @@ export class NewMessageService {
             // ========== NEU: Filter users without names ==========
             const usersWithNames = u.filter(user => user.displayName || user.name);
             this.users.set(usersWithNames);
-            this.filteredUsers.set(usersWithNames);
+            
+            // ========== FIX: Only set filteredUsers if not currently filtering ==========
+            if (!this.show() && !this.query()) {
+                this.filteredUsers.set(usersWithNames);
+            }
         });
 
         this.mi.loadChannels().subscribe((c) => {
@@ -43,7 +47,11 @@ export class NewMessageService {
                 ? c.filter(ch => ch.members && ch.members.includes(currentUid))
                 : [];
             this.channels.set(memberChannels);
-            this.filteredChannels.set(memberChannels);
+            
+            // ========== FIX: Only set filteredChannels if not currently filtering ==========
+            if (!this.show() && !this.query()) {
+                this.filteredChannels.set(memberChannels);
+            }
         });
     }
 
