@@ -62,17 +62,22 @@ export class NewMessageService {
         const firstChar = trimmed.slice(0, 1);
         const lastChar = value.slice(-1);
 
-        // ========== NEU: Email search detection (BEFORE lastChar check!) ==========
-        const containsAt = trimmed.includes('@') && !trimmed.startsWith('@');
-        const looksLikeEmail = containsAt && trimmed.length > 2;
+        // ========== NEU: Combined search - name AND email (no @ needed!) ==========
+        // For any query 3+ chars without @ or # prefix, search both name and email
+        const isNameOrEmailSearch = trimmed.length >= 3 && 
+                                    !trimmed.startsWith('@') && 
+                                    !trimmed.startsWith('#');
 
-        if (looksLikeEmail) {
-            // Email search mode - search from start of email only
-            console.log('🔍 EMAIL SEARCH:', trimmed);
+        if (isNameOrEmailSearch) {
+            // Search in both displayName/name AND email
+            console.log('🔍 NAME + EMAIL SEARCH:', trimmed);
             this.mode.set('user');
-            const emailQuery = trimmed.toLowerCase();
+            const searchQuery = trimmed.toLowerCase();
             const res = this.users().filter(u => {
-                const matches = u.email && u.email.toLowerCase().startsWith(emailQuery);
+                const nameMatch = (u.displayName || u.name || '').toLowerCase().includes(searchQuery);
+                const emailMatch = u.email && u.email.toLowerCase().includes(searchQuery);
+                const matches = nameMatch || emailMatch;
+                
                 if (matches) {
                     console.log('✅ Match:', u.displayName || u.name, '-', u.email);
                 }
