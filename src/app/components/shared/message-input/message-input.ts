@@ -97,18 +97,25 @@ export class MessageInput implements OnInit, OnChanges {
     if (!div) return;
 
     const currentPos = this.caretService.getCaretPosition(div);
+    const newHTML = this.getFormattedHTML(div);
+
+    if (div.innerHTML !== newHTML) {
+      this.updateDivContent(div, newHTML, currentPos);
+    }
+  }
+
+  private getFormattedHTML(div: HTMLDivElement): string {
     const text = this.caretService.getTextContent(div);
-    
-    const newHTML = this.validationService.validateAndFormatMentions(
+    return this.validationService.validateAndFormatMentions(
       text,
       this.state.users(),
       this.validationService.escapeHtml.bind(this.validationService)
     );
+  }
 
-    if (div.innerHTML !== newHTML) {
-      div.innerHTML = newHTML;
-      this.caretService.setCaretPosition(div, currentPos);
-    }
+  private updateDivContent(div: HTMLDivElement, html: string, caretPos: number): void {
+    div.innerHTML = html;
+    this.caretService.setCaretPosition(div, caretPos);
   }
 
   onKeyup(event: KeyboardEvent | Event): void {
