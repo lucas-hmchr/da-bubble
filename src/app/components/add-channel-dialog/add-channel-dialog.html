@@ -18,20 +18,6 @@
         <input placeholder="Dein Text hier" [(ngModel)]="descriptionName" />
     </div>
 
-    <div class="privacy-selection">
-        <label class="radio-option">
-            <input type="radio" name="privacy" [value]="false" [(ngModel)]="isPrivate">
-            <span>Öffentlich</span>
-            <small>Jeder kann diesem Channel beitreten</small>
-        </label>
-
-        <label class="radio-option">
-            <input type="radio" name="privacy" [value]="true" [(ngModel)]="isPrivate">
-            <span>Privat</span>
-            <small>Nur eingeladene Mitglieder haben Zugriff</small>
-        </label>
-    </div>
-
     <div class="button-add-container">
         <button class="button-add-channel cp" (click)="createChannel()">Erstellen</button>
     </div>
