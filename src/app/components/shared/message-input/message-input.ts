@@ -1,4 +1,4 @@
-import { Component, Input, ElementRef, ViewChild, OnInit, Output, EventEmitter, inject, HostListener } from '@angular/core';
+import { Component, Input, ElementRef, ViewChild, OnInit, OnChanges, SimpleChanges, Output, EventEmitter, inject, HostListener } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Channel } from '../../../models/channel.interface';
@@ -24,7 +24,7 @@ import { emojiReactions } from '../../../../shared/data/reactions';
   templateUrl: './message-input.html',
   styleUrl: './message-input.scss',
 })
-export class MessageInput implements OnInit {
+export class MessageInput implements OnInit, OnChanges {
   @Input() channel?: Channel;
   @Input() currentUserUid: string | null = null;
   @Input() contextType: 'channel' | 'conversation' | 'thread' = 'channel';
@@ -69,6 +69,26 @@ export class MessageInput implements OnInit {
     this.messageInputService.loadUsers().subscribe((users) => { this.state.setUsers(users); });
     this.messageInputService.loadChannels().subscribe((channels) => { this.state.setChannels(channels); });
   }
+
+  ngOnChanges(changes: SimpleChanges): void {
+    const channelChanged = changes['channel'] && !changes['channel'].firstChange;
+    const conversationChanged = changes['conversationId'] && !changes['conversationId'].firstChange;
+    
+    if (channelChanged || conversationChanged) {
+      this.clearAndFocusInput();
+    }
+  }
+
+  private clearAndFocusInput(): void {
+    setTimeout(() => {
+      const input = this.messageInput?.nativeElement;
+      if (input) {
+        input.innerHTML = '';
+        input.focus();
+      }
+    }, 100);
+  }
+
   getAvatarSrc(id: AvatarId): string { return getAvatarById(id).src; }
   onInput(event: Event): void { this.validateMentions(); }
 
