@@ -15,11 +15,14 @@
 
       <div class="message-content" [ngClass]="{ fdrr: isOwnMessage(msg) }" (mouseleave)="onMessageMouseLeave(msg)">
         <div class="message-actions">
-          <button class="emoji-quick-btn" (click)="toggleReaction(msg, 'check')">
-            ✅
-          </button>
-          <button class="emoji-quick-btn" (click)="toggleReaction(msg, 'thumbsup')">
-            👍
+          <button type="button" 
+                  class="emoji-quick-btn" 
+                  *ngFor="let emojiId of getQuickEmojis()" 
+                  (click)="toggleReaction(msg, emojiId)">
+            <ng-container *ngIf="getReactionDefById(emojiId) as def">
+              <img *ngIf="!def.isEmoji" [src]="def.icon" alt="" class="quick-emoji-icon" />
+              <span *ngIf="def.isEmoji">{{ def.icon }}</span>
+            </ng-container>
           </button>
 
           <img src="assets/icons/global/reaction1.svg" alt="" class="action-btn reaction-btn"
@@ -34,7 +37,7 @@
           </button>
 
           @if (optionsMenuForMessageId === getUniqueMessageId(msg)) {
-          <div class="message-options-menu" [class.open-up]="optionsMenuOpenUp" (mouseenter)="onOptionsMenuMouseEnter()"
+          <div class="message-options-menu" [class.open-up]="isLastMessage(msg, msgs)" (mouseenter)="onOptionsMenuMouseEnter()"
             (mouseleave)="onOptionsMenuMouseLeave()" (click)="$event.stopPropagation()">
             <button class="menu-item" type="button" (click)="startInlineEdit(msg); closeOptionsMenu()">
               Nachricht bearbeiten
@@ -46,7 +49,9 @@
           }
         </div>
 
-        <div class="reaction-picker" *ngIf="reactionPickerForMessageId === getUniqueMessageId(msg)">
+        <div class="reaction-picker" 
+             [class.open-up]="isLastMessage(msg, msgs)"
+             *ngIf="reactionPickerForMessageId === getUniqueMessageId(msg)">
           <button class="reaction-emoji-btn" *ngFor="let r of emojiReactions" (click)="onEmojiReaction(msg, r.id)">
             {{ r.icon }}
           </button>

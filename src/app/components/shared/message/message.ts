@@ -61,6 +61,7 @@ export class Message implements OnChanges {
   messages$?: Observable<MessageData[]>;
   users: User[] = [];
   emojiReactions: ReactionDef[] = EMOJI_REACTIONS as ReactionDef[];
+  recentEmojis: ReactionId[] = this.loadRecentEmojis();
 
   @ViewChild('bottom') bottom!: ElementRef<HTMLDivElement>;
 
@@ -80,6 +81,33 @@ export class Message implements OnChanges {
     private deleteService: MessageDeleteService
   ) {
     this.loadUsers();
+  }
+
+  private loadRecentEmojis(): ReactionId[] {
+    try {
+      const stored = localStorage.getItem('recentEmojis');
+      if (stored) {
+        const parsed = JSON.parse(stored);
+        return Array.isArray(parsed) ? parsed.slice(0, 2) : ['check', 'thumbsup'];
+      }
+    } catch (e) {
+      console.error('Error loading recent emojis:', e);
+    }
+    return ['check', 'thumbsup'];
+  }
+
+  private saveRecentEmoji(reactionId: ReactionId): void {
+    const updated = [reactionId, ...this.recentEmojis.filter(id => id !== reactionId)].slice(0, 2);
+    this.recentEmojis = updated;
+    try {
+      localStorage.setItem('recentEmojis', JSON.stringify(updated));
+    } catch (e) {
+      console.error('Error saving recent emoji:', e);
+    }
+  }
+
+  getQuickEmojis(): ReactionId[] {
+    return this.recentEmojis;
   }
 
   private loadUsers(): void {
@@ -198,6 +226,7 @@ export class Message implements OnChanges {
 
   onOpenThread(msg: MessageData): void {
     if (!msg.id) return;
+    this.uiService.closeReactionPicker();
     this.threadRequested.emit(msg);
   }
 
@@ -302,6 +331,9 @@ export class Message implements OnChanges {
     if (!this.currentUserUid) return;
     const contextId = this.getContextId();
     if (!contextId) return;
+    
+    this.saveRecentEmoji(reactionId);
+    
     await this.reactionService.toggleReaction(
       msg, reactionId, this.currentUserUid, this.contextType,
       contextId, this.isThreadContext, this.threadParentMessageId ?? undefined
@@ -371,8 +403,15 @@ export class Message implements OnChanges {
     this.uiService.closeReactionPicker();
   }
 
+  isLastMessage(msg: MessageData, messages: MessageData[]): boolean {
+    if (!msg.id || messages.length === 0) return false;
+    const lastMsg = messages[messages.length - 1];
+    return msg.id === lastMsg.id;
+  }
+
   toggleOptionsMenu(ev: MouseEvent, msgId: string): void {
     ev.stopPropagation();
+    this.uiService.closeReactionPicker();
     // ========== NEU: Pass context to make ID unique ==========
     const context = this.isThreadContext ? 'thread' : 'view';
     this.uiService.toggleOptionsMenu(msgId, context);

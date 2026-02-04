@@ -19,6 +19,12 @@
   &::-webkit-scrollbar {
     width: 6px;
   }
+
+  &.open-up {
+    top: auto;
+    bottom: 0;
+    transform: translateY(-160px);
+  }
 }
 
 
@@ -32,7 +38,6 @@
   overflow-y: auto;
   overflow-x: hidden;
   flex-direction: row !important;
-  justify-content: space-between;
 }
 
 .reaction-emoji-btn {
@@ -41,11 +46,6 @@
   cursor: pointer;
   font-size: 20px;
   height: 40px;
-  max-width: 40px;
-  aspect-ratio: 1/1;
-  display: flex;
-  align-items: center;
-  justify-content: center;
 
   &:hover {
     background-color: var(--bg-clr);
@@ -110,7 +110,7 @@
   left: 50%;
   transform: translateX(-50%);
   background: var(--clr-purple-1);
-  color: var(--clr-white);
+  color: #fff;
   border-radius: 18px;
   padding: 10px 16px;
   font-size: 14px;
