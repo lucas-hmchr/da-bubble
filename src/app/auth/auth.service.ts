@@ -50,6 +50,12 @@ export class AuthService {
     'avatar_male_4',
   ];
 
+  guestUser = {
+    name: "Max Mustermann",
+    email: "guest@da-bubble.de",
+    password: "Guest-Bubble"
+  }
+
   async register(
     email: string,
     password: string,
@@ -147,18 +153,32 @@ export class AuthService {
   }
 
   async loginAsGuest(): Promise<void> {
-    const cred = await signInAnonymously(this.auth);
-    const user = cred.user;
-    const ref = this.getUserRef(user.uid);
-    const snap = await getDoc(ref);
-    if (!snap.exists()) {
-      await this.createUserDocForNewUser(user, { isGuest: true });
-    } else {
-      await setDoc(ref, { lastActiveAt: serverTimestamp() }, { merge: true });
+    const { email, password } = this.guestUser;
+
+    try {
+      const cred = await signInWithEmailAndPassword(this.auth, email, password);
+      await this.markMeOnline(cred.user.uid);
+      this.toast.show('Du bist als Gast eingeloggt!', 4000);
+      this.router.navigate(['/']);
+    } catch (error) {
+      console.error('Guest Login Fehler:', error);
+      this.toast.show('Gast-Login fehlgeschlagen.');
     }
-    await this.markMeOnline(cred.user.uid);
-    this.router.navigate(['/']);
   }
+
+  // async loginAsGuest(): Promise<void> {
+  //   const cred = await signInAnonymously(this.auth);
+  //   const user = cred.user;
+  //   const ref = this.getUserRef(user.uid);
+  //   const snap = await getDoc(ref);
+  //   if (!snap.exists()) {
+  //     await this.createUserDocForNewUser(user, { isGuest: true });
+  //   } else {
+  //     await setDoc(ref, { lastActiveAt: serverTimestamp() }, { merge: true });
+  //   }
+  //   await this.markMeOnline(cred.user.uid);
+  //   this.router.navigate(['/']);
+  // }
 
   async logout(): Promise<void> {
     const user = this.activeUser();
