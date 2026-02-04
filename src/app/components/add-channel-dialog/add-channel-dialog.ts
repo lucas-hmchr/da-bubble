@@ -15,7 +15,7 @@ import { FirestoreService } from '../../services/firestore';
 export class AddChannelDialog {
   channelName = '';
   descriptionName = '';
-  isPrivate = false;
+  isPrivate = true;
 
   constructor(
     public dialogRef: MatDialogRef<AddChannelDialog>,
