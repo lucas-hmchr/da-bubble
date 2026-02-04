@@ -153,9 +153,6 @@ export class SearchService {
     const lowerTerm = term.toLowerCase();
     const channels = this.allChannels();
     
-    console.log('🔍 Searching for:', term);
-    console.log('📁 Channels to search:', channels.length);
-    
     if (channels.length === 0) {
       this.filteredMessages.set([]);
       return;
@@ -171,7 +168,6 @@ export class SearchService {
       }
       
       const messagesPath = `channels/${channel.id}/messages`;
-      console.log('🔎 Searching channel:', channel.name, messagesPath);
       
       this.firestore.getCollection<MessageData>(messagesPath).subscribe({
         next: (messages) => {
@@ -179,8 +175,6 @@ export class SearchService {
           const matching = messages.filter(msg => 
             msg.text && msg.text.toLowerCase().includes(lowerTerm)
           );
-          
-          console.log('✅ Matching messages:', matching.length);
           
           for (const msg of matching) {
             if (!msg.id) continue;
@@ -207,7 +201,6 @@ export class SearchService {
               return bTime - aTime;
             });
             
-            console.log('🎉 Total matching messages:', results.length);
             this.filteredMessages.set(results.slice(0, 20));
           }
         },
@@ -240,12 +233,8 @@ export class SearchService {
             user.email?.toLowerCase().includes(term),
         );
 
-        console.log('Before name filter:', users.length);
 
     users = users.filter(user => user.displayName || user.name);
-
-    console.log('After name filter:', users.length);
-
     if (excludeCurrentUser && currentUserId) {
       users = users.filter(user => user.uid !== currentUserId);
     }

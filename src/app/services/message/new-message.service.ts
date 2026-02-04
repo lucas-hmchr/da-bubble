@@ -68,17 +68,12 @@ export class NewMessageService {
 
         if (looksLikeEmail) {
             // Email search mode - search from start of email only
-            console.log('🔍 EMAIL SEARCH:', trimmed);
             this.mode.set('user');
             const emailQuery = trimmed.toLowerCase();
             const res = this.users().filter(u => {
                 const matches = u.email && u.email.toLowerCase().startsWith(emailQuery);
-                if (matches) {
-                    console.log('✅ Match:', u.displayName || u.name, '-', u.email);
-                }
                 return matches;
             });
-            console.log('📊 Total matches:', res.length);
             this.filteredUsers.set(res);
             this.show.set(res.length > 0);
             return;
