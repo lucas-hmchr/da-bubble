@@ -323,6 +323,29 @@ export class Message implements OnChanges {
     return this.reactionService.getReactionIds(msg);
   }
 
+  getVisibleReactionIds(msg: MessageData): ReactionId[] {
+    const allReactions = this.getReactionIds(msg);
+    const limit = this.getReactionLimit();
+    return allReactions.slice(0, limit);
+  }
+
+  getRemainingReactionsCount(msg: MessageData): number {
+    const allReactions = this.getReactionIds(msg);
+    const limit = this.getReactionLimit();
+    return Math.max(0, allReactions.length - limit);
+  }
+
+  private getReactionLimit(): number {
+    if (this.isThreadContext) {
+      return 7;
+    }
+    return this.isMobile() ? 7 : 20;
+  }
+
+  private isMobile(): boolean {
+    return window.innerWidth <= 1024;
+  }
+
   hasCurrentUserReaction(msg: MessageData, reactionId: ReactionId): boolean {
     if (!this.currentUserUid) return false;
     return this.reactionService.hasCurrentUserReaction(msg, reactionId, this.currentUserUid);

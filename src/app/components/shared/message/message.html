@@ -96,7 +96,7 @@
           </ng-template>
 
           <div class="reactions-summary" *ngIf="msg.reactions && hasReactions(msg)">
-            <button class="reaction-chip" *ngFor="let rid of getReactionIds(msg)" [ngClass]="{
+            <button class="reaction-chip" *ngFor="let rid of getVisibleReactionIds(msg)" [ngClass]="{
                 'mine': hasCurrentUserReaction(msg, rid),
                 'own-message': isOwnMessage(msg)
               }" (click)="toggleReaction(msg, rid)" (mouseenter)="msg.id && onHoverReaction(msg.id, rid)"
@@ -126,6 +126,10 @@
                 </div>
               </div>
             </button>
+            
+            <span class="remaining-reactions" *ngIf="getRemainingReactionsCount(msg) > 0">
+              +{{ getRemainingReactionsCount(msg) }} weitere
+            </span>
           </div>
 
           <div *ngIf="msg.threadCount > 0" class="thread-replies">
