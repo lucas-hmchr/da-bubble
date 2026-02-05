@@ -23,7 +23,7 @@ import { ChatContextService } from '../../../services/chat-context.service';
 import { User } from '../../../models/user.model';
 import { Channel } from '../../../models/channel.interface';
 import { MessageSearchResult } from '../../../services/search.service';
-import { getAvatarById } from '../../../../shared/data/avatars';
+import { getAvatarById, avatars, AvatarId } from '../../../../shared/data/avatars';
 import { Subject } from 'rxjs';
 
 @Component({
@@ -56,6 +56,8 @@ export class Topbar implements OnInit, OnDestroy {
   searchQuery = '';
   isSearchFocused = false;
   editNameValue = '';
+  selectedAvatarId: AvatarId = 'avatar_default';
+  availableAvatars = avatars;
 
   showUserSuggestions = computed(() => this.searchService.showUserSuggestions());
   showChannelSuggestions = computed(() => this.searchService.showChannelSuggestions());
@@ -132,16 +134,49 @@ export class Topbar implements OnInit, OnDestroy {
 
   async saveProfileName() {
     const user = this.currentUser();
-    const result = await this.profileHandler.saveProfileName(
+    if (!user?.uid) {
+      alert('Benutzer nicht gefunden');
+      return;
+    }
+
+    // Save name
+    const nameResult = await this.profileHandler.saveProfileName(
       this.editNameValue,
-      user?.uid || null
+      user.uid
     );
 
-    if (result.success) {
-      this.closeProfilEditModal();
-    } else {
-      alert(result.message);
+    if (!nameResult.success) {
+      alert(nameResult.message);
+      return;
     }
+
+    // Save avatar
+    try {
+      await this.firestore.updateDocument('users', user.uid, {
+        avatarId: this.selectedAvatarId
+      });
+      // alert('Änderungen gespeichert');
+      this.isDropdownMenuOpen = false;
+      this.closeProfilEditModal();
+    } catch (error) {
+      alert('Fehler beim Speichern des Avatars');
+    }
+  }
+
+  nextAvatar() {
+    const currentIndex = this.availableAvatars.findIndex(a => a.id === this.selectedAvatarId);
+    const nextIndex = (currentIndex + 1) % this.availableAvatars.length;
+    this.selectedAvatarId = this.availableAvatars[nextIndex].id;
+  }
+
+  previousAvatar() {
+    const currentIndex = this.availableAvatars.findIndex(a => a.id === this.selectedAvatarId);
+    const prevIndex = currentIndex === 0 ? this.availableAvatars.length - 1 : currentIndex - 1;
+    this.selectedAvatarId = this.availableAvatars[prevIndex].id;
+  }
+
+  getSelectedAvatarSrc(): string {
+    return getAvatarById(this.selectedAvatarId).src;
   }
 
   getAvatarSrc(user: User): string {
@@ -185,6 +220,7 @@ export class Topbar implements OnInit, OnDestroy {
   openProfilEditModal() {
     const user = this.currentUser();
     this.editNameValue = user?.displayName || user?.name || '';
+    this.selectedAvatarId = user?.avatarId || 'avatar_default';
     this.isProfilEditModalOpen = true;
     this.isProfilModalOpen = false;
     document.body.style.overflow = 'hidden';

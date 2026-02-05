@@ -205,8 +205,16 @@
                 </div>
 
                 <div class="modal-content">
-                    <div class="avatar-large">
-                        <img [src]="getCurrentUserAvatar()" alt="avatar-profil">
+                    <div class="avatar-selector">
+                        <button type="button" class="avatar-nav-btn" (click)="previousAvatar()">
+                            <img src="assets/icons/global/keyboard_arrow_down.svg" alt="previous" class="arrow-left">
+                        </button>
+                        <div class="avatar-large">
+                            <img [src]="getSelectedAvatarSrc()" alt="avatar-profil">
+                        </div>
+                        <button type="button" class="avatar-nav-btn" (click)="nextAvatar()">
+                            <img src="assets/icons/global/keyboard_arrow_down.svg" alt="next" class="arrow-right">
+                        </button>
                     </div>
 
                     <div class="form-section">

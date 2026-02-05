@@ -219,7 +219,8 @@ export class AuthService {
       await updateDoc(this.getUserRef(), {
         displayName: newName.trim(),
       });
-      this.toast.show('Dein Name ist erfolgreich geändert worden!');
+      // this.toast.show('Dein Name ist erfolgreich geändert worden!');
+      this.toast.show('Änderungen gespeichert!');
     } catch (err) {
       console.error(err);
 
