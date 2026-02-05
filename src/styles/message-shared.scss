@@ -1,8 +1,3 @@
-// ============================================================
-// SHARED MESSAGE STYLES
-// Wird verwendet von: message.scss UND thread-menu.scss
-// ============================================================
-
 @mixin message-bubble {
   padding: 12px 16px;
   border-radius: 0 20px 20px 20px;
@@ -36,7 +31,7 @@
 
 @mixin timestamp {
   font-size: 14px;
-  color: #686868;
+  color: var(--clr-gray);
   font-weight: 400;
 }
 
@@ -66,7 +61,7 @@
   padding: 4px 10px;
   border-radius: 20px;
   border: 1px solid #e0e0e0;
-  background: #ffffff;
+  background: var(--clr-white);
   cursor: pointer;
   transition: all 0.2s;
   font-size: 18px;
@@ -77,7 +72,7 @@
   }
 
   &.mine {
-    background: #eceefe;
+    background: var(--bg-clr);
     border-color: var(--clr-purple-3);
   }
 
@@ -89,7 +84,8 @@
   .reaction-count {
     font-size: 12px;
     font-weight: 600;
-    color: #444ce7;
+    // color: #444ce7;
+    color: var(--clr-purple-1);
   }
 }
 

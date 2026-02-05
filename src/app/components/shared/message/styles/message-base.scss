@@ -144,11 +144,11 @@
   overflow: hidden;
   text-overflow: ellipsis;
   max-width: 120px;
-  
+
   @container (min-width: 500px) {
     max-width: 200px;
   }
-  
+
   @container (min-width: 700px) {
     max-width: 250px;
   }
@@ -234,6 +234,20 @@ p {
   flex-direction: column;
   gap: 16px;
   padding: 0 35px;
+}
+
+.remaining-reactions {
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 8px;
+  font-size: 13px;
+  color: var(--clr-gray);
+  margin-left: 4px;
+}
+
+.quick-emoji-icon {
+  width: 20px;
+  height: 20px;
 }
 
 @media (max-width: 1550px) {

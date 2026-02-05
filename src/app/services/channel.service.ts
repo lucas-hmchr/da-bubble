@@ -78,7 +78,6 @@ export class ChannelService {
                 this.activeChannel.set(null);
                 return;
             }
-            // this.activeChannel.set(ch ?? null);
             this.activeChannel.set(ch ? ({ ...ch, id } as Channel) : null);
         });
         this.activeMessagesSub = this.getChannelMessages(id).subscribe(msgs => {

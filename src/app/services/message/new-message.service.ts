@@ -29,23 +29,26 @@ export class NewMessageService {
     private router = inject(Router);
 
     constructor(private mi: MessageInputService) {
-        this.mi.loadUsers().subscribe((u) => {
-            const usersWithNames = u.filter(user => user.displayName || user.name);
-            this.users.set(usersWithNames);
-            
-            if (!this.show() && !this.query()) {
-                this.filteredUsers.set(usersWithNames);
-            }
-        });
+        this.mi.loadUsers().subscribe((u) => this.handleUsersLoaded(u));
+        this.mi.loadChannels().subscribe((c) => this.handleChannelsLoaded(c));
+    }
 
-        this.mi.loadChannels().subscribe((c) => {
-            const memberChannels = this.filterMemberChannels(c);
-            this.channels.set(memberChannels);
-            
-            if (!this.show() && !this.query()) {
-                this.filteredChannels.set(memberChannels);
-            }
-        });
+    private handleUsersLoaded(users: User[]): void {
+        const usersWithNames = users.filter(user => user.displayName || user.name);
+        this.users.set(usersWithNames);
+        
+        if (!this.show() && !this.query()) {
+            this.filteredUsers.set(usersWithNames);
+        }
+    }
+
+    private handleChannelsLoaded(channels: Channel[]): void {
+        const memberChannels = this.filterMemberChannels(channels);
+        this.channels.set(memberChannels);
+        
+        if (!this.show() && !this.query()) {
+            this.filteredChannels.set(memberChannels);
+        }
     }
 
     private filterMemberChannels(channels: Channel[]): Channel[] {
@@ -119,12 +122,47 @@ export class NewMessageService {
     }
 
     private searchUsers(value: string): boolean {
-        const res = this.mi.filterUsersByQuery(this.users(), value);
-        if (res === null) {
+        const query = value.substring(1).toLowerCase();
+        
+        if (query.length === 0) {
+            this.filteredUsers.set(this.users().filter(u => u.displayName || u.name));
+            this.show.set(true);
+            return true;
+        }
+
+        const results = this.filterUsersByNameAndEmail(query);
+        return this.applyUserSearchResults(results);
+    }
+
+    private filterUsersByNameAndEmail(query: string): User[] {
+        return this.users().filter(u => {
+            const nameMatch = (u.displayName || u.name || '').toLowerCase().includes(query);
+            const emailMatch = this.isEmailMatch(u.email, query);
+            return nameMatch || emailMatch;
+        });
+    }
+
+    private isEmailMatch(email: string | undefined, query: string): boolean {
+        if (!email) return false;
+        
+        const emailLower = email.toLowerCase();
+        const parts = emailLower.split('@');
+        
+        if (parts.length !== 2) return false;
+        
+        const localPart = parts[0];  // Part before @
+        const domain = parts[1];     // Part after @
+        
+        // Only match if local part is exactly the query OR domain contains it
+        return localPart === query || domain.includes(query);
+    }
+
+    private applyUserSearchResults(results: User[]): boolean {
+        if (results.length === 0) {
             this.resetDropdown();
             return false;
         }
-        this.filteredUsers.set(res);
+        this.filteredUsers.set(results);
         this.show.set(true);
         return true;
     }

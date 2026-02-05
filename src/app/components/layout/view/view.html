@@ -62,7 +62,7 @@
                 </div>
                 <div class="user-info-container">
                   <span class="user-name">{{ u.displayName || u.name || 'Unbekannter Nutzer' }}</span>
-                  @if (isEmailSearch() && u.email) {
+                  @if (shouldShowEmail(u)) {
                   <span class="user-email">{{ u.email }}</span>
                   }
                 </div>

@@ -221,7 +221,7 @@ app-message-input {
 
 .channel-description {
   font-size: 13px;
-  color: #686868;
+  color: var(--clr-gray);
 }
 
 .user-info-container {
@@ -361,12 +361,6 @@ app-message-input {
 .channel-name {
   color: var(--clr-black);
 }
-
-// .user-avatar {
-//   height: 70px;
-//   border-radius: 50%;
-// }
-
 
 @media (max-width: 1024px) {
   section {

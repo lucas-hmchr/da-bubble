@@ -22,7 +22,6 @@
                     <span class="fw-700 fs-20">E-Mail-Adresse</span>
                 </div>
                 <a class="fs-18 email" [href]="'mailto:' + (popup.user()?.email ?? '')">{{ popup.user()?.email }}</a>
-                <!-- <span class="fs-18 email">{{ popup.user()?.email }}</span> -->
             </div>
             <div class="contact-btn" (click)="popup.navigateToChat()">
                 <img src="assets/icons/global/message.svg" alt="">

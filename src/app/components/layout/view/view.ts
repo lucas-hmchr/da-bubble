@@ -237,13 +237,33 @@ export class View {
     }
   }
 
-  // ========== NEU: Check if current search is email search ==========
-  isEmailSearch(): boolean {
-    const query = this.newMessage.query().trim();
-    return query.includes('@') && !query.startsWith('@');
+  shouldShowEmail(user: User): boolean {
+    const query = this.newMessage.query().trim().toLowerCase();
+    
+    if (!query.includes('@') || !user.email) {
+      return false;
+    }
+    
+    const searchTerm = query.startsWith('@') ? query.substring(1) : query;
+    
+    const userName = (user.displayName || user.name || '').toLowerCase();
+    if (userName.includes(searchTerm)) {
+      return false;
+    }
+    
+    const email = user.email.toLowerCase();
+    const emailParts = email.split('@');
+    
+    if (emailParts.length !== 2) {
+      return false;
+    }
+    
+    const localPart = emailParts[0];
+    const domain = emailParts[1];
+    
+    return localPart === searchTerm || domain.includes(searchTerm);
   }
 
-  // ========== NEU: Close "Neue Nachricht" dropdown on window resize ==========
   @HostListener('window:resize')
   onWindowResize() {
     if (this.newMessage.show()) {
