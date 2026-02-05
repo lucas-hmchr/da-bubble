@@ -115,28 +115,18 @@ export class ChannelService {
 
     async leaveChannel(channelId: string, userId: string): Promise<void> {
         try {
-
-            // Hole aktuelles Channel-Dokument
             const channel = await this.getChannelById(channelId);
 
             if (!channel) {
                 throw new Error('Channel not found');
             }
-
-            // Aktuelle Members-Liste
             const currentMembers = (channel.members || []) as string[];
-
-            // User aus Members entfernen
             const updatedMembers = currentMembers.filter(id => id !== userId);
 
-
-            // Firebase updaten
             await this.firestore.updateDocument('channels', channelId, {
                 members: updatedMembers,
                 updatedAt: Timestamp.now()
             });
-
-
         } catch (error) {
             throw error;
         }
@@ -161,7 +151,6 @@ export class ChannelService {
 
     const currentMembers = (channel.members || []) as string[];
 
-    // 🔑 doppelte vermeiden
     const updatedMembers = Array.from(
       new Set([...currentMembers, ...userIds])
     );

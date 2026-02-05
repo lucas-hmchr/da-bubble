@@ -32,7 +32,7 @@ export class AuthView {
   readonly screenWidth = signal(window.innerWidth);
 
   @ViewChild('splash', { static: true }) splash!: ElementRef<HTMLElement>;
-  @ViewChild('splashLogo', { static: true }) splashLogo!: ElementRef<HTMLElement>; // logo-container
+  @ViewChild('splashLogo', { static: true }) splashLogo!: ElementRef<HTMLElement>;
   @ViewChild('targetLogo', { static: true }) targetLogo!: ElementRef<HTMLElement>;
   @ViewChild('splashIcon', { static: true }) splashIcon!: ElementRef<HTMLElement>;
 

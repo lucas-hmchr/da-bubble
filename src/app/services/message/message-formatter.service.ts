@@ -61,16 +61,12 @@ export class MessageFormatterService {
 
   parseMessageText(text: string, users: User[]): string {
     if (!text) return '';
-    
-    // Regex matched @Name (mehrere Wörter mit Großbuchstaben am Anfang)
-    // Matched z.B. "Lucas Hamacher" aber stoppt vor "test" in "@Lucas Hamachertest"
+
     const mentionRegex = /@\[([^\]]+)\]|@([A-Z][a-zäöüÄÖÜß]*(?:\s+[A-Z][a-zäöüÄÖÜß]*)*)/g;
-    
     const result = text.replace(mentionRegex, (match, bracketName, simpleName) => {
       const displayName = bracketName || simpleName;
       const user = this.findUserByDisplayName(displayName, users);
       if (user && user.uid) {
-        // Speichere User-ID in CSS-Klasse (Angular entfernt data-* Attribute)
         return `<span class="mention mention-${user.uid}">${match}</span>`;
       }
       return match;
@@ -87,11 +83,9 @@ export class MessageFormatterService {
   }
 
   getUserIdFromElement(element: HTMLElement): string | null {
-    // Prüfe ob Element eine mention ist
     if (element.classList.contains('mention')) {
       return this.extractUserIdFromClasses(element);
     }
-    // Prüfe ob ein Parent eine mention ist
     const mentionParent = element.closest('.mention') as HTMLElement | null;
     if (mentionParent) {
       return this.extractUserIdFromClasses(mentionParent);
@@ -100,10 +94,9 @@ export class MessageFormatterService {
   }
 
   private extractUserIdFromClasses(element: HTMLElement): string | null {
-    // Suche nach mention-{userId} Klasse
     for (const className of Array.from(element.classList)) {
       if (className.startsWith('mention-')) {
-        return className.substring(8); // "mention-" entfernen
+        return className.substring(8);
       }
     }
     return null;

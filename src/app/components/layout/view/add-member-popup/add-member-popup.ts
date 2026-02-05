@@ -31,7 +31,7 @@ export class AddMemberPopup implements OnInit {
   filteredUsers = computed(() => {
     const q = this.query().trim().toLowerCase();
     const selectedIds = new Set(this.addMemberList().map(m => m.id));
-    const channelMemberIds = new Set(this.channel()?.members ?? []); // <- neu
+    const channelMemberIds = new Set(this.channel()?.members ?? []);
     return this.users()
       .filter(u => !channelMemberIds.has(u.id!))
       .filter(u => !selectedIds.has(u.id))

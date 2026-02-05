@@ -58,7 +58,7 @@ export class MessageScrollService {
   private calculateProgress(currentTime: number, startTime: number): number {
     const elapsed = currentTime - startTime;
     const progress = Math.min(elapsed / 300, 1);
-    return 1 - Math.pow(1 - progress, 3); // Easing function
+    return 1 - Math.pow(1 - progress, 3);
   }
 
   private isInThreadMenu(element: HTMLElement): boolean {

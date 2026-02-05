@@ -5,7 +5,7 @@ import { Observable } from 'rxjs';
 import { FirestoreService } from './firestore';
 
 @Injectable({
-  providedIn: 'root',
+    providedIn: 'root',
 })
 export class UserService {
 

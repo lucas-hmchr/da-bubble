@@ -280,7 +280,6 @@ export class Message implements OnChanges {
     return this.uiService.getHoveredReaction().messageId;
   }
 
-  // ========== NEU: Helper to get unique message ID with context ==========
   getUniqueMessageId(msg: MessageData): string | null {
     if (!msg.id) return null;
     const context = this.isThreadContext ? 'thread' : 'view';
@@ -393,7 +392,6 @@ export class Message implements OnChanges {
 
   onToggleReactionPicker(msg: MessageData): void {
     if (!msg.id) return;
-    // ========== NEU: Pass context to make ID unique ==========
     const context = this.isThreadContext ? 'thread' : 'view';
     this.uiService.toggleReactionPicker(msg.id, context);
   }
@@ -412,7 +410,6 @@ export class Message implements OnChanges {
   toggleOptionsMenu(ev: MouseEvent, msgId: string): void {
     ev.stopPropagation();
     this.uiService.closeReactionPicker();
-    // ========== NEU: Pass context to make ID unique ==========
     const context = this.isThreadContext ? 'thread' : 'view';
     this.uiService.toggleOptionsMenu(msgId, context);
     if (this.uiService.getOptionsMenuMessageId() === msgId) {

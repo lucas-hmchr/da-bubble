@@ -15,10 +15,8 @@
 
       <div class="message-content" [ngClass]="{ fdrr: isOwnMessage(msg) }" (mouseleave)="onMessageMouseLeave(msg)">
         <div class="message-actions">
-          <button type="button" 
-                  class="emoji-quick-btn" 
-                  *ngFor="let emojiId of getQuickEmojis()" 
-                  (click)="toggleReaction(msg, emojiId)">
+          <button type="button" class="emoji-quick-btn" *ngFor="let emojiId of getQuickEmojis()"
+            (click)="toggleReaction(msg, emojiId)">
             <ng-container *ngIf="getReactionDefById(emojiId) as def">
               <img *ngIf="!def.isEmoji" [src]="def.icon" alt="" class="quick-emoji-icon" />
               <span *ngIf="def.isEmoji">{{ def.icon }}</span>
@@ -28,7 +26,7 @@
           <img src="assets/icons/global/reaction1.svg" alt="" class="action-btn reaction-btn"
             (click)="onToggleReactionPicker(msg)" />
 
-          <img *ngIf="contextType === 'channel'" src="assets/icons/global/answer1.svg" alt="Thread öffnen"
+          <img *ngIf="contextType === 'channel'" src="assets/icons/global/Answer1.svg" alt="Thread öffnen"
             class="action-btn answer-btn" (click)="onOpenThread(msg)" />
 
           <button *ngIf="isOwnMessage(msg)" class="action-btn option-btn"
@@ -37,8 +35,9 @@
           </button>
 
           @if (optionsMenuForMessageId === getUniqueMessageId(msg)) {
-          <div class="message-options-menu" [class.open-up]="isLastMessage(msg, msgs)" (mouseenter)="onOptionsMenuMouseEnter()"
-            (mouseleave)="onOptionsMenuMouseLeave()" (click)="$event.stopPropagation()">
+          <div class="message-options-menu" [class.open-up]="isLastMessage(msg, msgs)"
+            (mouseenter)="onOptionsMenuMouseEnter()" (mouseleave)="onOptionsMenuMouseLeave()"
+            (click)="$event.stopPropagation()">
             <button class="menu-item" type="button" (click)="startInlineEdit(msg); closeOptionsMenu()">
               Nachricht bearbeiten
             </button>
@@ -49,9 +48,8 @@
           }
         </div>
 
-        <div class="reaction-picker" 
-             [class.open-up]="isLastMessage(msg, msgs)"
-             *ngIf="reactionPickerForMessageId === getUniqueMessageId(msg)">
+        <div class="reaction-picker" [class.open-up]="isLastMessage(msg, msgs)"
+          *ngIf="reactionPickerForMessageId === getUniqueMessageId(msg)">
           <button class="reaction-emoji-btn" *ngFor="let r of emojiReactions" (click)="onEmojiReaction(msg, r.id)">
             {{ r.icon }}
           </button>
@@ -131,7 +129,7 @@
                 </div>
               </div>
             </button>
-            
+
             <span class="remaining-reactions" *ngIf="getRemainingReactionsCount(msg) > 0">
               +{{ getRemainingReactionsCount(msg) }} weitere
             </span>

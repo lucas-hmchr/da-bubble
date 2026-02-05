@@ -221,8 +221,6 @@ export class Topbar implements OnInit, OnDestroy {
     await this.auth.logout();
   }
 
-  // ========== FULLTEXT SEARCH METHODS ==========
-
   getTotalResultCount(): number {
     return this.filteredChannels().length + 
            this.filteredUsers().length + 
@@ -247,7 +245,6 @@ export class Topbar implements OnInit, OnDestroy {
       this.chatContext.openConversation(msg.senderId);
     }
     
-    // Scroll to message after context is loaded
     setTimeout(() => {
       this.scrollToMessage(msg.id);
     }, 500);
@@ -260,7 +257,6 @@ export class Topbar implements OnInit, OnDestroy {
     if (element) {
       element.scrollIntoView({ behavior: 'smooth', block: 'center' });
       
-      // Highlight effect
       element.classList.add('highlight');
       setTimeout(() => {
         element.classList.remove('highlight');

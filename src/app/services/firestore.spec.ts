@@ -1,5 +1,5 @@
 import { TestBed } from '@angular/core/testing';
-import { FirestoreService } from './firestore';  // ✅ richtig
+import { FirestoreService } from './firestore';
 
 describe('FirestoreService', () => {
   let service: FirestoreService;

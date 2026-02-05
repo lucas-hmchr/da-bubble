@@ -339,8 +339,8 @@ export type ReactionId =
 
 export interface ReactionDef {
   id: ReactionId;
-  icon: string;     // SVG-Path ODER Emoji
-  isEmoji: boolean; // true = Emoji, false = SVG-Datei
+  icon: string;
+  isEmoji: boolean;
 }
 
 export const reactionDefs: readonly ReactionDef[] = [
@@ -685,6 +685,5 @@ export function getReactionDef(id: ReactionId): ReactionDef {
   return reactionDefs.find((r) => r.id === id) ?? reactionDefs[0];
 }
 
-// hilfreiche Subsets
 export const emojiReactions = reactionDefs.filter((r) => r.isEmoji);
 export const quickReactions = reactionDefs.filter((r) => !r.isEmoji);

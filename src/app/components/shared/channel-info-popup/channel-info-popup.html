@@ -7,7 +7,6 @@
         </div>
 
         <div class="popup-content">
-            <!-- Channel-Name Section -->
             <div class="info-section section-border">
                 <div class="section-header">
                     <span class="section-label">Channel-Name</span>
@@ -20,12 +19,10 @@
                 </div>
 
                 @if (!isEditingName()) {
-                <!-- Normal View -->
                 <div class="channel-name">
                     # {{ channel()?.name }}
                 </div>
                 } @else {
-                <!-- Edit Mode -->
                 <div class="edit-input-wrapper">
                     <span class="input-prefix">#</span>
                     <input type="text" class="edit-input" [(ngModel)]="editNameValue"
@@ -50,12 +47,10 @@
                     </div>
 
                     @if (!isEditingDescription()) {
-                    <!-- Normal View -->
                     <p class="description">
                         {{ channel()?.description || 'Keine Beschreibung' }}
                     </p>
                     } @else {
-                    <!-- Edit Mode -->
                     <div class="edit-textarea-wrapper">
                         <textarea class="edit-textarea" [(ngModel)]="editDescriptionValue" placeholder="Dein Text hier"
                             (keydown.escape)="cancelEditDescription()" rows="4" autofocus></textarea>
@@ -63,16 +58,14 @@
                     }
                 </div>
                 <nav class="separator"></nav>
-                <!-- Erstellt von Section -->
                 <div class="info-section" style="display: flex; flex-direction: column;">
                     <span class="section-label">Erstellt von</span>
                     <span class="creator-name" (click)="openCreatorProfile()">
                         <!-- {{ channel()?.creatorName || 'Unbekannt' }} -->
-                          {{ creatorName() }}
+                        {{ creatorName() }}
                     </span>
                 </div>
             </div>
-            <!-- Channel verlassen Button -->
             <div class="leave-container">
                 <button class="leave-btn" (click)="leaveChannel()">
                     Channel verlassen

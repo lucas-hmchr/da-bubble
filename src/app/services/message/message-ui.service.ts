@@ -15,7 +15,6 @@ export class MessageUiService {
   }
 
   toggleReactionPicker(messageId: string, context?: string): void {
-    // ========== Add context prefix to make ID unique ==========
     const uniqueId = context ? `${context}-${messageId}` : messageId;
     const current = this.reactionPickerForMessageId();
     this.reactionPickerForMessageId.set(current === uniqueId ? null : uniqueId);
@@ -38,7 +37,6 @@ export class MessageUiService {
   }
 
   toggleOptionsMenu(messageId: string, context?: string): void {
-    // ========== Add context prefix to make ID unique ==========
     const uniqueId = context ? `${context}-${messageId}` : messageId;
     const current = this.optionsMenuForMessageId();
     if (current === uniqueId) {

@@ -33,7 +33,6 @@ export interface ChannelMessage {
   providedIn: 'root'
 })
 
-
 export class FirestoreService {
   firestore: Firestore = inject(Firestore);
 

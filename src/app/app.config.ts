@@ -24,7 +24,6 @@ export const appConfig: ApplicationConfig = {
     provideFirestore(() => getFirestore()),
     provideDatabase(() => getDatabase()),
 
-    // ⬇️ hier neu:
     { provide: LOCALE_ID, useValue: 'de-DE' }
   ]
 };

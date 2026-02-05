@@ -7,5 +7,4 @@ import localeDe from '@angular/common/locales/de';
 
 registerLocaleData(localeDe);
 
-bootstrapApplication(App, appConfig)
-  .catch((err) => console.error(err));
+bootstrapApplication(App, appConfig).catch((err) => console.error(err));

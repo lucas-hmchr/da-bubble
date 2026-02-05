@@ -164,7 +164,7 @@ export class MessageService {
         }
 
         const currentCount = parentDoc.threadCount ?? 0;
-        const newCount = Math.max(0, currentCount - 1);  // Nie negativ!
+        const newCount = Math.max(0, currentCount - 1);
 
         await this.firestore.updateDocument(basePath, parentMessageId, {
             threadCount: newCount,

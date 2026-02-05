@@ -54,7 +54,6 @@ export class ProfilePopupService {
         this.chatCtx.openConversation(uid);
         this.close();
 
-        // Channel-Info auch schließen
         if (this.channelInfoService.isOpen()) {
             this.channelInfoService.close();
         }
