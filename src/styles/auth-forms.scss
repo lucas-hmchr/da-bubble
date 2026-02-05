@@ -115,9 +115,15 @@
 
 .arrow-back {
     position: absolute;
-    top: 48px;
-    left: 56px;
+    top: 40px;
+    left: 48px;
     cursor: pointer;
+    border-radius: 50%;
+    padding: 8px;
+
+    &:hover{
+        background-color: var(--bg-clr);
+    }
 }
 
 .error-message {
@@ -148,7 +154,7 @@
     }
 
     .arrow-back {
-        top: 48px;
+        top: 40px;
         left: 40px;
     }
 
@@ -163,7 +169,7 @@
 
 @media (max-width: $bp-phone-xl) {
     .arrow-back {
-        top: 48px;
+        top: 40px;
         left: 32px;
     }
 }
@@ -183,8 +189,8 @@
     }
 
     .arrow-back {
-        bottom: 48px;
-        left: 48px;
+        bottom: 40px;
+        left: 40px;
         top: auto;
     }
 }
@@ -211,8 +217,8 @@
     }
 
     .arrow-back {
-        bottom: 32px;
-        left: 32px;
+        bottom: 24px;
+        left: 24px;
     }
 }
 
@@ -227,8 +233,8 @@
     }
 
     .arrow-back {
-        bottom: 28px;
-        left: 28px;
+        bottom: 20px;
+        left: 20px;
     }
 }
 
