@@ -21,7 +21,8 @@
         </div>
         <div class="form-input">
             <img src="assets/icons/login/lock_passive.svg" alt="" class="form-input-icon">
-            <input #passwordModel="ngModel" name="password" type="password" placeholder="Passwort" [(ngModel)]="password" required minlength="6">
+            <input #passwordModel="ngModel" name="password" type="password" placeholder="Passwort"
+                [(ngModel)]="password" required minlength="6">
             @if (passwordModel.invalid && (passwordModel.dirty || passwordModel.touched || form.submitted)) {
             <span class="error-message">Verwende min. 6 Zeichen.</span>
             }
@@ -31,7 +32,8 @@
                 <input type="checkbox" required [(ngModel)]="acceptPP" name="acceptPP">
             </label>
             <p>Ich stimme der
-                <span class="linked-text">Datenschutzerklärung</span> zu.
+                <span class="linked-text" routerLink="/datenschutz">Datenschutzerklärung</span>
+                zu.
             </p>
         </div>
     </form>
@@ -55,8 +57,8 @@
         </div>
     </form>
     <button style="margin-left: auto;" type="submit" class="submit-button"
-        [class]="selectedAvatar().id !== 'avatar_default' ? 'btn-enabled' : 'btn-disabled'" [disabled]="selectedAvatar().id === 'avatar_default'"
-        (click)="submitRegistration()">
+        [class]="selectedAvatar().id !== 'avatar_default' ? 'btn-enabled' : 'btn-disabled'"
+        [disabled]="selectedAvatar().id === 'avatar_default'" (click)="submitRegistration()">
         <span>Weiter</span>
     </button>
     }
