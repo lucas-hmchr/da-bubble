@@ -107,7 +107,7 @@ export class AuthService {
     await setDoc(ref, {
       uid: user.uid,
       email: user.email ?? null,
-      displayName: displayName ?? (isGuest ? 'Gast' : null),
+      displayName: displayName,
       avatarId: finalAvatarId,
       isGuest: !!isGuest,
       isOnline: true,

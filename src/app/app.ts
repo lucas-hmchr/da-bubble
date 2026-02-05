@@ -14,7 +14,6 @@ export class App {
   protected readonly title = signal('da-bubble');
 
   constructor(private authService: AuthService) {
-    // this.authService.logout();
     setInterval(() => {
       this.authService.pingUser();
     }, 60_000)

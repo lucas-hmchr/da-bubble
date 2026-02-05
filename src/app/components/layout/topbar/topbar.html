@@ -135,7 +135,7 @@
 
         </div>
         <div class="profil" (click)="toggleDropdownMenu($event)">
-            <h1>{{ currentUser()?.displayName || currentUser()?.name || 'Gast' }}</h1>
+            <h1>{{ currentUser()?.displayName || currentUser()?.name }}</h1>
             <div class="profil-image">
                 <img [src]="getCurrentUserAvatar()" alt="avatar-profil">
                 <img [src]="getCurrentUserOnlineStatus()" alt="avatar-online-icon" class="online-icon">
@@ -170,7 +170,7 @@
 
                     <div class="profil-info">
                         <div class="profil-info-details">
-                            <h3>{{ currentUser()?.displayName || currentUser()?.name || 'Gast' }}</h3>
+                            <h3>{{ currentUser()?.displayName || currentUser()?.name }}</h3>
                             <button class="edit-button" (click)="openProfilEditModal()">Bearbeiten</button>
                             <div class="testos activee" (click)="openProfilEditModal()">
                                 <img src="assets/icons/global/edit-profil-mobil.svg" alt="open-edit-profil">
