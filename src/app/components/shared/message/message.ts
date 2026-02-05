@@ -402,7 +402,7 @@ export class Message implements OnChanges {
   }
 
   isLastMessage(msg: MessageData, messages: MessageData[]): boolean {
-    if (!msg.id || messages.length === 0) return false;
+    if (!msg.id || messages.length <= 1) return false;
     const lastMsg = messages[messages.length - 1];
     return msg.id === lastMsg.id;
   }

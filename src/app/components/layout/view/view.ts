@@ -271,4 +271,8 @@ export class View {
     }
   }
 
+  isSelfChat(): boolean {
+    return this.dmPartner?.uid === this.currentUserUid;
+  }
+
 }
