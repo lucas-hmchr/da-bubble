@@ -95,11 +95,11 @@
 
 .edit-square-icon {
     &:hover {
-        content: url(/assets/icons/global/edit_square_hover.svg);
+        content: url(assets/icons/global/edit_square_hover.svg);
     }
 
     &:active {
-        content: url(/assets/icons/global/edit_square_click.svg);
+        content: url(assets/icons/global/edit_square_click.svg);
     }
 }
 
@@ -119,7 +119,7 @@
         font-weight: 700;
 
         img {
-            content: url(/assets/icons/global/tag_hover.svg);
+            content: url(assets/icons/global/tag_hover.svg);
         }
     }
 }
@@ -161,13 +161,13 @@ mat-expansion-panel {
 
         .three-circle-channels-container {
             img {
-                content: url(/assets/icons/global/workspaces_three_circles_hover.svg);
+                content: url(assets/icons/global/workspaces_three_circles_hover.svg);
             }
         }
 
         .account-directMessage-container {
             img {
-                content: url(/assets/icons/global/account_circle_hover.svg);
+                content: url(assets/icons/global/account_circle_hover.svg);
             }
         }
     }
@@ -183,13 +183,13 @@ mat-expansion-panel {
         .three-circle-channels-container {
 
             img {
-                content: url(/assets/icons/global/workspaces_three_circles_hover.svg);
+                content: url(assets/icons/global/workspaces_three_circles_hover.svg);
             }
         }
 
         .account-directMessage-container {
             img {
-                content: url(/assets/icons/global/account_circle_hover.svg);
+                content: url(assets/icons/global/account_circle_hover.svg);
             }
         }
     }
@@ -215,7 +215,7 @@ mat-expansion-panel {
         color: var(--clr-purple-3);
 
         img {
-            content: url(/assets/icons/global/add_circle_hover.svg);
+            content: url(assets/icons/global/add_circle_hover.svg);
 
         }
     }
@@ -224,7 +224,7 @@ mat-expansion-panel {
         color: #000000;
 
         img {
-            content: url(/assets/icons/global/add_circle_hover.svg);
+            content: url(assets/icons/global/add_circle_hover.svg);
 
         }
     }
@@ -262,11 +262,11 @@ mat-expansion-panel {
         z-index: 3;
 
         &:hover {
-            content: url(/assets/icons/global/add_hover.svg);
+            content: url(assets/icons/global/add_hover.svg);
         }
 
         &:active {
-            content: url(/assets/icons/global/add_click.svg);
+            content: url(assets/icons/global/add_click.svg);
         }
     }
 }
