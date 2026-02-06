@@ -35,6 +35,7 @@ import { NewMessageService } from '../../../services/message/new-message.service
 import { getAvatarById } from '../../../../shared/data/avatars';
 import { AddPeopleDialogComponent } from '../../add-people-dialog/add-people-dialog';
 import { MatDrawer } from '@angular/material/sidenav';
+import { AuthService } from '../../../auth/auth.service';
 
 @Component({
   selector: 'app-workspace-sidebar',
@@ -85,7 +86,8 @@ export class WorkspaceSidebar implements OnInit, OnDestroy {
     public userService: UserService,
     public conversationService: ConversationService,
     private searchService: SearchService,
-  ) {}
+    private authService: AuthService,
+  ) { }
 
   ngOnInit() {
     this.resetSearch();
@@ -166,7 +168,7 @@ export class WorkspaceSidebar implements OnInit, OnDestroy {
     if (this.isSearching()) {
       return this.filteredChannels();
     }
-    const currentUid = this.currentUserUid;
+    const currentUid = this.authService.uid();
     if (!currentUid) return [];
 
     return this.channelService.getAccessibleChannels(currentUid);
