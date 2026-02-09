@@ -1,17 +1,4 @@
-import {
-  Component,
-  Input,
-  inject,
-  signal,
-  OnInit,
-  OnDestroy,
-  Output,
-  EventEmitter,
-  computed,
-  effect,
-  ViewChild,
-  HostListener,
-} from '@angular/core';
+import { Component, Input, inject, signal, OnInit, OnDestroy, Output, EventEmitter, computed, ViewChild, HostListener, } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { MatSidenavModule } from '@angular/material/sidenav';
 import { MatButtonModule } from '@angular/material/button';
@@ -40,14 +27,7 @@ import { AuthService } from '../../../auth/auth.service';
 @Component({
   selector: 'app-workspace-sidebar',
   standalone: true,
-  imports: [
-    CommonModule,
-    MatSidenavModule,
-    MatButtonModule,
-    MatExpansionModule,
-    MatIconModule,
-    AddPeopleDialogComponent,
-  ],
+  imports: [CommonModule, MatSidenavModule, MatButtonModule, MatExpansionModule, MatIconModule, AddPeopleDialogComponent],
   templateUrl: './workspace-sidebar.html',
   styleUrl: './workspace-sidebar.scss',
 })
