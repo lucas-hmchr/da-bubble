@@ -9,7 +9,7 @@
     </p>
     <div class="text-input-container">
         <h3 class="text">Channel-Name</h3>
-        <input placeholder="#    z.B. Kooperationsprojekt" [(ngModel)]="channelName" />
+        <input placeholder="#    z.B. Kooperationsprojekt" [(ngModel)]="channelName" (input)="onChannelNameInput()" />
     </div>
     <div class="text-input-container">
         <div class="">
@@ -19,6 +19,11 @@
     </div>
 
     <div class="button-add-container">
+        @if (errorMessage) {
+        <div class="error-message">
+            {{ errorMessage }}
+        </div>
+        }
         <button class="button-add-channel cp" (click)="createChannel()">Erstellen</button>
     </div>
 </div>

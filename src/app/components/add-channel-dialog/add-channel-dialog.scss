@@ -48,6 +48,7 @@ input::placeholder {
 .button-add-container {
     display: flex;
     flex-direction: row-reverse;
+    position: relative;
 
     .button-add-channel {
         background-color: #444DF2;
@@ -77,4 +78,11 @@ input::placeholder {
     &:hover {
         content: url(/assets/icons/global/close_right_top_hover.svg);
     }
+}
+
+.error-message {
+    position: absolute;
+    top: 10px;
+    color: #ED1E79;
+    font-size: 20px;
 }

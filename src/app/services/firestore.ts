@@ -56,6 +56,16 @@ export class FirestoreService {
     return collectionData(ref, { idField: 'id' }) as Observable<T[]>;
   }
 
+  async getCollectionOnce<T extends object>(path: string): Promise<T[]> {
+    const ref = collection(this.firestore, path);
+    const snapshot = await getDocs(ref);
+
+    return snapshot.docs.map(d => ({
+      id: d.id,
+      ...(d.data() as Omit<T, 'id'>),
+    })) as T[];
+  }
+
   getDocument<T extends object>(path: string): Observable<T | undefined> {
     const ref = doc(this.firestore, path);
     return docData(ref) as Observable<T | undefined>;

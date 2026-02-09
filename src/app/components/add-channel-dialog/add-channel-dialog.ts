@@ -16,21 +16,39 @@ export class AddChannelDialog {
   channelName = '';
   descriptionName = '';
   isPrivate = true;
+  errorMessage = '';
 
   constructor(
     public dialogRef: MatDialogRef<AddChannelDialog>,
     private firestore: FirestoreService,
     @Inject(MAT_DIALOG_DATA) public data: { uid: string },
-  ) {}
+  ) { }
   closeDialog() {
     this.dialogRef.close();
   }
 
-  createChannel() {
-    if (!this.channelName.trim()) return;
+  async createChannel() {
+    const rawName = this.channelName.trim();
+    if (!rawName) return;
+
+    const normalized = rawName.toLowerCase();
+
+    // 1) vorhandene Channels laden (einmalig)
+    const channels = await this.firestore.getCollectionOnce<Channel>('channels');
+
+    // 2) Duplikat-Check (case-insensitive)
+    const exists = channels.some(ch =>
+      (ch.name ?? '').trim().toLowerCase() === normalized
+    );
+
+    if (exists) {
+      this.errorMessage = 'Dieser Channel existiert bereits.';
+      return;
+    }
+
 
     const newChannel: Channel = {
-      name: this.channelName.trim(),
+      name: rawName,
       description: this.descriptionName.trim() || '',
       members: [this.data.uid],
       createdAt: Date.now(),
@@ -41,14 +59,18 @@ export class AddChannelDialog {
       admins: [this.data.uid],
     };
 
-    this.firestore.addDocument('channels', newChannel).then((docRef) => {
-      const channelId = docRef.id;
+    const docRef = await this.firestore.addDocument('channels', newChannel);
+    const channelId = docRef.id;
 
-      this.dialogRef.close({
-        created: true,
-        channelId: channelId,
-        channelName: newChannel.name,
-      });
+    this.dialogRef.close({
+      created: true,
+      channelId,
+      channelName: newChannel.name,
     });
-  }
+  };
+
+  onChannelNameInput() {
+  this.errorMessage = '';
+}
+
 }
