@@ -119,7 +119,7 @@
         font-weight: 700;
 
         img {
-            content: url(/assets/icons/global/tag_hover.svg);
+            filter: brightness(0) saturate(100%) invert(38%) sepia(92%) saturate(6123%) hue-rotate(235deg) brightness(98%) contrast(93%);
         }
     }
 }
@@ -161,13 +161,13 @@ mat-expansion-panel {
 
         .three-circle-channels-container {
             img {
-                content: url(/assets/icons/global/workspaces_three_circles_hover.svg);
+                filter: brightness(0) saturate(100%) invert(38%) sepia(92%) saturate(6123%) hue-rotate(235deg) brightness(98%) contrast(93%);
             }
         }
 
         .account-directMessage-container {
             img {
-                content: url(/assets/icons/global/account_circle_hover.svg);
+                filter: brightness(0) saturate(100%) invert(38%) sepia(92%) saturate(6123%) hue-rotate(235deg) brightness(98%) contrast(93%);
             }
         }
     }
@@ -183,13 +183,15 @@ mat-expansion-panel {
         .three-circle-channels-container {
 
             img {
-                content: url(/assets/icons/global/workspaces_three_circles_hover.svg);
+                // content: url(/assets/icons/global/workspaces_three_circles_hover.svg);
+                filter: brightness(0) saturate(100%) invert(38%) sepia(92%) saturate(6123%) hue-rotate(235deg) brightness(98%) contrast(93%);
             }
         }
 
         .account-directMessage-container {
             img {
-                content: url(/assets/icons/global/account_circle_hover.svg);
+                // content: url(/assets/icons/global/account_circle_hover.svg);
+                filter: brightness(0) saturate(100%) invert(38%) sepia(92%) saturate(6123%) hue-rotate(235deg) brightness(98%) contrast(93%);
             }
         }
     }
@@ -215,8 +217,7 @@ mat-expansion-panel {
         color: var(--clr-purple-3);
 
         img {
-            content: url(/assets/icons/global/add_circle_hover.svg);
-
+            filter: brightness(0) saturate(100%) invert(38%) sepia(92%) saturate(6123%) hue-rotate(235deg) brightness(98%) contrast(93%);
         }
     }
 
@@ -224,8 +225,7 @@ mat-expansion-panel {
         color: #000000;
 
         img {
-            content: url(/assets/icons/global/add_circle_hover.svg);
-
+            filter: brightness(0) saturate(100%) invert(38%) sepia(92%) saturate(6123%) hue-rotate(235deg) brightness(98%) contrast(93%);
         }
     }
 }
@@ -247,9 +247,9 @@ mat-expansion-panel {
 }
 
 :host ::ng-deep .channel-panel .mat-expansion-panel-content .mat-expansion-panel-body {
-  max-height: 68vh;  
-  overflow-y: auto;
-  overflow-x: hidden;
+    max-height: 68vh;
+    overflow-y: auto;
+    overflow-x: hidden;
 }
 
 .channel-message-add-container {
