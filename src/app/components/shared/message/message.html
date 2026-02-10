@@ -5,19 +5,19 @@
       <p>Sei der Erste, der eine Nachricht in diesem Channel schreibt!</p>
     </div>
 
-    <section *ngFor="let msg of msgs; let i = index" class="message-wrapper" [attr.data-message-id]="msg.id"
+    <section *ngFor="let msg of msgs; let i = index; trackBy: trackByMessageId" class="message-wrapper" [attr.data-message-id]="msg.id"
       [class.menu-open]="optionsMenuForMessageId === getUniqueMessageId(msg)">
-      <div class="date-separator" *ngIf="i === 0 || !isSameDay(msg.createdAt, msgs[i - 1]?.createdAt)">
+      <div class="date-separator" *ngIf="i === 0 || !formatter.isSameDay(msg.createdAt, msgs[i - 1]?.createdAt)">
         <span>
-          {{ getFormattedDateWithWeekday(msg.createdAt) }}
+          {{ formatter.getFormattedDateWithWeekday(msg.createdAt) }}
         </span>
       </div>
 
-      <div class="message-content" [ngClass]="{ fdrr: isOwnMessage(msg) }" (mouseleave)="onMessageMouseLeave(msg)">
+      <div class="message-content" [ngClass]="{ fdrr: helper.isOwnMessage(msg.senderId, currentUserUid) }" (mouseleave)="onMessageMouseLeave(msg)">
         <div class="message-actions">
           <button type="button" class="emoji-quick-btn" *ngFor="let emojiId of getQuickEmojis()"
             (click)="toggleReaction(msg, emojiId)">
-            <ng-container *ngIf="getReactionDefById(emojiId) as def">
+            <ng-container *ngIf="getReactionDef(emojiId) as def">
               <img *ngIf="!def.isEmoji" [src]="def.icon" alt="" class="quick-emoji-icon" />
               <span *ngIf="def.isEmoji">{{ def.icon }}</span>
             </ng-container>
@@ -26,10 +26,10 @@
           <img src="assets/icons/global/reaction1.svg" alt="" class="action-btn reaction-btn"
             (click)="onToggleReactionPicker(msg)" />
 
-          <img *ngIf="contextType === 'channel'" src="assets/icons/global/Answer1.svg" alt="Thread öffnen"
+          <img *ngIf="contextType === 'channel'" src="assets/icons/global/answer1.svg" alt="Thread öffnen"
             class="action-btn answer-btn" (click)="onOpenThread(msg)" />
 
-          <button *ngIf="isOwnMessage(msg)" class="action-btn option-btn"
+          <button *ngIf="helper.isOwnMessage(msg.senderId, currentUserUid)" class="action-btn option-btn"
             (click)="msg.id && toggleOptionsMenu($event, msg.id)" type="button">
             <img src="assets/icons/global/option1.svg" alt="">
           </button>
@@ -48,27 +48,29 @@
           }
         </div>
 
-        <div class="reaction-picker" [class.open-up]="isLastMessage(msg, msgs)"
+        <div class="reaction-picker-wrapper" [class.open-up]="isLastMessage(msg, msgs)"
           *ngIf="reactionPickerForMessageId === getUniqueMessageId(msg)">
-          <button class="reaction-emoji-btn" *ngFor="let r of emojiReactions" (click)="onEmojiReaction(msg, r.id)">
-            {{ r.icon }}
-          </button>
+          <div class="reaction-picker">
+            <button class="reaction-emoji-btn" *ngFor="let r of emojiReactions" (click)="onEmojiReaction(msg, r.id)">
+              {{ r.icon }}
+            </button>
+          </div>
         </div>
 
 
-        <img class="profile-pic" [src]="getSenderAvatarUrl(msg.senderId)" [alt]="getSenderName(msg.senderId)"
+        <img class="profile-pic" [src]="helper.getSenderAvatarUrl(msg.senderId)" [alt]="helper.getUserDisplayName(msg.senderId)"
           (click)="openUserProfile(msg.senderId, $event)" style="cursor: pointer;" />
 
         <div>
-          <div [class.message-header-reverse]="isOwnMessage(msg)" class="gap5">
+          <div [class.message-header-reverse]="helper.isOwnMessage(msg.senderId, currentUserUid)" class="gap5">
             <span class="send-name clickable" (click)="openUserProfile(msg.senderId, $event)">
-              {{ getSenderName(msg.senderId) }}
+              {{ helper.getUserDisplayName(msg.senderId) }}
             </span>
             <span class="send-info">
               <ng-container *ngIf="showFullDate">
-                {{ getFormattedDate(msg.createdAt) }}
+                {{ formatter.getFormattedDate(msg.createdAt) }}
               </ng-container>
-              {{ toDate(msg.createdAt) | date: 'HH:mm' }} Uhr
+              {{ formatter.toDate(msg.createdAt) | date: 'HH:mm' }} Uhr
             </span>
           </div>
 
@@ -89,29 +91,29 @@
 
 
           <ng-template #normalBubble>
-            <p class="text bubble" [ngClass]="isOwnMessage(msg) ? 'me-person' : 'other-person'"
-              [innerHTML]="users.length > 0 ? parseMessageText(msg.text) : msg.text"
+            <p class="text bubble" [ngClass]="helper.isOwnMessage(msg.senderId, currentUserUid) ? 'me-person' : 'other-person'"
+              [innerHTML]="users.length > 0 ? formatter.parseMessageText(msg.text, users) : msg.text"
               (click)="onMessageTextClick($event)">
             </p>
           </ng-template>
 
-          <div class="reactions-summary" *ngIf="msg.reactions && hasReactions(msg)">
+          <div class="reactions-summary" *ngIf="msg.reactions && reactionService.hasReactions(msg)">
             <button class="reaction-chip" *ngFor="let rid of getVisibleReactionIds(msg)" [ngClass]="{
-                'mine': hasCurrentUserReaction(msg, rid),
-                'own-message': isOwnMessage(msg)
+                'mine': hasUserReacted(msg, rid),
+                'own-message': helper.isOwnMessage(msg.senderId, currentUserUid)
               }" (click)="toggleReaction(msg, rid)" (mouseenter)="msg.id && onHoverReaction(msg.id, rid)"
               (mouseleave)="onLeaveReaction()">
-              <ng-container *ngIf="getReactionDefById(rid) as def">
+              <ng-container *ngIf="getReactionDef(rid) as def">
                 <img *ngIf="!def.isEmoji" [src]="def.icon" alt="" class="reaction-icon" />
                 <span *ngIf="def.isEmoji" class="reaction-emoji">
                   {{ def.icon }}
                 </span>
               </ng-container>
 
-              <span class="reaction-count">{{ getReactionCount(msg, rid) }}</span>
+              <span class="reaction-count">{{ reactionService.getReactionCount(msg, rid) }}</span>
 
               <div class="reaction-tooltip" *ngIf="hoveredReaction === rid && hoveredMessageId === msg.id">
-                <div class="tooltip-icon" *ngIf="getReactionDefById(rid) as def">
+                <div class="tooltip-icon" *ngIf="getReactionDef(rid) as def">
                   <img *ngIf="!def.isEmoji" [src]="def.icon" alt="" />
                   <span *ngIf="def.isEmoji">
                     {{ def.icon }}
@@ -137,7 +139,7 @@
               {{ msg.threadCount }} {{ msg.threadCount === 1 ? 'Antwort' : 'Antworten' }}
             </a>
             <span class="last-reply-time" *ngIf="msg.lastReplyAt">
-              {{ toDate(msg.lastReplyAt) | date: 'HH:mm' }} Uhr
+              {{ formatter.toDate(msg.lastReplyAt) | date: 'HH:mm' }} Uhr
             </span>
           </div>
         </div>

@@ -101,4 +101,41 @@ export class MessageReactionService {
     if (!Array.isArray(users)) return false;
     return users.includes(currentUserId);
   }
+
+  getVisibleReactionIds(msg: MessageData, isThreadContext: boolean): ReactionId[] {
+    const allReactions = this.getReactionIds(msg);
+    const limit = this.getReactionLimit(isThreadContext);
+    return allReactions.slice(0, limit);
+  }
+
+  getRemainingReactionsCount(msg: MessageData, isThreadContext: boolean): number {
+    const allReactions = this.getReactionIds(msg);
+    const limit = this.getReactionLimit(isThreadContext);
+    return Math.max(0, allReactions.length - limit);
+  }
+
+  private getReactionLimit(isThreadContext: boolean): number {
+    if (isThreadContext) return 7;
+    return this.isMobile() ? 7 : 20;
+  }
+
+  private isMobile(): boolean {
+    return window.innerWidth <= 1024;
+  }
+
+  getReactionUserLabel(msg: MessageData, reactionId: ReactionId, users: any[]): string {
+    const uids = this.getReactionUserIds(msg, reactionId);
+    if (!uids.length) return '';
+
+    const getUserName = (uid: string) => {
+      const user = users.find(u => u.uid === uid);
+      return user?.displayName || user?.name || 'Unbekannt';
+    };
+
+    if (uids.length === 1) return getUserName(uids[0]);
+    if (uids.length === 2) {
+      return `${getUserName(uids[0])} und ${getUserName(uids[1])}`;
+    }
+    return `${getUserName(uids[0])} und ${uids.length - 1} weitere`;
+  }
 }
