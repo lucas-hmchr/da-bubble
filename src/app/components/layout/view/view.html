@@ -2,14 +2,15 @@
 
   <header class="dm-header" [class.dm-header-small]="viewState.isChannel() || viewState.isDm()"
     [class.dm-header-big]="viewState.isNew()">
-    <div style="width: 100%;">
-      <div id="header-left" style="display: flex; align-items: center; gap: 8px; width: 100%;">
+    <div id="header-left">
 
-        @if (viewState.isChannel() && channel; as ch) {
-        <img src="assets/icons/global/tag.svg" alt="">
-        <h2>{{ ch.name }}</h2>
-        <img src="assets/icons/global/keyboard_arrow_down.svg" alt="" (click)="openChannelInfo()" style="cursor: pointer;">
-        }
+      @if (viewState.isChannel() && channel; as ch) {
+      <img src="assets/icons/global/tag.svg" alt="">
+      <div class="channel-name-wrapper">
+        <span class="channel-name-text">{{ ch.name }}</span>
+      </div>
+      <img src="assets/icons/global/keyboard_arrow_down.svg" alt="" (click)="openChannelInfo()" style="cursor: pointer;">
+      }
 
         @else if (viewState.isDm()) {
         @if (dmPartner) {
@@ -75,7 +76,6 @@
         }
 
       </div>
-    </div>
 
     @if (viewState.isChannel() && channel) {
     <div class="channel-members">
