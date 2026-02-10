@@ -21,6 +21,7 @@
             "polyfills": [
               "zone.js"
             ],
+            "baseHref": "/angular-projects/browser/",
             "tsConfig": "tsconfig.app.json",
             "inlineStyleLanguage": "scss",
             "assets": [
