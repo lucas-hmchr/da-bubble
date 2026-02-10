@@ -32,6 +32,10 @@ export class MessageInput implements OnInit, OnChanges {
   @Input() forceEditable = false;
   @Input() placeholderText?: string;
 
+  isHoveringEmoji = false;
+  isHoveringMention = false;
+  isHoveringSend = false;
+
   @Input() set editingMessage(value: { id: string; text: string } | undefined) {
     this._editingMessage = value;
     this.isEditing = !!value;

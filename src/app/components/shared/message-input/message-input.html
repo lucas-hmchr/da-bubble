@@ -46,14 +46,27 @@
 
   <div id="message-actions">
     <div>
-      <img src="assets/icons/global/smile1.svg" alt="Emoji" class="form-input-icon icon-smile"
-        (click)="onEmojiButtonClick()" />
+      <img [src]="isHoveringEmoji ? 'assets/icons/global/smile3.svg' : 'assets/icons/global/smile1.svg'" 
+           alt="Emoji" 
+           class="form-input-icon icon-smile"
+           (mouseenter)="isHoveringEmoji = true"
+           (mouseleave)="isHoveringEmoji = false"
+           (click)="onEmojiButtonClick()" />
 
-      <img src="assets/icons/global/at1.svg" alt="Mention" class="form-input-icon icon-at"
-        (click)="onAtButtonClick()" />
+      <img [src]="isHoveringMention ? 'assets/icons/global/at3.svg' : 'assets/icons/global/at1.svg'" 
+           alt="Mention" 
+           class="form-input-icon icon-at"
+           (mouseenter)="isHoveringMention = true"
+           (mouseleave)="isHoveringMention = false"
+           (click)="onAtButtonClick()" />
     </div>
 
-    <img src="assets/icons/global/send1.svg" alt="Send" class="icon-send" [class.disabled]="isReadOnly"
-      (click)="onSend()" />
+    <img [src]="isHoveringSend ? 'assets/icons/global/send2.svg' : 'assets/icons/global/send1.svg'" 
+         alt="Send" 
+         class="icon-send" 
+         [class.disabled]="isReadOnly"
+         (mouseenter)="isHoveringSend = true"
+         (mouseleave)="isHoveringSend = false"
+         (click)="onSend()" />
   </div>
 </div>

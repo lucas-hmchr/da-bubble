@@ -18,20 +18,33 @@
           <button type="button" class="emoji-quick-btn" *ngFor="let emojiId of getQuickEmojis()"
             (click)="toggleReaction(msg, emojiId)">
             <ng-container *ngIf="getReactionDef(emojiId) as def">
-              <img *ngIf="!def.isEmoji" [src]="def.icon" alt="" class="quick-emoji-icon" />
-              <span *ngIf="def.isEmoji">{{ def.icon }}</span>
+              <span>{{ def.icon }}</span>
             </ng-container>
           </button>
 
-          <img src="assets/icons/global/reaction1.svg" alt="" class="action-btn reaction-btn"
-            (click)="onToggleReactionPicker(msg)" />
+          <img [src]="isHoveringReaction ? './assets/icons/global/reaction2.svg' : './assets/icons/global/reaction1.svg'" 
+               alt="" 
+               class="action-btn reaction-btn"
+               (mouseenter)="isHoveringReaction = true"
+               (mouseleave)="isHoveringReaction = false"
+               (click)="onToggleReactionPicker(msg)" />
 
-          <img *ngIf="contextType === 'channel'" src="assets/icons/global/answer1.svg" alt="Thread öffnen"
-            class="action-btn answer-btn" (click)="onOpenThread(msg)" />
+          <img *ngIf="contextType === 'channel'" 
+               [src]="isHoveringThread ? './assets/icons/global/answer2.svg' : './assets/icons/global/answer1.svg'"
+               alt="Thread öffnen"
+               class="action-btn answer-btn"
+               (mouseenter)="isHoveringThread = true"
+               (mouseleave)="isHoveringThread = false"
+               (click)="onOpenThread(msg)" />
 
-          <button *ngIf="helper.isOwnMessage(msg.senderId, currentUserUid)" class="action-btn option-btn"
-            (click)="msg.id && toggleOptionsMenu($event, msg.id)" type="button">
-            <img src="assets/icons/global/option1.svg" alt="">
+          <button *ngIf="helper.isOwnMessage(msg.senderId, currentUserUid)" 
+                  class="action-btn option-btn"
+                  (click)="msg.id && toggleOptionsMenu($event, msg.id)" 
+                  type="button"
+                  (mouseenter)="isHoveringOptions = true"
+                  (mouseleave)="isHoveringOptions = false">
+            <img [src]="isHoveringOptions ? './assets/icons/global/option2.svg' : './assets/icons/global/option1.svg'" 
+                 alt="">
           </button>
 
           @if (optionsMenuForMessageId === getUniqueMessageId(msg)) {

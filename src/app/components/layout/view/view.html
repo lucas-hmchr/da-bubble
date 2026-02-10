@@ -86,7 +86,11 @@
         <span class="fw-600">{{ channelMembers.length }}</span>
       </div>
 
-      <img class="add-person" src="assets/icons/global/person_add1.svg" (click)="toggleAddChannelMemberPopup()">
+      <img class="add-person" 
+           [src]="isHoveringAddPerson ? 'assets/icons/global/person_add2.svg' : 'assets/icons/global/person_add1.svg'"
+           (mouseenter)="isHoveringAddPerson = true"
+           (mouseleave)="isHoveringAddPerson = false"
+           (click)="toggleAddChannelMemberPopup()">
       @if (showChannelMemberList()) {
       <div class="member-list-popup">
         <div class="member-list-content">

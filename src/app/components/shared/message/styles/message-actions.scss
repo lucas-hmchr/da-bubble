@@ -40,39 +40,27 @@
 }
 
 .action-btn {
+  width: 40px;
+  height: 40px;
   border: none;
   background: transparent;
   cursor: pointer;
-  font-size: 16px;
-  line-height: 1;
   padding: 0;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-}
+  border-radius: 50%;
+  transition: background-color 0.2s;
 
-.check-btn:hover {
-  content: url("/assets/icons/global/check2.svg");
-}
+  &:hover {
+    background-color: var(--bg-clr);
+  }
 
-.thumbsup-btn:hover {
-  content: url("/assets/icons/global/thumbsup2.svg");
-}
-
-.reaction-btn:hover {
-  content: url("/assets/icons/global/reaction2.svg");
-}
-
-.answer-btn:hover {
-  content: url("/assets/icons/global/answer2.svg");
-}
-
-.option-btn img {
-  display: block;
-}
-
-.option-btn:hover img {
-  content: url("/assets/icons/global/option2.svg");
+  img {
+    display: block;
+    width: 24px;
+    height: 24px;
+  }
 }
 
 

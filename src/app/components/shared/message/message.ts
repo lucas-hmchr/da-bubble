@@ -63,6 +63,11 @@ export class Message implements OnChanges {
   recentEmojis: ReactionId[] = [];
   private previousExternalMessagesCount = 0;
   
+  // Hover states für Action-Icons
+  isHoveringReaction = false;
+  isHoveringThread = false;
+  isHoveringOptions = false;
+  
   readonly getReactionDef = getReactionDef;
 
   @ViewChild('bottom') bottom!: ElementRef<HTMLDivElement>;

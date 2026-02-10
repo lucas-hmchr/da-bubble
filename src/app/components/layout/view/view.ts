@@ -54,6 +54,7 @@ export class View {
   selectedRecipient: RecipientSuggestion | null = null;
   showChannelMemberList = signal<Boolean>(false);
   showAddChannelMemberPopup = signal<Boolean>(false);
+  isHoveringAddPerson = false;
   @Output() openThread = new EventEmitter<MessageData>();
 
   constructor(
