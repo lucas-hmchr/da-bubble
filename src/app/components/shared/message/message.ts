@@ -14,7 +14,6 @@ import { CommonModule } from '@angular/common';
 import { Observable, of } from 'rxjs';
 import { take } from 'rxjs/operators';
 import { FormsModule } from '@angular/forms';
-
 import { Channel } from '../../../models/channel.interface';
 import { FirestoreService } from '../../../services/firestore';
 import { MessageService } from '../../../services/message/message.service';
@@ -26,7 +25,7 @@ import { MessageUiService } from '../../../services/message/message-ui.service';
 import { MessageHelperService } from '../../../services/message/message-helper.service';
 import { MessageDataService } from '../../../services/message/message-data.service';
 import { MessageDeleteService } from '../../../services/message/message-delete.service';
-
+import { MessageEmojiStorageService } from '../../../services/message/message-emoji-storage.service';
 import { MessageData } from '../../../models/message.interface';
 import { User } from '../../../models/user.model';
 import {
@@ -61,7 +60,10 @@ export class Message implements OnChanges {
   messages$?: Observable<MessageData[]>;
   users: User[] = [];
   emojiReactions: ReactionDef[] = EMOJI_REACTIONS as ReactionDef[];
-  recentEmojis: ReactionId[] = this.loadRecentEmojis();
+  recentEmojis: ReactionId[] = [];
+  private previousExternalMessagesCount = 0;
+  
+  readonly getReactionDef = getReactionDef;
 
   @ViewChild('bottom') bottom!: ElementRef<HTMLDivElement>;
 
@@ -78,36 +80,11 @@ export class Message implements OnChanges {
     public uiService: MessageUiService,
     public helper: MessageHelperService,
     private dataService: MessageDataService,
-    private deleteService: MessageDeleteService
+    private deleteService: MessageDeleteService,
+    private emojiStorage: MessageEmojiStorageService
   ) {
+    this.recentEmojis = this.emojiStorage.loadRecentEmojis();
     this.loadUsers();
-  }
-
-  private loadRecentEmojis(): ReactionId[] {
-    try {
-      const stored = localStorage.getItem('recentEmojis');
-      if (stored) {
-        const parsed = JSON.parse(stored);
-        return Array.isArray(parsed) ? parsed.slice(0, 2) : ['check', 'thumbsup'];
-      }
-    } catch (e) {
-      console.error('Error loading recent emojis:', e);
-    }
-    return ['check', 'thumbsup'];
-  }
-
-  private saveRecentEmoji(reactionId: ReactionId): void {
-    const updated = [reactionId, ...this.recentEmojis.filter(id => id !== reactionId)].slice(0, 2);
-    this.recentEmojis = updated;
-    try {
-      localStorage.setItem('recentEmojis', JSON.stringify(updated));
-    } catch (e) {
-      console.error('Error saving recent emoji:', e);
-    }
-  }
-
-  getQuickEmojis(): ReactionId[] {
-    return this.recentEmojis;
   }
 
   private loadUsers(): void {
@@ -115,6 +92,10 @@ export class Message implements OnChanges {
       this.users = users;
       this.helper.buildUserMap(users);
     });
+  }
+
+  getQuickEmojis(): ReactionId[] {
+    return this.recentEmojis;
   }
 
   ngOnChanges(changes: SimpleChanges): void {
@@ -125,13 +106,13 @@ export class Message implements OnChanges {
   }
 
   private handleExternalMessagesChange(changes: SimpleChanges): void {
-    if (!changes['externalMessages']) return;
-    if (this.externalMessages && this.externalMessages.length > 0) {
-      this.messages$ = of(this.externalMessages);
-      setTimeout(() => {
-        this.scrollService.scrollToBottom(this.bottom, this.isThreadContext);
-      }, 200);
+    if (!changes['externalMessages'] || !this.externalMessages?.length) return;
+    this.messages$ = of(this.externalMessages);
+    const currentCount = this.externalMessages.length;
+    if (currentCount > this.previousExternalMessagesCount) {
+      setTimeout(() => this.scrollService.scrollToBottom(this.bottom, this.isThreadContext), 200);
     }
+    this.previousExternalMessagesCount = currentCount;
   }
 
   private handleChannelChange(changes: SimpleChanges): void {
@@ -169,13 +150,9 @@ export class Message implements OnChanges {
 
   private scheduleScroll(): void {
     setTimeout(() => {
-      if (this.messages$) {
-        this.messages$.pipe(take(1)).subscribe(() => {
-          setTimeout(() => {
-            this.scrollService.scrollToBottom(this.bottom, this.isThreadContext);
-          }, 200);
-        });
-      }
+      this.messages$?.pipe(take(1)).subscribe(() => {
+        setTimeout(() => this.scrollService.scrollToBottom(this.bottom, this.isThreadContext), 200);
+      });
     }, 100);
   }
 
@@ -212,18 +189,6 @@ export class Message implements OnChanges {
     );
   }
 
-  isOwnMessage(msg: MessageData): boolean {
-    return this.helper.isOwnMessage(msg.senderId, this.currentUserUid);
-  }
-
-  getSenderName(senderId: string): string {
-    return this.helper.getUserDisplayName(senderId);
-  }
-
-  getSenderAvatarUrl(senderId: string): string {
-    return this.helper.getSenderAvatarUrl(senderId);
-  }
-
   onOpenThread(msg: MessageData): void {
     if (!msg.id) return;
     this.uiService.closeReactionPicker();
@@ -238,52 +203,22 @@ export class Message implements OnChanges {
   }
 
   private handleOutsideClick(target: HTMLElement): void {
-    const isInside = target.closest('.inline-edit') ||
-      target.closest('.message-options-menu') ||
-      target.closest('.option-btn');
+    const isInside = target.closest('.inline-edit') || target.closest('.message-options-menu') || target.closest('.option-btn');
     if (!isInside) this.editService.tryDiscardEdit('outside-click');
   }
 
-  get editingMessageId(): string | null {
-    return this.editService.getEditingMessageId();
-  }
-
-  get editText(): string {
-    return this.editService.getEditText();
-  }
-
-  set editText(value: string) {
-    this.editService.setEditText(value);
-  }
-
-  get canSaveInlineEdit(): boolean {
-    return this.editService.canSave();
-  }
-
-  get reactionPickerForMessageId(): string | null {
-    return this.uiService.getReactionPickerMessageId();
-  }
-
-  get optionsMenuForMessageId(): string | null {
-    return this.uiService.getOptionsMenuMessageId();
-  }
-
-  get optionsMenuOpenUp(): boolean {
-    return this.uiService.isOptionsMenuOpenUp();
-  }
-
-  get hoveredReaction(): ReactionId | null {
-    return this.uiService.getHoveredReaction().reactionId;
-  }
-
-  get hoveredMessageId(): string | null {
-    return this.uiService.getHoveredReaction().messageId;
-  }
+  get editingMessageId(): string | null { return this.editService.getEditingMessageId(); }
+  get editText(): string { return this.editService.getEditText(); }
+  set editText(value: string) { this.editService.setEditText(value); }
+  get canSaveInlineEdit(): boolean { return this.editService.canSave(); }
+  get reactionPickerForMessageId(): string | null { return this.uiService.getReactionPickerMessageId(); }
+  get optionsMenuForMessageId(): string | null { return this.uiService.getOptionsMenuMessageId(); }
+  get optionsMenuOpenUp(): boolean { return this.uiService.isOptionsMenuOpenUp(); }
+  get hoveredReaction(): ReactionId | null { return this.uiService.getHoveredReaction().reactionId; }
+  get hoveredMessageId(): string | null { return this.uiService.getHoveredReaction().messageId; }
 
   getUniqueMessageId(msg: MessageData): string | null {
-    if (!msg.id) return null;
-    const context = this.isThreadContext ? 'thread' : 'view';
-    return `${context}-${msg.id}`;
+    return this.uiService.getUniqueMessageId(msg, this.isThreadContext);
   }
 
   startInlineEdit(msg: MessageData): void {
@@ -330,9 +265,7 @@ export class Message implements OnChanges {
     if (!this.currentUserUid) return;
     const contextId = this.getContextId();
     if (!contextId) return;
-    
-    this.saveRecentEmoji(reactionId);
-    
+    this.recentEmojis = this.emojiStorage.saveRecentEmoji(reactionId, this.recentEmojis);
     await this.reactionService.toggleReaction(
       msg, reactionId, this.currentUserUid, this.contextType,
       contextId, this.isThreadContext, this.threadParentMessageId ?? undefined
@@ -346,48 +279,12 @@ export class Message implements OnChanges {
     return null;
   }
 
-  hasReactions(msg: MessageData): boolean {
-    return this.reactionService.hasReactions(msg);
-  }
-
-  getReactionIds(msg: MessageData): ReactionId[] {
-    return this.reactionService.getReactionIds(msg);
-  }
-
   getVisibleReactionIds(msg: MessageData): ReactionId[] {
-    const allReactions = this.getReactionIds(msg);
-    const limit = this.getReactionLimit();
-    return allReactions.slice(0, limit);
+    return this.reactionService.getVisibleReactionIds(msg, this.isThreadContext);
   }
 
   getRemainingReactionsCount(msg: MessageData): number {
-    const allReactions = this.getReactionIds(msg);
-    const limit = this.getReactionLimit();
-    return Math.max(0, allReactions.length - limit);
-  }
-
-  private getReactionLimit(): number {
-    if (this.isThreadContext) {
-      return 7;
-    }
-    return this.isMobile() ? 7 : 20;
-  }
-
-  private isMobile(): boolean {
-    return window.innerWidth <= 1024;
-  }
-
-  hasCurrentUserReaction(msg: MessageData, reactionId: ReactionId): boolean {
-    if (!this.currentUserUid) return false;
-    return this.reactionService.hasCurrentUserReaction(msg, reactionId, this.currentUserUid);
-  }
-
-  getReactionCount(msg: MessageData, reactionId: ReactionId): number {
-    return this.reactionService.getReactionCount(msg, reactionId);
-  }
-
-  getReactionDefById(id: ReactionId): ReactionDef {
-    return getReactionDef(id);
+    return this.reactionService.getRemainingReactionsCount(msg, this.isThreadContext);
   }
 
   onToggleReactionPicker(msg: MessageData): void {
@@ -402,9 +299,7 @@ export class Message implements OnChanges {
   }
 
   isLastMessage(msg: MessageData, messages: MessageData[]): boolean {
-    if (!msg.id || messages.length <= 1) return false;
-    const lastMsg = messages[messages.length - 1];
-    return msg.id === lastMsg.id;
+    return this.uiService.isLastMessage(msg, messages);
   }
 
   toggleOptionsMenu(ev: MouseEvent, msgId: string): void {
@@ -413,24 +308,8 @@ export class Message implements OnChanges {
     const context = this.isThreadContext ? 'thread' : 'view';
     this.uiService.toggleOptionsMenu(msgId, context);
     if (this.uiService.getOptionsMenuMessageId() === msgId) {
-      this.calculateMenuPosition(ev);
+      this.uiService.calculateMenuPosition(ev);
     }
-  }
-
-  private calculateMenuPosition(ev: MouseEvent): void {
-    queueMicrotask(() => {
-      const btn = ev.currentTarget as HTMLElement | null;
-      if (!btn) return;
-      const scroll = btn.closest('.messages-scroll') as HTMLElement | null;
-      const menu = scroll?.querySelector('.message-options-menu') as HTMLElement | null;
-      const menuHeight = menu?.getBoundingClientRect().height ?? 160;
-      const btnRect = btn.getBoundingClientRect();
-      const scrollRect = (scroll ?? document.documentElement).getBoundingClientRect();
-      const spaceBelow = scrollRect.bottom - btnRect.bottom;
-      const spaceAbove = btnRect.top - scrollRect.top;
-      const openUp = spaceBelow < (menuHeight + 12) && spaceAbove > (menuHeight + 12);
-      this.uiService.setOptionsMenuOpenUp(openUp);
-    });
   }
 
   onOptionsMenuMouseEnter(): void {
@@ -455,7 +334,7 @@ export class Message implements OnChanges {
   }
 
   async onDeleteMessage(msg: any): Promise<void> {
-    if (!msg?.id || !this.isOwnMessage(msg)) return;
+    if (!msg?.id || !this.helper.isOwnMessage(msg.senderId, this.currentUserUid)) return;
     const contextId = this.getContextId();
     if (!contextId) return;
     if (this.deleteService.confirmThreadDeletion(msg, this.isThreadContext)) {
@@ -478,33 +357,12 @@ export class Message implements OnChanges {
   }
 
   getReactionUserLabel(msg: MessageData, reactionId: ReactionId): string {
-    const uids = this.reactionService.getReactionUserIds(msg, reactionId);
-    if (!uids.length) return '';
-    if (uids.length === 1) return this.helper.getUserDisplayName(uids[0]);
-    if (uids.length === 2) {
-      return `${this.helper.getUserDisplayName(uids[0])} und ${this.helper.getUserDisplayName(uids[1])}`;
-    }
-    return `${this.helper.getUserDisplayName(uids[0])} und ${uids.length - 1} weitere`;
+    return this.reactionService.getReactionUserLabel(msg, reactionId, this.users);
   }
 
-  toDate(date: Date | any): Date | null {
-    return this.formatter.toDate(date);
-  }
-
-  isSameDay(dateA: any, dateB: any): boolean {
-    return this.formatter.isSameDay(dateA, dateB);
-  }
-
-  getFormattedDate(date: Date | any): string {
-    return this.formatter.getFormattedDate(date);
-  }
-
-  getFormattedDateWithWeekday(date: Date | any): string {
-    return this.formatter.getFormattedDateWithWeekday(date);
-  }
-
-  parseMessageText(text: string): string {
-    return this.formatter.parseMessageText(text, this.users);
+  hasUserReacted(msg: MessageData, reactionId: ReactionId): boolean {
+    if (!this.currentUserUid) return false;
+    return this.reactionService.hasCurrentUserReaction(msg, reactionId, this.currentUserUid);
   }
 
   openUserProfile(userId: string, event?: Event): void {
@@ -523,14 +381,17 @@ export class Message implements OnChanges {
   }
 
   getFullDateTimeString(date: Date | any): string {
-    const formattedDate = this.getFormattedDate(date);
-    const msgDate = this.toDate(date);
+    const formattedDate = this.formatter.getFormattedDate(date);
+    const msgDate = this.formatter.toDate(date);
     if (!msgDate) return formattedDate;
-
     const time = msgDate.toLocaleTimeString('de-DE', {
       hour: '2-digit',
       minute: '2-digit'
     });
     return `${formattedDate} ${time} Uhr`;
+  }
+
+  trackByMessageId(index: number, msg: MessageData): string {
+    return msg.id || index.toString();
   }
 }

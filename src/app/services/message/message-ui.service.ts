@@ -78,4 +78,31 @@ export class MessageUiService {
     this.hoveredReaction.set(null);
     this.hoveredMessageId.set(null);
   }
+
+  getUniqueMessageId(msg: any, isThreadContext: boolean): string | null {
+    if (!msg.id) return null;
+    return isThreadContext ? `thread-${msg.id}` : `view-${msg.id}`;
+  }
+
+  isLastMessage(msg: any, messages: any[]): boolean {
+    if (!msg.id || messages.length <= 1) return false;
+    const lastMsg = messages[messages.length - 1];
+    return msg.id === lastMsg.id;
+  }
+
+  calculateMenuPosition(event: MouseEvent): void {
+    queueMicrotask(() => {
+      const btn = event.currentTarget as HTMLElement | null;
+      if (!btn) return;
+      const scroll = btn.closest('.messages-scroll') as HTMLElement | null;
+      const menu = scroll?.querySelector('.message-options-menu') as HTMLElement | null;
+      const menuHeight = menu?.getBoundingClientRect().height ?? 160;
+      const btnRect = btn.getBoundingClientRect();
+      const scrollRect = (scroll ?? document.documentElement).getBoundingClientRect();
+      const spaceBelow = scrollRect.bottom - btnRect.bottom;
+      const spaceAbove = btnRect.top - scrollRect.top;
+      const openUp = spaceBelow < (menuHeight + 12) && spaceAbove > (menuHeight + 12);
+      this.setOptionsMenuOpenUp(openUp);
+    });
+  }
 }

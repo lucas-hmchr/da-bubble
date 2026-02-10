@@ -56,9 +56,11 @@ export class MessageDataService {
     contextKey: string
   ): void {
     const currentCount = messages.length;
-    const previousCount = this.messageCounts.get(contextKey) || 0;
+    const previousCount = this.messageCounts.get(contextKey);
     
-    if (currentCount > previousCount) {
+    // Nur scrollen wenn es wirklich NEUE Messages gibt (Anzahl erhöht)
+    // NICHT scrollen bei Reactions-Updates (gleiche Anzahl)
+    if (previousCount !== undefined && currentCount > previousCount) {
       setTimeout(() => {
         const bottomElement = getBottomElement();
         this.scrollService.scrollToBottom(bottomElement, isThreadContext);
