@@ -56,6 +56,8 @@ export class WorkspaceSidebar implements OnInit, OnDestroy {
   showAddPeopleDialog = false;
   createdChannelId: string | null = null;
   createdChannelName: string | null = null;
+  isHoveringEditSquare = false;
+  isHoveringAddIcon = false;
 
   private destroy$ = new Subject<void>();
   constructor(

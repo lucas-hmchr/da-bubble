@@ -94,12 +94,15 @@
 }
 
 .edit-square-icon {
+    cursor: pointer;
+    transition: opacity 0.2s;
+    
     &:hover {
-        content: url(/assets/icons/global/edit_square_hover.svg);
+        opacity: 0.9;
     }
 
     &:active {
-        content: url(/assets/icons/global/edit_square_click.svg);
+        opacity: 0.8;
     }
 }
 
@@ -260,13 +263,15 @@ mat-expansion-panel {
         top: 9px;
         right: 0px;
         z-index: 3;
+        cursor: pointer;
+        transition: opacity 0.2s;
 
         &:hover {
-            content: url(/assets/icons/global/add_hover.svg);
+            opacity: 0.9;
         }
 
         &:active {
-            content: url(/assets/icons/global/add_click.svg);
+            opacity: 0.8;
         }
     }
 }

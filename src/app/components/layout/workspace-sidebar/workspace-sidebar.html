@@ -9,8 +9,12 @@
           <span class="devspace-txt">Devspace</span>
         </div>
 
-        <img class="edit-square-icon cp" src="assets/icons/global/edit_square_default.svg" alt=""
-          (click)="openNewMessage()" />
+        <img class="edit-square-icon cp" 
+             [src]="isHoveringEditSquare ? 'assets/icons/global/edit_square_hover.svg' : 'assets/icons/global/edit_square_default.svg'" 
+             alt=""
+             (mouseenter)="isHoveringEditSquare = true"
+             (mouseleave)="isHoveringEditSquare = false"
+             (click)="openNewMessage()" />
       </div>
       } @else {
       <div class="channels-button-container">
@@ -23,7 +27,11 @@
 
       <div *ngIf="!isSearching()" class="channel-message-add-container">
 
-        <img class="add-icon cp" src="assets/icons/global/add_default.svg" (click)="openAddChannelDialog()" />
+        <img class="add-icon cp" 
+             [src]="isHoveringAddIcon ? 'assets/icons/global/add_hover.svg' : 'assets/icons/global/add_default.svg'" 
+             (mouseenter)="isHoveringAddIcon = true"
+             (mouseleave)="isHoveringAddIcon = false"
+             (click)="openAddChannelDialog()" />
 
         <mat-accordion class="mat-accordion-container">
 
