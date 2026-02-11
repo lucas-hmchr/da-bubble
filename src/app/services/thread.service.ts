@@ -21,6 +21,9 @@ export class ThreadService {
   private _contextType = signal<'channel' | 'conversation'>('channel');
   private _contextId = signal<string | null>(null);
   private _threadMessages = signal<MessageData[]>([]);
+  
+  // NEU: Signal für Focus-Request
+  private _focusRequested = signal(0);
 
   private threadMessagesSub?: Subscription;
   private parentMessageSub?: Subscription;
@@ -30,6 +33,7 @@ export class ThreadService {
   readonly contextType = this._contextType.asReadonly();
   readonly contextId = this._contextId.asReadonly();
   readonly threadMessages = this._threadMessages.asReadonly();
+  readonly focusRequested = this._focusRequested.asReadonly(); // NEU
 
   readonly channelName = computed(() => {
     const type = this._contextType();
@@ -58,6 +62,11 @@ export class ThreadService {
     this.subscribeToParentMessage(contextType, contextId, parentMessage.id);
 
     this.subscribeToThreadMessages(contextType, contextId, parentMessage.id);
+    
+    // NEU: Focus nach dem Öffnen anfordern
+    setTimeout(() => {
+      this.requestFocus();
+    }, 200);
   }
 
   close() {
@@ -70,6 +79,11 @@ export class ThreadService {
     this.threadMessagesSub = undefined;
     this.parentMessageSub?.unsubscribe();
     this.parentMessageSub = undefined;
+  }
+
+  // NEU: Methode um Focus anzufordern
+  requestFocus() {
+    this._focusRequested.set(this._focusRequested() + 1);
   }
 
   private subscribeToThreadMessages(
@@ -140,6 +154,11 @@ export class ThreadService {
     try {
       await this.firestore.addDocument(path, message);
       await this.updateParentMessage(contextType, contextId, parentMsg.id);
+      
+      // NEU: Nach dem Senden Focus wieder anfordern
+      setTimeout(() => {
+        this.requestFocus();
+      }, 100);
     } catch (error) {
       throw error;
     }

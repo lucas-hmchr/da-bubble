@@ -1,4 +1,4 @@
-import { Component, Input, ElementRef, ViewChild, OnInit, OnChanges, SimpleChanges, Output, EventEmitter, inject, HostListener } from '@angular/core';
+import { Component, Input, ElementRef, ViewChild, OnInit, OnChanges, SimpleChanges, Output, EventEmitter, inject, HostListener, effect } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Channel } from '../../../models/channel.interface';
@@ -67,7 +67,21 @@ export class MessageInput implements OnInit, OnChanges {
   public userService = inject(UserService);
   @ViewChild('messageInput') messageInput?: ElementRef<HTMLDivElement>;
   @ViewChild('container') container!: ElementRef<HTMLDivElement>;
-  constructor(private messageInputService: MessageInputService) { }
+
+  constructor(private messageInputService: MessageInputService) {
+  // Effect für Thread-Focus: Reagiert auf focusRequested Signal
+  effect(() => {
+    const focusCount = this.threadService.focusRequested();
+    
+    // Nur wenn wir im Thread-Context sind UND focusRequested sich geändert hat
+    if (this.contextType === 'thread' && focusCount > 0) {
+      setTimeout(() => {
+        this.messageInput?.nativeElement.focus();
+        console.log('✅ Thread-Focus gesetzt via Signal');
+      }, 50);
+    }
+  });
+}
 
   ngOnInit(): void {
     this.messageInputService.loadUsers().subscribe((users) => { this.state.setUsers(users); });
