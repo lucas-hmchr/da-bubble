@@ -1,7 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { Router, ActivatedRoute } from '@angular/router';
 import { Location } from '@angular/common';
-import { CommonModule } from '@angular/common';
 
 @Component({
   selector: 'app-policy-view',
@@ -13,7 +12,11 @@ import { CommonModule } from '@angular/common';
 export class PolicyView implements OnInit {
   pageType: 'impressum' | 'datenschutz' = 'impressum';
 
-  constructor(private route: ActivatedRoute, private location: Location) {}
+  constructor(
+    private route: ActivatedRoute,
+    private location: Location,
+    private router: Router
+  ) {}
 
   ngOnInit() {
     const currentPath = this.route.snapshot.url[0]?.path;
@@ -26,6 +29,10 @@ export class PolicyView implements OnInit {
   }
 
   previousSite() {
-    this.location.back();
+    if (window.history.length > 1) {
+      this.location.back();
+    } else {
+      this.router.navigateByUrl('/');
+    }
   }
 }
