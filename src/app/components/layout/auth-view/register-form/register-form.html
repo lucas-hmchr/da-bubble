@@ -8,8 +8,23 @@
     <form class="auth-form-container" #form="ngForm" (ngSubmit)="continueRegistration()" id="registerForm">
         <div class="form-input">
             <img src="assets/icons/login/person_passive.svg" alt="" class="form-input-icon">
-            <input name="name" type="text" placeholder="Name und Nachname" [(ngModel)]="fullName" required
-                minlength="4">
+            <input #nameModel="ngModel" name="name" type="text" placeholder="Name und Nachname" [(ngModel)]="fullName"
+                required pattern="^[A-Za-zÄÖÜäöüß]{2,}\s+[A-Za-zÄÖÜäöüß]{2,}.*$" />
+
+            @if (nameModel.invalid && (nameModel.dirty || nameModel.touched || form.submitted)) {
+
+            @if (nameModel.errors?.['required']) {
+            <span class="error-message">
+                Bitte gebe deinen Vor- und Nachnamen an.
+            </span>
+            }
+
+            @if (nameModel.errors?.['pattern']) {
+            <span class="error-message">
+                Bitte gib einen gültigen Vor- und Nachnamen ein.
+            </span>
+            }
+            }
         </div>
         <div class="form-input">
             <img src="assets/icons/login/mail_passive.svg" alt="" class="form-input-icon">
