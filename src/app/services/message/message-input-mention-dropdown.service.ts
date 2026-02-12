@@ -47,21 +47,43 @@ export class MessageInputMentionDropdownService {
 
   private filterUserMentions(value: string): void {
     const result = this.messageInputService.filterUsersByQuery(this.state.users(), value);
+    
+    // Wenn result null ist UND Query leer, zeige alle User
+    const atMatch = value.match(/@(\w*)$/);
+    const query = atMatch ? atMatch[1] : '';
+    
+    if (result === null && query === '') {
+      this.state.setFilteredUsers(this.state.users());
+      return;
+    }
+    
     if (result === null || result.length === 0) {
       this.state.resetMentions();
       this.state.setFilteredUsers([]);
       return;
     }
+    
     this.state.setFilteredUsers(result);
   }
 
   private filterChannelMentions(value: string): void {
     const result = this.messageInputService.filterChannelsByQuery(this.state.channelsList(), value);
+    
+    // Wenn result null ist UND Query leer, zeige alle Channels
+    const hashMatch = value.match(/#(\w*)$/);
+    const query = hashMatch ? hashMatch[1] : '';
+    
+    if (result === null && query === '') {
+      this.state.setFilteredChannels(this.state.channelsList());
+      return;
+    }
+    
     if (result === null || result.length === 0) {
       this.state.resetMentions();
       this.state.setFilteredChannels([]);
       return;
     }
+    
     this.state.setFilteredChannels(result);
   }
 
