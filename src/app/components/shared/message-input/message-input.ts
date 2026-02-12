@@ -31,11 +31,6 @@ export class MessageInput implements OnInit, OnChanges {
   @Input() conversationId?: string | null;
   @Input() forceEditable = false;
   @Input() placeholderText?: string;
-
-  isHoveringEmoji = false;
-  isHoveringMention = false;
-  isHoveringSend = false;
-
   @Input() set editingMessage(value: { id: string; text: string } | undefined) {
     this._editingMessage = value;
     this.isEditing = !!value;
@@ -43,6 +38,11 @@ export class MessageInput implements OnInit, OnChanges {
       this.messageInput.nativeElement.innerHTML = this.validationService.escapeHtml(value.text);
     }
   }
+
+  isHoveringEmoji = false;
+  isHoveringMention = false;
+  isHoveringSend = false;
+
   get editingMessage() { return this._editingMessage; }
 
   @Output() editFinished = new EventEmitter<void>();
@@ -69,19 +69,17 @@ export class MessageInput implements OnInit, OnChanges {
   @ViewChild('container') container!: ElementRef<HTMLDivElement>;
 
   constructor(private messageInputService: MessageInputService) {
-  // Effect für Thread-Focus: Reagiert auf focusRequested Signal
-  effect(() => {
-    const focusCount = this.threadService.focusRequested();
-    
-    // Nur wenn wir im Thread-Context sind UND focusRequested sich geändert hat
-    if (this.contextType === 'thread' && focusCount > 0) {
-      setTimeout(() => {
-        this.messageInput?.nativeElement.focus();
-        console.log('✅ Thread-Focus gesetzt via Signal');
-      }, 50);
-    }
-  });
-}
+    effect(() => {
+      const focusCount = this.threadService.focusRequested();
+
+      if (this.contextType === 'thread' && focusCount > 0) {
+        setTimeout(() => {
+          this.messageInput?.nativeElement.focus();
+          console.log('✅ Thread-Focus gesetzt via Signal');
+        }, 50);
+      }
+    });
+  }
 
   ngOnInit(): void {
     this.messageInputService.loadUsers().subscribe((users) => { this.state.setUsers(users); });
@@ -91,7 +89,7 @@ export class MessageInput implements OnInit, OnChanges {
   ngOnChanges(changes: SimpleChanges): void {
     const channelChanged = changes['channel'] && !changes['channel'].firstChange;
     const conversationChanged = changes['conversationId'] && !changes['conversationId'].firstChange;
-    
+
     if (channelChanged || conversationChanged) {
       this.clearAndFocusInput();
     }
@@ -108,7 +106,21 @@ export class MessageInput implements OnInit, OnChanges {
   }
 
   getAvatarSrc(id: AvatarId): string { return getAvatarById(id).src; }
-  onInput(event: Event): void { this.validateMentions(); }
+
+  onInput(event: Event): void {
+    this.validateMentions();
+    this.checkAndClearEmptyInput();
+  }
+
+  private checkAndClearEmptyInput(): void {
+    const div = this.messageInput?.nativeElement;
+    if (!div) return;
+
+    const text = this.caretService.getTextContent(div).trim();
+    if (text.length === 0) {
+      div.innerHTML = '';
+    }
+  }
 
   private validateMentions(): void {
     const div = this.messageInput?.nativeElement;
@@ -301,6 +313,13 @@ export class MessageInput implements OnInit, OnChanges {
       this.forceEditable,
       this.isChannelMember
     );
+  }
+
+  get isInputEmpty(): boolean {
+    const div = this.messageInput?.nativeElement;
+    if (!div) return true;
+    const text = this.caretService.getTextContent(div).trim();
+    return text.length === 0;
   }
 
   onEnter(event: KeyboardEvent | Event): void {

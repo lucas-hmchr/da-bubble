@@ -223,7 +223,11 @@
                             <label>Vollständiger Name</label>
                         </div>
                         <input type="text" [(ngModel)]="editNameValue" class="input-field"
-                            placeholder="Dein vollständiger Name">
+                            placeholder="Dein vollständiger Name" (input)="onNameInput()">
+                    </div>
+
+                    <div class="error-message-container" [class.show-error]="showNameError">
+                        <span>Bitte gib einen Namen ein.</span>
                     </div>
 
                     <div class="modal-actions">
