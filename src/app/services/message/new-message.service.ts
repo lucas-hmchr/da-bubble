@@ -19,6 +19,7 @@ export class NewMessageService {
     mode = signal<Mode>(null);
     show = signal<boolean>(false);
     target = signal<Target>(null);
+    showRecipientError = signal<boolean>(false);
 
     filteredUsers = signal<User[]>([]);
     filteredChannels = signal<Channel[]>([]);
@@ -150,10 +151,9 @@ export class NewMessageService {
         
         if (parts.length !== 2) return false;
         
-        const localPart = parts[0];  // Part before @
-        const domain = parts[1];     // Part after @
+        const localPart = parts[0];
+        const domain = parts[1]; 
         
-        // Only match if local part is exactly the query OR domain contains it
         return localPart === query || domain.includes(query);
     }
 
@@ -186,6 +186,7 @@ export class NewMessageService {
         
         this.query.set(queryValue);
         this.target.set({ type: 'user', id: u.uid });
+        this.showRecipientError.set(false);
         this.resetDropdown();
     }
 
@@ -199,6 +200,7 @@ export class NewMessageService {
 
         this.query.set(`#${ch.name ?? ''}`);
         this.target.set({ type: 'channel', id: ch.id });
+        this.showRecipientError.set(false);
         this.resetDropdown();
     }
 
@@ -225,11 +227,15 @@ export class NewMessageService {
         if (!text) return false;
         
         const t = this.target();
-        if (!t) return false;
+        if (!t) {
+            this.showRecipientError.set(true);
+            return false;
+        }
         
         const senderId = this.auth.activeUser()?.uid;
         if (!senderId) return false;
         
+        this.showRecipientError.set(false);
         return t.type === 'channel' 
             ? await this.sendToChannel(t.id, text, senderId)
             : await this.sendToConversation(t.id, text, senderId);

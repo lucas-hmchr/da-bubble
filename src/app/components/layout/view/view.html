@@ -31,7 +31,7 @@
           style="display: flex; flex-direction: column; gap: 16px; align-items: start; width: 100%; position: relative;">
           <h2>Neue Nachricht</h2>
 
-          <input class="new-message-to-input" type="text" [value]="newMessage.query()"
+          <input class="new-message-to-input" [class.error]="newMessage.showRecipientError()" type="text" [value]="newMessage.query()"
             (keyup)="onNewMessageToKeyup($event)" placeholder="An: #channel, oder @jemand oder E-Mail Adresse" />
 
           @if (newMessage.show() && newMessage.mode() === 'channel') {
