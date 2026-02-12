@@ -58,6 +58,7 @@ export class Topbar implements OnInit, OnDestroy {
   editNameValue = '';
   selectedAvatarId: AvatarId = 'avatar_default';
   availableAvatars = avatars;
+  showNameError = false;
 
   showUserSuggestions = computed(() => this.searchService.showUserSuggestions());
   showChannelSuggestions = computed(() => this.searchService.showChannelSuggestions());
@@ -135,7 +136,7 @@ export class Topbar implements OnInit, OnDestroy {
   async saveProfileName() {
     const user = this.currentUser();
     if (!user?.uid) {
-      alert('Benutzer nicht gefunden');
+      this.showNameError = true;
       return;
     }
 
@@ -146,7 +147,7 @@ export class Topbar implements OnInit, OnDestroy {
     );
 
     if (!nameResult.success) {
-      alert(nameResult.message);
+      this.showNameError = true;
       return;
     }
 
@@ -155,11 +156,11 @@ export class Topbar implements OnInit, OnDestroy {
       await this.firestore.updateDocument('users', user.uid, {
         avatarId: this.selectedAvatarId
       });
-      // alert('Änderungen gespeichert');
+      this.showNameError = false;
       this.isDropdownMenuOpen = false;
       this.closeProfilEditModal();
     } catch (error) {
-      alert('Fehler beim Speichern des Avatars');
+      this.showNameError = true;
     }
   }
 
@@ -221,9 +222,16 @@ export class Topbar implements OnInit, OnDestroy {
     const user = this.currentUser();
     this.editNameValue = user?.displayName || user?.name || '';
     this.selectedAvatarId = user?.avatarId || 'avatar_default';
+    this.showNameError = false;
     this.isProfilEditModalOpen = true;
     this.isProfilModalOpen = false;
     document.body.style.overflow = 'hidden';
+  }
+
+  onNameInput() {
+    if (this.editNameValue.trim()) {
+      this.showNameError = false;
+    }
   }
 
   closeProfilModalOnly() {
