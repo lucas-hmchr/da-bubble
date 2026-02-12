@@ -74,7 +74,6 @@ export class ChannelService {
         this.cleanUp();
         this.activeChannelSub = this.getChannel(id).subscribe(ch => {
             if (ch && !this.canUserAccessChannel(ch, userId)) {
-                console.error('Kein Zugriff auf diesen Channel');
                 this.activeChannel.set(null);
                 return;
             }
