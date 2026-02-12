@@ -16,6 +16,7 @@
                     } @else {
                     <span class="edit-link save-link" (click)="saveChannelName()">Speichern</span>
                     }
+
                 </div>
 
                 @if (!isEditingName()) {
@@ -26,8 +27,10 @@
                 <div class="edit-input-wrapper">
                     <span class="input-prefix">#</span>
                     <input type="text" class="edit-input" [(ngModel)]="editNameValue"
+                        (ngModelChange)="editNameValue.set($event); nameError.set('')"
                         [placeholder]="channel()?.name || ''" (keydown.enter)="saveChannelName()"
                         (keydown.escape)="cancelEditName()" autofocus>
+
                 </div>
                 }
             </div>
@@ -63,6 +66,9 @@
                 </div>
             </div>
             <div class="leave-container">
+                @if (nameError()) {
+                <div class="error-msg">{{ nameError() }}</div>
+                }
                 <button class="leave-btn" (click)="leaveChannel()">
                     Channel verlassen
                 </button>
