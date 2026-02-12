@@ -189,6 +189,14 @@ app-message-input {
   &:focus {
     border-color: #535fff;
   }
+
+  &.error {
+    border-color: #ED1E79;
+    
+    &:focus {
+      border-color: #ED1E79;
+    }
+  }
 }
 
 .to-autocomplete {
