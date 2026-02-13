@@ -121,7 +121,7 @@
     border-radius: 50%;
     padding: 8px;
 
-    &:hover{
+    &:hover {
         background-color: var(--bg-clr);
     }
 }
@@ -244,13 +244,13 @@
         gap: 12px;
     }
 
-    .mobile-registration-link{
+    .mobile-registration-link {
         display: flex;
         align-items: center;
         justify-content: space-between;
         width: 100%;
 
-        > .linked-text{
+        >.linked-text {
             margin-top: 0px;
         }
     }
@@ -262,13 +262,38 @@
         padding: 16px;
     }
 
-    .mobile-registration-link{
+    .mobile-registration-link {
         display: flex;
         align-items: center;
         justify-content: space-between;
         width: 100%;
 
-        > .linked-text{
+        >.linked-text {
+            margin-top: 0px;
+        }
+    }
+}
+
+@media (max-height: 700px) {
+    .form-input {
+        gap: 8px;
+        padding: 8px 18px;
+        height: 40px;
+
+        >input {
+            font-size: 15px;
+        }
+    }
+
+    .login-google-btn {
+        height: 40px !important;
+    }
+
+
+    .mobile-registration-link {
+        justify-content: center;
+        gap: 16px;
+        >.linked-text {
             margin-top: 0px;
         }
     }

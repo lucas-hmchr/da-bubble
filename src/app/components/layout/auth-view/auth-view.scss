@@ -64,7 +64,7 @@
     width: auto;
     animation: nameSlideIn 0.8s forwards;
     animation-delay: 0.6s;
-    filter:invert(1);
+    filter: invert(1);
   }
 }
 
@@ -151,6 +151,6 @@
 @media (max-height: 780px) {
   .auth-window {
     justify-content: center;
-    gap: 12px;
+    gap: 18px;
   }
 }

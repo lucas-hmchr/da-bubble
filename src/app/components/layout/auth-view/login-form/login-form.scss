@@ -62,3 +62,18 @@
     }
 
 }
+
+@media (max-height: 700px) {
+
+    .guest-login-btn {
+        height: 40px;
+        padding: 12px 24px;
+        font-size: 16px;
+    }
+
+    .submit-button {
+        height: 40px;
+        padding: 12px 24px;
+        font-size: 16px;
+    }
+}
