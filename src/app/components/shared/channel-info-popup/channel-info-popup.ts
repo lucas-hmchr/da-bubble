@@ -83,7 +83,6 @@ export class ChannelInfoPopup {
       return;
     }
 
-      // ✅ Duplikat-Check (case-insensitive) wie beim Erstellen
   const normalized = newName.toLowerCase();
   const channels = await this.firestore.getCollectionOnce<Channel>('channels');
 
