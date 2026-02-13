@@ -69,11 +69,31 @@
                 @if (nameError()) {
                 <div class="error-msg">{{ nameError() }}</div>
                 }
-                <button class="leave-btn" (click)="leaveChannel()">
+                <button class="leave-btn" (click)="openLeaveConfirmModal()">
                     Channel verlassen
                 </button>
             </div>
         </div>
     </div>
 </div>
+
+@if (showLeaveConfirmModal()) {
+<div class="leave-modal-overlay" (click)="cancelLeaveChannel()">
+    <div class="leave-modal" (click)="$event.stopPropagation()">
+        <div class="leave-modal-header">
+            <h2>Channel verlassen</h2>
+            <img src="assets/icons/global/close.svg" class="close-icon" (click)="cancelLeaveChannel()">
+        </div>
+        
+        <div class="leave-modal-content">
+            <p>Möchtest du den Channel <strong>"{{ channel()?.name }}"</strong> wirklich verlassen?</p>
+        </div>
+        
+        <div class="leave-modal-actions">
+            <button class="cancel-btn" (click)="cancelLeaveChannel()">Abbrechen</button>
+            <button class="confirm-btn" (click)="leaveChannel()">Verlassen</button>
+        </div>
+    </div>
+</div>
+}
 }

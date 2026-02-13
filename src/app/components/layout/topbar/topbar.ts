@@ -140,34 +140,44 @@ export class Topbar implements OnInit, OnDestroy {
       return;
     }
 
-    // Validiere Name
     const trimmedName = this.editNameValue.trim();
     
-    if (trimmedName.length === 0) {
-      this.nameErrorMessage = 'Bitte Namen eintragen!.';
+    if (!this.validateName(trimmedName)) {
       return;
     }
 
-    const nameParts = trimmedName.split(/\s+/);
+    await this.saveUserProfile(user.uid, trimmedName);
+  }
+
+  private validateName(name: string): boolean {
+    if (name.length === 0) {
+      this.nameErrorMessage = 'Bitte Namen eintragen!.';
+      return false;
+    }
+
+    const nameParts = name.split(/\s+/);
     if (nameParts.length < 2) {
       this.nameErrorMessage = 'Bitte vollständigen Namen eintragen!';
-      return;
+      return false;
     }
 
-    // Save name
-    const nameResult = await this.profileHandler.saveProfileName(
-      trimmedName,
-      user.uid
-    );
+    return true;
+  }
+
+  private async saveUserProfile(uid: string, name: string): Promise<void> {
+    const nameResult = await this.profileHandler.saveProfileName(name, uid);
 
     if (!nameResult.success) {
       this.nameErrorMessage = nameResult.message;
       return;
     }
 
-    // Save avatar
+    await this.saveAvatarAndClose(uid);
+  }
+
+  private async saveAvatarAndClose(uid: string): Promise<void> {
     try {
-      await this.firestore.updateDocument('users', user.uid, {
+      await this.firestore.updateDocument('users', uid, {
         avatarId: this.selectedAvatarId
       });
       this.nameErrorMessage = '';

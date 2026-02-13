@@ -52,6 +52,8 @@ export class ChannelInfoPopup {
 
   isEditingDescription = signal(false);
   editDescriptionValue = signal('');
+  
+  showLeaveConfirmModal = signal(false);
 
   close() {
     this.channelInfoService.close();
@@ -81,7 +83,6 @@ export class ChannelInfoPopup {
       return;
     }
 
-      // ✅ Duplikat-Check (case-insensitive) wie beim Erstellen
   const normalized = newName.toLowerCase();
   const channels = await this.firestore.getCollectionOnce<Channel>('channels');
 
@@ -160,6 +161,14 @@ this.nameError.set('');
     this.profilePopupService.open(creatorId);
   }
 
+  openLeaveConfirmModal() {
+    this.showLeaveConfirmModal.set(true);
+  }
+
+  cancelLeaveChannel() {
+    this.showLeaveConfirmModal.set(false);
+  }
+
   async leaveChannel() {
     const ch = this.channel();
     const currentUserId = this.authService.uid();
@@ -168,17 +177,11 @@ this.nameError.set('');
       return;
     }
 
-    const confirmed = confirm(
-      `Möchtest du den Channel "${ch.name}" wirklich verlassen?`
-    );
-
-    if (!confirmed) return;
-
     try {
       await this.channelService.leaveChannel(ch.id, currentUserId);
+      this.showLeaveConfirmModal.set(false);
       this.close();
       this.router.navigate(['/']);
-
     } catch (error) {
       alert('Fehler beim Verlassen des Channels');
     }
