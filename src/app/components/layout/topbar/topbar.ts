@@ -58,7 +58,7 @@ export class Topbar implements OnInit, OnDestroy {
   editNameValue = '';
   selectedAvatarId: AvatarId = 'avatar_default';
   availableAvatars = avatars;
-  showNameError = false;
+  nameErrorMessage = '';
 
   showUserSuggestions = computed(() => this.searchService.showUserSuggestions());
   showChannelSuggestions = computed(() => this.searchService.showChannelSuggestions());
@@ -136,18 +136,32 @@ export class Topbar implements OnInit, OnDestroy {
   async saveProfileName() {
     const user = this.currentUser();
     if (!user?.uid) {
-      this.showNameError = true;
+      this.nameErrorMessage = 'Benutzer nicht gefunden';
+      return;
+    }
+
+    // Validiere Name
+    const trimmedName = this.editNameValue.trim();
+    
+    if (trimmedName.length === 0) {
+      this.nameErrorMessage = 'Bitte Namen eintragen!.';
+      return;
+    }
+
+    const nameParts = trimmedName.split(/\s+/);
+    if (nameParts.length < 2) {
+      this.nameErrorMessage = 'Bitte vollständigen Namen eintragen!';
       return;
     }
 
     // Save name
     const nameResult = await this.profileHandler.saveProfileName(
-      this.editNameValue,
+      trimmedName,
       user.uid
     );
 
     if (!nameResult.success) {
-      this.showNameError = true;
+      this.nameErrorMessage = nameResult.message;
       return;
     }
 
@@ -156,11 +170,11 @@ export class Topbar implements OnInit, OnDestroy {
       await this.firestore.updateDocument('users', user.uid, {
         avatarId: this.selectedAvatarId
       });
-      this.showNameError = false;
+      this.nameErrorMessage = '';
       this.isDropdownMenuOpen = false;
       this.closeProfilEditModal();
     } catch (error) {
-      this.showNameError = true;
+      this.nameErrorMessage = 'Fehler beim Speichern des Avatars';
     }
   }
 
@@ -222,7 +236,7 @@ export class Topbar implements OnInit, OnDestroy {
     const user = this.currentUser();
     this.editNameValue = user?.displayName || user?.name || '';
     this.selectedAvatarId = user?.avatarId || 'avatar_default';
-    this.showNameError = false;
+    this.nameErrorMessage = '';
     this.isProfilEditModalOpen = true;
     this.isProfilModalOpen = false;
     document.body.style.overflow = 'hidden';
@@ -230,7 +244,7 @@ export class Topbar implements OnInit, OnDestroy {
 
   onNameInput() {
     if (this.editNameValue.trim()) {
-      this.showNameError = false;
+      this.nameErrorMessage = '';
     }
   }
 
