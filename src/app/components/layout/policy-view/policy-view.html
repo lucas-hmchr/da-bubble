@@ -33,7 +33,7 @@
                 <p>Boban Jakovljevic:</p>
                 <a href="mailto:jakovljevic.boban@gmail.com">jakovljevic.boban@gmail.com</a>
                 <p>Belal Noori:</p>
-                <a href="mailto:linfo@belalnoori.de]">info@belalnoori.de</a>
+                <a href="mailto:linfo@belalnoori.de">info@belalnoori.de</a>
                 <!-- <p>Email: [lucashamacher01@gmail.com,[steven.bracke@proton.me], [Boban], info@belalnoori.de]</p> -->
             </div>
         </div>
@@ -41,13 +41,181 @@
     }
 
     @if (pageType === 'datenschutz') {
-        <div class="datenschutz-container">
-            <div class="imprint-arrow-back-wrapper" (click)="previousSite()">
-                <img src="assets/icons/global/arrow_back.svg" alt="arrow-back" class="imprint-arrow-back">
-            </div>
+    <div class="datenschutz-container">
+        <div class="imprint-arrow-back-wrapper" (click)="previousSite()">
+            <img src="assets/icons/global/arrow_back.svg" alt="arrow-back" class="imprint-arrow-back"
+                style="height: 36px;">
         </div>
-        <div class="datenschutz-construction">
-            <p>In construction</p>
+
+        <div class="datenschutz-details">
+            <h1>Datenschutzerklärung</h1>
+            <p class="datenschutz-updated">Stand: Februar 2026</p>
+
+            <section class="ds-section">
+                <h2>1. Verantwortliche</h2>
+                <p>Verantwortlich für die Datenverarbeitung im Rahmen dieser Anwendung sind:</p>
+
+                <ul class="ds-list">
+                    <li>
+                        <strong>Lucas Hamacher</strong><br>
+                        Kreuzgasse 4, 53894 Mechernich<br>
+                        <a href="mailto:lucashamacher01@gmail.com">lucashamacher01@gmail.com</a>
+                    </li>
+                    <li>
+                        <strong>Steven Bracke</strong><br>
+                        Am Worthhang 4, 58511 Lüdenscheid<br>
+                        <a href="mailto:steven.bracke@proton.me">steven.bracke@proton.me</a>
+                    </li>
+                    <li>
+                        <strong>Boban Jakovljevic</strong><br>
+                        Straße, 63263 Neu-Isenburg<br>
+                        <a href="mailto:jakovljevic.boban@gmail.com">jakovljevic.boban@gmail.com</a>
+                    </li>
+                    <li>
+                        <strong>Belal Noori</strong><br>
+                        Straße hausnummer, plz ort<br>
+                        <a href="mailto:info@belalnoori.de">info@belalnoori.de</a>
+                    </li>
+                </ul>
+            </section>
+
+            <section class="ds-section">
+                <h2>2. Allgemeines zur Datenverarbeitung</h2>
+                <p>
+                    Diese Anwendung ist ein Portfolio-/Demo-Projekt. Wir verarbeiten personenbezogene Daten nur,
+                    soweit dies zur Bereitstellung der Anwendung, zur Anmeldung/Authentifizierung sowie zur Nutzung
+                    der Kommunikationsfunktionen (z.B. Channels, Chats, Nachrichten) erforderlich ist.
+                </p>
+            </section>
+
+            <section class="ds-section">
+                <h2>3. Verarbeitete Datenkategorien</h2>
+
+                <h3>3.1 Authentifizierungs- und Kontodaten</h3>
+                <p>
+                    Für die Anmeldung nutzen wir <strong>Firebase Authentication</strong>. Dabei werden insbesondere
+                    folgende Daten verarbeitet: E-Mail-Adresse (bei E-Mail/Passwort-Login), Benutzer-ID (UID) sowie
+                    Anmelde-/Session-Informationen (z.B. Authentifizierungs-Token). Optional kann ein Anzeigename
+                    (Display Name) gespeichert werden.
+                </p>
+
+                <h3>3.2 Google-Login</h3>
+                <p>
+                    Du kannst dich auch über <strong>Google Sign-In</strong> anmelden. In diesem Fall erhalten wir von
+                    Google
+                    die für die Anmeldung erforderlichen Informationen (z.B. Google-Konto-ID/UID, E-Mail-Adresse und
+                    ggf.
+                    Anzeigename/Profilbild – abhängig von deinen Google-Kontoeinstellungen). Die Verarbeitung erfolgt
+                    über
+                    Firebase Authentication.
+                </p>
+
+                <h3>3.3 Inhaltsdaten (Chats, Nachrichten, Channels)</h3>
+                <p>
+                    Wenn du Inhalte erstellst (z.B. Nachrichten oder Channels), werden diese Inhalte in der Datenbank
+                    gespeichert
+                    und innerhalb der Anwendung angezeigt. Dabei können personenbezogene Daten enthalten sein, sofern du
+                    diese
+                    selbst in deinen Inhalten angibst.
+                </p>
+
+                <h3>3.4 Status- und Aktivitätsdaten (Online/Zuletzt aktiv)</h3>
+                <p>
+                    Zur Darstellung des Online-Status verarbeiten wir Zeitpunkte der letzten Aktivität (z.B.
+                    „lastActiveAt“).
+                    Daraus wird innerhalb der Anwendung abgeleitet, ob ein Nutzer aktuell als „online“ oder „offline“
+                    angezeigt wird.
+                </p>
+            </section>
+
+            <section class="ds-section">
+                <h2>4. Zwecke der Verarbeitung</h2>
+                <ul class="ds-list">
+                    <li><strong>Bereitstellung und Betrieb der Anwendung</strong> (z.B. Laden von Inhalten, technische
+                        Auslieferung)</li>
+                    <li><strong>Authentifizierung und Kontoverwaltung</strong> (Login/Logout, Google-Login)</li>
+                    <li><strong>Kommunikation</strong> (Erstellen/Anzeigen von Channels, Chats, Nachrichten)</li>
+                    <li><strong>Darstellung von Aktivitäts- / Statusinformationen</strong> (Online/Zuletzt aktiv)</li>
+                    <li><strong>Sicherheit</strong> (Missbrauchsprävention, Stabilität, Fehleranalyse im Rahmen des
+                        Betriebs)</li>
+                </ul>
+            </section>
+
+            <section class="ds-section">
+                <h2>5. Rechtsgrundlagen</h2>
+                <ul class="ds-list">
+                    <li>
+                        <strong>Art. 6 Abs. 1 lit. b DSGVO</strong> (Vertrag/Anbahnung): Verarbeitung zur Bereitstellung
+                        der Funktionen,
+                        die du aktiv nutzt (z.B. Anmeldung, Nutzung der App-Funktionen).
+                    </li>
+                    <li>
+                        <strong>Art. 6 Abs. 1 lit. f DSGVO</strong> (berechtigtes Interesse): Betrieb, Sicherheit und
+                        Missbrauchsprävention,
+                        soweit hierfür eine Verarbeitung erforderlich ist.
+                    </li>
+                </ul>
+            </section>
+
+            <section class="ds-section">
+                <h2>6. Empfänger / Auftragsverarbeiter</h2>
+
+                <h3>6.1 Google Firebase (Authentication & Datenbank)</h3>
+                <p>
+                    Wir nutzen <strong>Google Firebase</strong> als technische Plattform für
+                    <strong>Authentifizierung</strong>
+                    sowie als <strong>Datenbank</strong> zur Speicherung von App-Daten (z.B. Nutzerprofile, Nachrichten,
+                    Channels,
+                    Aktivitätszeitpunkte). Anbieter ist Google Ireland Limited (für Europa) bzw. je nach Verarbeitung
+                    auch verbundene
+                    Unternehmen der Google LLC.
+                </p>
+                <p>
+                    Dabei kann es zu einer Verarbeitung in Rechenzentren außerhalb der EU/des EWR kommen (insbesondere
+                    USA).
+                    Google setzt hierfür vertragliche und organisatorische Maßnahmen ein (z.B.
+                    Standardvertragsklauseln),
+                    um ein angemessenes Datenschutzniveau zu gewährleisten.
+                </p>
+            </section>
+
+            <section class="ds-section">
+                <h2>7. Speicherdauer</h2>
+                <p>
+                    Wir speichern personenbezogene Daten nur so lange, wie dies für die oben genannten Zwecke
+                    erforderlich ist.
+                    Kontodaten und in der App erstellte Inhalte bleiben grundsätzlich gespeichert, solange dein Account
+                    besteht
+                    bzw. bis Inhalte/Account gelöscht werden, sofern keine gesetzlichen Aufbewahrungspflichten
+                    entgegenstehen.
+                </p>
+            </section>
+
+            <section class="ds-section">
+                <h2>8. Deine Rechte</h2>
+                <p>Du hast nach der DSGVO insbesondere folgende Rechte:</p>
+                <ul class="ds-list">
+                    <li>Auskunft (Art. 15 DSGVO)</li>
+                    <li>Berichtigung (Art. 16 DSGVO)</li>
+                    <li>Löschung (Art. 17 DSGVO)</li>
+                    <li>Einschränkung der Verarbeitung (Art. 18 DSGVO)</li>
+                    <li>Datenübertragbarkeit (Art. 20 DSGVO)</li>
+                    <li>Widerspruch (Art. 21 DSGVO)</li>
+                </ul>
+                <p>
+                    Außerdem hast du das Recht, dich bei einer Datenschutzaufsichtsbehörde zu beschweren (Art. 77
+                    DSGVO).
+                </p>
+            </section>
+
+            <section class="ds-section">
+                <h2>9. Kontakt</h2>
+                <p>
+                    Wenn du Fragen zum Datenschutz hast oder deine Rechte geltend machen möchtest,
+                    kontaktiere uns bitte über die oben genannten E-Mail-Adressen.
+                </p>
+            </section>
         </div>
+    </div>
     }
 </div>
