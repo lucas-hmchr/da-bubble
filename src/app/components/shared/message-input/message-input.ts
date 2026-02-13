@@ -75,7 +75,6 @@ export class MessageInput implements OnInit, OnChanges {
       if (this.contextType === 'thread' && focusCount > 0) {
         setTimeout(() => {
           this.messageInput?.nativeElement.focus();
-          console.log('✅ Thread-Focus gesetzt via Signal');
         }, 50);
       }
     });
